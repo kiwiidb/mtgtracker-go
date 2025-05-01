@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Tracker - Groups</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .group {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .group img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        .player {
+            margin-top: 20px;
+        }
+        .deck-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .deck {
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .deck img {
+            max-width: 100px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="groups-container">Loading...</div>
+
+    <script>
+        async function fetchGroups() {
+            try {
+                const response = await fetch('/player/v1/groups');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch groups');
+                }
+                const groups = await response.json();
+                renderGroups(groups);
+            } catch (error) {
+                document.getElementById('groups-container').innerText = error.message;
+            }
+        }
+
+        function renderGroups(groups) {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = ''; // Clear loading text
+
+            groups.forEach(group => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'group';
+
+                groupDiv.innerHTML = `
+                    <h2>${group.Name}</h2>
+                    <img src="${group.Image}">
+                `;
+
+                group.Players.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'player';
+
+                    playerDiv.innerHTML = `
+                        <strong>${player.Name}</strong>
+                    `;
+
+                    const deckGrid = document.createElement('div');
+                    deckGrid.className = 'deck-grid';
+
+                    player.Decks.forEach(deck => {
+                        const deckDiv = document.createElement('div');
+                        deckDiv.className = 'deck';
+
+                        deckDiv.innerHTML = `
+                            ${deck.Commander}<br>
+                            <img src="${deck.Image}">
+                        `;
+
+                        deckGrid.appendChild(deckDiv);
+                    });
+
+                    playerDiv.appendChild(deckGrid);
+                    groupDiv.appendChild(playerDiv);
+                });
+
+                container.appendChild(groupDiv);
+            });
+        }
+
+        // Fetch and render groups on page load
+        fetchGroups();
+    </script>
+</body>
+</html>
