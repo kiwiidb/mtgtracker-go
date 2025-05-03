@@ -13,6 +13,7 @@ type Deck struct {
 	MoxfieldURL string
 	Commander   string
 	Image       string
+	Crop        string
 	PlayerID    uint
 }
 

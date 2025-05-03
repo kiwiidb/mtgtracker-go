@@ -70,8 +70,9 @@ func (s *Service) AddDeckToPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	crop := imgUris.ArtCrop
+	img := imgUris.Normal
 
-	deck, err := s.Repository.AddDeckToPlayer(request.PlayerID, request.MoxfieldURL, request.Commander, crop)
+	deck, err := s.Repository.AddDeckToPlayer(request.PlayerID, request.MoxfieldURL, request.Commander, img, crop)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTG Tracker - Groups</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -33,38 +32,74 @@
         }
         .deck-grid {
             display: flex;
-            gap: 10px;
+            gap: 5px; /* Reduce spacing between cards */
             flex-wrap: wrap;
         }
         .deck {
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin: 0;
         }
         .deck img {
-            max-width: 100px;
-            margin-top: 10px;
+            max-width: 150px; /* Increase card size */
             border-radius: 5px;
         }
         .delete-button {
-            margin-top: 5px;
-            padding: 5px 10px;
-            background-color: #e74c3c;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
             color: white;
             border: none;
-            border-radius: 3px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .delete-button:hover {
-            background-color: #c0392b;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .add-deck-form {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .add-deck-form input, .add-deck-form button, .add-deck-form select {
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .add-deck-form button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+        .add-deck-form button:hover {
+            background-color: #2980b9;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="add-deck-form">
+        <select id="player-dropdown">
+            <option value="" disabled selected>Select a player</option>
+            <!-- Player options will be dynamically populated -->
+        </select>
+        <input type="text" placeholder="Search Commander" id="commander-input" oninput="fetchCommanders(this.value, 'commander-dropdown')">
+        <select id="commander-dropdown">
+            <option value="" disabled selected>Select a commander</option>
+        </select>
+        <button onclick="submitDeck()">Add Deck</button>
+    </div>
     <div id="groups-container">Loading...</div>
 
     <script>
@@ -75,20 +110,83 @@
                     throw new Error('Failed to fetch groups');
                 }
                 const groups = await response.json();
+                populatePlayerDropdown(groups);
                 renderGroups(groups);
             } catch (error) {
                 document.getElementById('groups-container').innerText = error.message;
             }
         }
 
-        async function deleteDeck(deckId) {
+        function populatePlayerDropdown(groups) {
+            const dropdown = document.getElementById('player-dropdown');
+            dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>'; // Reset options
+
+            groups.forEach(group => {
+                group.Players.forEach(player => {
+                    const option = document.createElement('option');
+                    option.value = player.ID;
+                    option.textContent = player.Name;
+                    dropdown.appendChild(option);
+                });
+            });
+        }
+
+        async function fetchCommanders(query, dropdownId) {
             try {
-                const response = await fetch(`/player/v1/decks/${deckId}`, { method: 'DELETE' });
-                if (!response.ok) {
-                    throw new Error('Failed to delete deck');
+                const scryfallResponse = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`);
+                if (!scryfallResponse.ok) {
+                    throw new Error('Failed to fetch commander suggestions');
                 }
-                alert('Deck deleted successfully');
-                fetchGroups(); // Refresh the groups after deletion
+                const data = await scryfallResponse.json();
+                const dropdown = document.getElementById(dropdownId);
+                dropdown.innerHTML = '<option value="" disabled selected>Select a commander</option>'; // Clear existing options
+
+                data.data.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    dropdown.appendChild(option);
+                });
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function submitDeck() {
+            const playerId = parseInt(document.getElementById('player-dropdown').value, 10);
+            const commanderName = document.getElementById('commander-dropdown').value;
+
+            if (!playerId || !commanderName) {
+                alert('Please select a player and a commander.');
+                return;
+            }
+
+            try {
+                // Fetch card image using Scryfall's fuzzy search API
+                const scryfallResponse = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(commanderName)}`);
+                if (!scryfallResponse.ok) {
+                    throw new Error('Failed to fetch card data from Scryfall');
+                }
+                const cardData = await scryfallResponse.json();
+                const cardImage = cardData.image_uris.art_crop;
+
+                // Add deck to the player
+                const response = await fetch('/player/v1/decks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        player_id: playerId,
+                        commander: commanderName,
+                        moxfield_url: '', // Optional field
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add deck');
+                }
+
+                alert('Deck added successfully');
+                fetchGroups(); // Refresh the groups after adding the deck
             } catch (error) {
                 alert(error.message);
             }
@@ -123,9 +221,8 @@
                         deckDiv.className = 'deck';
 
                         deckDiv.innerHTML = `
-                            ${deck.Commander}<br>
+                            <button class="delete-button" onclick="deleteDeck(${deck.ID})">🗑️</button>
                             <img src="${deck.Image}">
-                            <button class="delete-button" onclick="deleteDeck(${deck.ID})">Delete</button>
                         `;
 
                         deckGrid.appendChild(deckDiv);
@@ -137,6 +234,19 @@
 
                 container.appendChild(groupDiv);
             });
+        }
+
+        async function deleteDeck(deckId) {
+            try {
+                const response = await fetch(`/player/v1/decks/${deckId}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    throw new Error('Failed to delete deck');
+                }
+                alert('Deck deleted successfully');
+                fetchGroups(); // Refresh the groups after deletion
+            } catch (error) {
+                alert(error.message);
+            }
         }
 
         // Fetch and render groups on page load
