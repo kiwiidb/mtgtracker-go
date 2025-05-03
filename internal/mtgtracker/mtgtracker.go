@@ -152,6 +152,10 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(request.Rankings) < 2 {
+		http.Error(w, "At least two rankings are required", http.StatusBadRequest)
+		return
+	}
 	// Call the repository to insert the game
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
