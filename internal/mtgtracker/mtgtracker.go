@@ -162,7 +162,7 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 			CouldHaveWon: rank.CouldHaveWon,
 		})
 	}
-	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, rankings)
+	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, request.Date, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

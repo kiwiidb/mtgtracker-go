@@ -85,10 +85,43 @@
         .add-deck-form button:hover {
             background-color: #2980b9;
         }
+        .add-game-form {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .add-game-form input, .add-game-form button, .add-game-form select {
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .add-game-form button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+        .add-game-form button:hover {
+            background-color: #2980b9;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="add-game-form">
+        <h2>Add a Game</h2>
+        <label for="game-date">Date:</label>
+        <input type="date" id="game-date">
+        <div id="rankings-container">
+            <h3>Rankings</h3>
+            <button type="button" onclick="addRanking()">Add Player</button>
+        </div>
+        <button onclick="submitGame()">Submit Game</button>
+    </div>
     <div class="add-deck-form">
         <select id="player-dropdown">
             <option value="" disabled selected>Select a player</option>
@@ -247,6 +280,160 @@
                 alert(error.message);
             }
         }
+
+        function addRanking() {
+            const rankingsContainer = document.getElementById('rankings-container');
+            const rankingDiv = document.createElement('div');
+            rankingDiv.className = 'ranking';
+
+            rankingDiv.innerHTML = `
+                <select class="player-dropdown">
+                    <option value="" disabled selected>Select a player</option>
+                    <!-- Player options will be dynamically populated -->
+                </select>
+                <select class="deck-dropdown">
+                    <option value="" disabled selected>Select a deck</option>
+                </select>
+                <button type="button" onclick="removeRanking(this)">Remove</button>
+            `;
+
+            rankingsContainer.appendChild(rankingDiv);
+            populatePlayerDropdown(rankingDiv.querySelector('.player-dropdown'));
+        }
+
+        function removeRanking(button) {
+            button.parentElement.remove();
+        }
+
+        async function submitGame() {
+            const dateInput = document.getElementById('game-date');
+            const rankingsContainer = document.getElementById('rankings-container');
+
+            if (!dateInput || !rankingsContainer) {
+                console.error('Required elements for submitting the game are missing.');
+                return;
+            }
+
+            const date = dateInput.value;
+            const rankings = [];
+
+            document.querySelectorAll('.ranking').forEach((rankingDiv, index) => {
+                const playerDropdown = rankingDiv.querySelector('.player-dropdown');
+                const deckDropdown = rankingDiv.querySelector('.deck-dropdown');
+
+                if (!playerDropdown || !deckDropdown) {
+                    console.error('Player or deck dropdown is missing in a ranking entry.');
+                    return;
+                }
+
+                const playerId = parseInt(playerDropdown.value, 10);
+                const deckId = parseInt(deckDropdown.value, 10);
+
+                if (playerId && deckId) {
+                    rankings.push({
+                        player_id: playerId,
+                        deck_id: deckId,
+                        position: index + 1,
+                        could_have_won: false // Default value
+                    });
+                }
+            });
+
+            if (!date || rankings.length === 0) {
+                alert('Please fill out all fields and add at least one player.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/player/v1/groups/1/games', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        group_id: 1,
+                        date: new Date(date).toISOString(),
+                        duration: 0, // Duration is optional and not included in the form
+                        comments: '',
+                        image: '',
+                        rankings: rankings
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add game');
+                }
+
+                alert('Game added successfully');
+                fetchGroups(); // Refresh the groups after adding the game
+            } catch (error) {
+                console.error('Error submitting game:', error);
+                alert(error.message);
+            }
+        }
+
+        function populatePlayerDropdown(dropdown) {
+            fetch('/player/v1/groups')
+                .then(response => response.json())
+                .then(groups => {
+                    if (!(dropdown instanceof HTMLSelectElement)) {
+                        console.error('Dropdown is not a valid HTMLSelectElement');
+                        return;
+                    }
+                    dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>';
+                    groups.forEach(group => {
+                        group.Players.forEach(player => {
+                            const option = document.createElement('option');
+                            option.value = player.ID;
+                            option.textContent = player.Name;
+                            dropdown.appendChild(option);
+                        });
+                    });
+
+                    dropdown.addEventListener('change', function () {
+                        const playerId = parseInt(this.value, 10);
+                        const deckDropdown = this.parentElement.querySelector('.deck-dropdown');
+                        populateDeckDropdown(playerId, deckDropdown);
+                    });
+                })
+                .catch(error => alert('Failed to fetch players: ' + error.message));
+        }
+
+        function populateDeckDropdown(playerId, dropdown) {
+            fetch(`/player/v1/players/${playerId}/decks`)
+                .then(response => response.json())
+                .then(decks => {
+                    dropdown.innerHTML = '<option value="" disabled selected>Select a deck</option>';
+                    decks.forEach(deck => {
+                        const option = document.createElement('option');
+                        option.value = deck.ID;
+                        option.textContent = deck.Commander;
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => alert('Failed to fetch decks: ' + error.message));
+        }
+
+        function populatePlayerDropdownForAddDeck() {
+            const dropdown = document.getElementById('player-dropdown');
+            fetch('/player/v1/groups')
+                .then(response => response.json())
+                .then(groups => {
+                    dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>';
+                    groups.forEach(group => {
+                        group.Players.forEach(player => {
+                            const option = document.createElement('option');
+                            option.value = player.ID;
+                            option.textContent = player.Name;
+                            dropdown.appendChild(option);
+                        });
+                    });
+                })
+                .catch(error => alert('Failed to fetch players: ' + error.message));
+        }
+
+        // Call this function on page load to populate the player dropdown for the "Add Deck" form
+        document.addEventListener('DOMContentLoaded', () => {
+            populatePlayerDropdownForAddDeck();
+        });
 
         // Fetch and render groups on page load
         fetchGroups();

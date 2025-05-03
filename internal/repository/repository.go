@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"log"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -94,7 +95,7 @@ func (r *Repository) AddPlayerToGroup(groupID uint, email string) error {
 	return r.DB.Model(&group).Association("Players").Append(&player)
 }
 
-func (r *Repository) InsertGame(groupID uint, duration int, comments, image string, rankings []Ranking) (*Game, error) {
+func (r *Repository) InsertGame(groupID uint, duration int, comments, image string, date *time.Time, rankings []Ranking) (*Game, error) {
 	var group Group
 	if err := r.DB.First(&group, groupID).Error; err != nil {
 		return nil, errors.New("invalid group ID")
@@ -114,6 +115,7 @@ func (r *Repository) InsertGame(groupID uint, duration int, comments, image stri
 	game := Game{
 		GroupID:  groupID,
 		Duration: duration,
+		Date:     date,
 		Comments: comments,
 		Image:    image,
 		Rankings: rankings,
