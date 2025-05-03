@@ -54,6 +54,7 @@ http POST :8080/player/v1/decks player_id:=9 commander="Ms. Bumbleflower"
 
 http PUT localhost:8080/player/v1/groups/1/add/brain
 http PUT localhost:8080/player/v1/groups/1/add/kwinten
+http PUT localhost:8080/player/v1/groups/1/add/alex
 http PUT localhost:8080/player/v1/groups/1/add/lorin
 http PUT localhost:8080/player/v1/groups/1/add/lucas
 http PUT localhost:8080/player/v1/groups/1/add/dries

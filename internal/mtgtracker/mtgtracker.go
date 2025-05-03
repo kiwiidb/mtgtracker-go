@@ -144,7 +144,36 @@ func (s *Service) DeleteDeck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {}
+func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
+	// Parse the request body
+	var request CreateGameRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Call the repository to insert the game
+	var rankings []repository.Ranking
+	for _, rank := range request.Rankings {
+		rankings = append(rankings, repository.Ranking{
+			PlayerID: rank.PlayerID,
+			DeckID:   rank.DeckID,
+			Position: rank.Position,
+		})
+	}
+	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, rankings)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(game)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
 func (s *Service) GetGroups(w http.ResponseWriter, r *http.Request) {
 	// Call the repository to get the groups
 	groups, err := s.Repository.GetGroups()
