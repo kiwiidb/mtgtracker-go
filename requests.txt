@@ -12,13 +12,11 @@ http POST :8080/player/v1/decks player_id:=1 commander="Sauron, the Dark Lord"
 
 http POST :8080/player/v1/decks player_id:=4 commander="Henzie \"Toolbox\" Torre"
 http POST :8080/player/v1/decks player_id:=4 commander="Atraxa, Praetors' Voice"
-http POST :8080/player/v1/decks player_id:=4 commander="Jodah, Archmage Eternal"
+http POST :8080/player/v1/decks player_id:=4 commander="Jodah, The Unifier"
 http POST :8080/player/v1/decks player_id:=4 commander="Satoru Umezawa"
 
 http POST :8080/player/v1/decks player_id:=3 commander="Massacre Girl"
 http POST :8080/player/v1/decks player_id:=3 commander="Raffine, Scheming Seer"
-http POST :8080/player/v1/decks player_id:=3 commander="Judith, the Scourge Diva"
-http POST :8080/player/v1/decks player_id:=3 commander="Imoti, Celebrant of Bounty"
 http POST :8080/player/v1/decks player_id:=3 commander="Norin the Wary"
 http POST :8080/player/v1/decks player_id:=3 commander="Ojer Axonil, Deepest Might"
 

@@ -28,6 +28,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/player/v1/groups", s.GetGroups)
 	mux.HandleFunc("/player/v1/games", s.GetGames)
 	mux.HandleFunc("/player/v1/players/{playerId}/decks", s.GetDecks)
+	mux.HandleFunc("DELETE /player/v1/decks/{deckId}", s.DeleteDeck)
 	mux.HandleFunc("/player/v1/groups/{groupId}/ranking", s.GetRanking)
 }
 
@@ -118,6 +119,23 @@ func (s *Service) AddPlayerToGroup(w http.ResponseWriter, r *http.Request) {
 	err = s.Repository.AddPlayerToGroup(uint(groupIDInt), email)
 	if err != nil {
 		log.Println("Error adding player to group:", err, email)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Service) DeleteDeck(w http.ResponseWriter, r *http.Request) {
+	// Call the repository to delete the deck
+	deckID := r.PathValue("deckId")
+	deckIDInt, err := strconv.Atoi(deckID)
+	if err != nil {
+		http.Error(w, "Invalid deck ID", http.StatusBadRequest)
+		return
+	}
+	err = s.Repository.DeleteDeck(uint(deckIDInt))
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

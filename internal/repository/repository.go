@@ -29,6 +29,14 @@ func (r *Repository) GetGames() ([]Game, error) {
 	return games, nil
 }
 
+func (r *Repository) DeleteDeck(deckID uint) error {
+	var deck Deck
+	if err := r.DB.First(&deck, deckID).Error; err != nil {
+		return errors.New("deck not found")
+	}
+	return r.DB.Delete(&deck).Error
+}
+
 func (r *Repository) GetGroups() ([]Group, error) {
 	var groups []Group
 	// preload the players for the groups
