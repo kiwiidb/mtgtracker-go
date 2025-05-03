@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rankings</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+        .ranking-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .player-ranking {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .player-ranking:last-child {
+            border-bottom: none;
+        }
+        .player-ranking h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #34495e;
+        }
+        .deck-ranking {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .deck {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100px;
+        }
+        .deck img {
+            width: 80px;
+            height: 120px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .deck p {
+            margin: 5px 0 0;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Player Rankings</h1>
+    <div class="ranking-container" id="ranking-container">Loading...</div>
+    <a href="index.html">Back to Home</a>
+
+    <script>
+        async function fetchRankings() {
+            try {
+                const response = await fetch('/player/v1/groups/1/ranking');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch rankings');
+                }
+                const rankings = await response.json();
+                renderRankings(rankings);
+            } catch (error) {
+                document.getElementById('ranking-container').innerText = error.message;
+            }
+        }
+
+        function renderRankings(rankings) {
+            const container = document.getElementById('ranking-container');
+            container.innerHTML = ''; // Clear loading text
+
+            rankings.forEach(playerWin => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-ranking';
+
+                playerDiv.innerHTML = `
+                    <h2>${playerWin.Player.Name} - ${playerWin.Wins} Wins</h2>
+                    <div class="deck-ranking">
+                        ${playerWin.DeckWins.map(deckWin => `
+                            <div class="deck">
+                                <img src="${deckWin.Deck.Image}" alt="${deckWin.Deck.Commander}">
+                                <p>${deckWin.Deck.Commander} (${deckWin.Wins})</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(playerDiv);
+            });
+        }
+
+        // Fetch and render rankings on page load
+        fetchRankings();
+    </script>
+</body>
+</html>
