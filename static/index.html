@@ -38,10 +38,29 @@
         .deck {
             position: relative;
             margin: 0;
+            width: 150px; /* Ensure consistent size for decks */
+            height: 220px; /* Adjust height to fit both images */
         }
         .deck img {
-            max-width: 150px; /* Increase card size */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .deck img.back {
+            opacity: 0;
+            transform: scale(0.95); /* Slightly smaller for staggered effect */
+        }
+        .deck img.front {
+            opacity: 1;
+            z-index: 1;
+        }
+        .deck img:hover {
+            cursor: pointer;
         }
         .delete-button {
             position: absolute;
@@ -227,6 +246,18 @@
             }
         }
 
+        function toggleDeckImage(deckElement) {
+            const frontImage = deckElement.querySelector('.front');
+            const backImage = deckElement.querySelector('.back');
+
+            if (frontImage && backImage) {
+                frontImage.classList.toggle('front');
+                frontImage.classList.toggle('back');
+                backImage.classList.toggle('front');
+                backImage.classList.toggle('back');
+            }
+        }
+
         function renderGroups(groups) {
             const container = document.getElementById('groups-container');
             container.innerHTML = ''; // Clear loading text
@@ -254,12 +285,12 @@
                     player.Decks.forEach(deck => {
                         const deckDiv = document.createElement('div');
                         deckDiv.className = 'deck';
-
                         deckDiv.innerHTML = `
                             <button class="delete-button" onclick="deleteDeck(${deck.ID})">🗑️</button>
-                            <img src="${deck.Image}">
+                            <img src="${deck.Image}" class="front" alt="${deck.Commander}">
+                            ${deck.SecondaryImage ? `<img src="${deck.SecondaryImage}" class="back" alt="${deck.Commander} (Back)">` : ''}
                         `;
-
+                        deckDiv.onclick = () => toggleDeckImage(deckDiv);
                         deckGrid.appendChild(deckDiv);
                     });
 
