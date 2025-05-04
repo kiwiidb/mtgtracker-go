@@ -48,11 +48,15 @@ type Game struct {
 
 type Ranking struct {
 	gorm.Model
-	GameID       uint
-	PlayerID     uint
-	DeckID       uint
-	Position     int
-	CouldHaveWon bool
+	GameID         uint
+	PlayerID       uint
+	DeckID         uint
+	Position       int
+	CouldHaveWon   bool
+	PlayerName     string `gorm:"-"`
+	Commander      string `gorm:"-"`
+	CommanderImage string `gorm:"-"`
+	SecondaryImage string `gorm:"-"`
 
 	Player Player
 	Deck   Deck

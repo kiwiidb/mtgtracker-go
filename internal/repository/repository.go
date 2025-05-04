@@ -23,10 +23,24 @@ func (r *Repository) GetDecks(playerId uint) ([]Deck, error) {
 
 func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
-	err := r.DB.Preload("Rankings").Find(&games).Error
+	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+		return db.Preload("Player").Preload("Deck")
+	}).Order("Date desc").Find(&games).Error
 	if err != nil {
 		return nil, err
 	}
+
+	// Populate additional fields for Rankings
+	for i := range games {
+		for j := range games[i].Rankings {
+			rank := &games[i].Rankings[j]
+			rank.PlayerName = rank.Player.Name
+			rank.Commander = rank.Deck.Commander
+			rank.CommanderImage = rank.Deck.Image
+			rank.SecondaryImage = rank.Deck.SecondaryImage
+		}
+	}
+
 	return games, nil
 }
 

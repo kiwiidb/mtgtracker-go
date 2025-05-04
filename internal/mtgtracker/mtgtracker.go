@@ -28,7 +28,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /player/v1/groups/{groupId}/add/{email}", s.AddPlayerToGroup)
 	mux.HandleFunc("PUT /player/v1/groups/{groupId}/games", s.AddGame)
 	mux.HandleFunc("/player/v1/groups", s.GetGroups)
-	mux.HandleFunc("/player/v1/games", s.GetGames)
+	mux.HandleFunc("/player/v1/groups/{groupId}/games", s.GetGames)
 	mux.HandleFunc("/player/v1/players/{playerId}/decks", s.GetDecks)
 	mux.HandleFunc("DELETE /player/v1/decks/{deckId}", s.DeleteDeck)
 	mux.HandleFunc("/player/v1/groups/{groupId}/ranking", s.GetRanking)

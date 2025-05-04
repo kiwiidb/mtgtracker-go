@@ -112,6 +112,40 @@
         .deck img:hover {
             cursor: pointer;
         }
+        .games-list {
+            list-style: none;
+            padding: 0;
+        }
+        .game-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .game-item h3 {
+            margin: 0 0 10px;
+        }
+        .game-item .player-entry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .game-item .player-entry img {
+            width: 50px;
+            height: 75px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .game-item .winner {
+            font-weight: bold;
+            color: green;
+        }
+        .game-item .could-have-won {
+            font-style: italic;
+            color: orange;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -169,6 +203,19 @@
             }
         }
 
+        async function fetchGames(groupId, gamesContainer) {
+            try {
+                const response = await fetch(`/player/v1/groups/${groupId}/games`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch games');
+                }
+                const games = await response.json();
+                renderGames(games, gamesContainer);
+            } catch (error) {
+                gamesContainer.innerText = error.message;
+            }
+        }
+
         function renderGroups(groups) {
             const container = document.getElementById('groups-container');
             container.innerHTML = ''; // Clear loading text
@@ -181,10 +228,17 @@
                     <h2>${group.Name}</h2>
                     <img src="${group.Image}">
                     <div class="tabs">
-                        <div class="tab active" onclick="showTab(this, 'decks-${group.ID}')">Decks</div>
+                        <div class="tab active" onclick="showTab(this, 'games-${group.ID}')">Games</div>
                         <div class="tab" onclick="showTab(this, 'ranking-${group.ID}')">Ranking</div>
+                        <div class="tab" onclick="showTab(this, 'decks-${group.ID}')">Decks</div>
                     </div>
-                    <div class="tab-content active" id="decks-${group.ID}">
+                    <div class="tab-content active" id="games-${group.ID}">
+                        <ul class="games-list">Loading games...</ul>
+                    </div>
+                    <div class="tab-content" id="ranking-${group.ID}">
+                        <div class="ranking-container">Loading rankings...</div>
+                    </div>
+                    <div class="tab-content" id="decks-${group.ID}">
                         ${group.Players.map(player => `
                             <div class="player">
                                 <strong>${player.Name}</strong>
@@ -199,13 +253,13 @@
                             </div>
                         `).join('')}
                     </div>
-                    <div class="tab-content" id="ranking-${group.ID}">
-                        <div class="ranking-container">Loading rankings...</div>
-                    </div>
                 `;
 
                 const rankingContainer = groupDiv.querySelector('.ranking-container');
                 fetchRankings(group.ID, rankingContainer);
+
+                const gamesContainer = groupDiv.querySelector('.games-list');
+                fetchGames(group.ID, gamesContainer);
 
                 container.appendChild(groupDiv);
             });
@@ -238,6 +292,31 @@
 
             container.innerHTML = '';
             container.appendChild(table);
+        }
+
+        function renderGames(games, container) {
+            container.innerHTML = games.map(game => `
+                <li class="game-item">
+                    <h3>${new Date(game.Date).toLocaleDateString()}</h3>
+                    <div style="display: flex; align-items: center;">
+                        <div style="flex: 1; text-align: center;">
+                            ${game.Rankings.filter(ranking => ranking.Position === 1).map(winner => `
+                                <img src="${winner.Deck.Image}" alt="${winner.Player.Name}" title="${winner.Player.Name}" style="width: 300px; height: 450px; border: 3px solid gold; border-radius: 5px;">
+                                <div>
+                                    <span style="font-weight: bold; color: gold;" title="${winner.Player.Name}">🏆 ${winner.Player.Name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="flex: 2; display: flex; flex-wrap: wrap;">
+                            ${game.Rankings.filter(ranking => ranking.Position !== 1).map(participant => `
+                                <div style="text-align: center;">
+                                    <img src="${participant.Deck.Image}" alt="${participant.Player.Name}" title="${participant.Player.Name}" style="width: 200px; height: 300px; border-radius: 5px;">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </li>
+            `).join('');
         }
 
         function showTab(tabElement, contentId) {
