@@ -289,6 +289,82 @@
             }
         }
 
+        function addRanking() {
+            const rankingsContainer = document.getElementById('rankings-container');
+            const isFirstEntry = rankingsContainer.querySelectorAll('.ranking-entry').length === 0;
+
+            const rankingEntry = document.createElement('div');
+            rankingEntry.className = 'ranking-entry';
+            rankingEntry.innerHTML = `
+                <select class="player-dropdown">
+                    <option value="" disabled selected>Select a player</option>
+                    <!-- Player options will be dynamically populated -->
+                </select>
+                <select class="deck-dropdown">
+                    <option value="" disabled selected>Select a deck</option>
+                    <!-- Deck options will be dynamically populated -->
+                </select>
+                ${isFirstEntry ? '<span class="winner-indicator">🏆</span>' : ''}
+                <button type="button" onclick="removeRanking(this)">Remove</button>
+            `;
+
+            rankingsContainer.appendChild(rankingEntry);
+
+            populatePlayerDropdown(rankingEntry.querySelector('.player-dropdown'));
+            rankingEntry.querySelector('.player-dropdown').addEventListener('change', function () {
+                populateDeckDropdown(this.value, rankingEntry.querySelector('.deck-dropdown'));
+            });
+        }
+
+        function getRankings() {
+            const rankingsContainer = document.getElementById('rankings-container');
+            const rankingEntries = rankingsContainer.querySelectorAll('.ranking-entry');
+            return Array.from(rankingEntries).map((entry, index) => ({
+                PlayerID: entry.querySelector('.player-dropdown').value,
+                DeckID: entry.querySelector('.deck-dropdown').value,
+                Position: index + 1, // Use the order in which they are added
+            }));
+        }
+
+        function populatePlayerDropdown(dropdown) {
+            fetch('/player/v1/groups')
+                .then(response => response.json())
+                .then(groups => {
+                    if (groups.length === 0) {
+                        throw new Error('No groups available');
+                    }
+                    const players = groups[0].Players;
+                    dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>';
+                    players.forEach(player => {
+                        const option = document.createElement('option');
+                        option.value = player.ID;
+                        option.textContent = player.Name;
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error populating player dropdown:', error));
+        }
+
+        function populateDeckDropdown(playerId, dropdown) {
+            fetch(`/player/v1/players/${playerId}/decks`)
+                .then(response => response.json())
+                .then(decks => {
+                    dropdown.innerHTML = '<option value="" disabled selected>Select a deck</option>';
+                    decks.forEach(deck => {
+                        const option = document.createElement('option');
+                        option.value = deck.ID;
+                        option.textContent = deck.Commander;
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error populating deck dropdown:', error));
+        }
+
+        function removeRanking(button) {
+            const rankingEntry = button.parentElement;
+            rankingEntry.remove();
+        }
+
         function renderGroups(groups) {
             const container = document.getElementById('groups-container');
             container.innerHTML = ''; // Clear loading text
