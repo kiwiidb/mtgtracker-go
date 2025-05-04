@@ -102,7 +102,7 @@ func (s *Service) AddDeckToPlayer(w http.ResponseWriter, r *http.Request) {
 
 func findPartner(oracleText string) (*scryfall.Card, bool) {
 	// Use a regex to find "Partner with <partner name>"
-	re := regexp.MustCompile(`Partner with ([^\\n]+)`)
+	re := regexp.MustCompile(`Partner with ([^\n]+)`)
 	matches := re.FindStringSubmatch(oracleText)
 
 	if len(matches) < 2 {
@@ -110,6 +110,7 @@ func findPartner(oracleText string) (*scryfall.Card, bool) {
 	}
 
 	partnerName := matches[1]
+	log.Println("Partner found:", partnerName)
 	partnerCard, err := scryfall.GetCard(partnerName)
 	if err != nil {
 		log.Printf("Failed to fetch partner card: %v", err)
