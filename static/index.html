@@ -216,6 +216,79 @@
             }
         }
 
+        async function fetchPlayers() {
+            try {
+                const groupsResponse = await fetch('/player/v1/groups');
+                if (!groupsResponse.ok) {
+                    throw new Error('Failed to fetch groups');
+                }
+                const groups = await groupsResponse.json();
+                if (groups.length === 0) {
+                    throw new Error('No groups available');
+                }
+
+                const firstGroup = groups[0];
+                const players = firstGroup.Players;
+
+                const playerDropdown = document.getElementById('player-dropdown');
+                playerDropdown.innerHTML = '<option value="" disabled selected>Select a player</option>';
+                players.forEach(player => {
+                    const option = document.createElement('option');
+                    option.value = player.ID;
+                    option.textContent = player.Name;
+                    playerDropdown.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching players:', error);
+            }
+        }
+
+        async function fetchCommanders(query, dropdownId) {
+            try {
+                const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch commanders');
+                }
+                const data = await response.json();
+                const commanders = data.data.filter(card => card.type_line.includes('Legendary') && card.type_line.includes('Creature'));
+
+                const commanderDropdown = document.getElementById(dropdownId);
+                commanderDropdown.innerHTML = '<option value="" disabled selected>Select a commander</option>';
+                commanders.forEach(commander => {
+                    const option = document.createElement('option');
+                    option.value = commander.id;
+                    option.textContent = commander.name;
+                    commanderDropdown.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching commanders:', error);
+            }
+        }
+
+        async function submitDeck() {
+            const playerId = document.getElementById('player-dropdown').value;
+            const commanderId = document.getElementById('commander-dropdown').value;
+            if (!playerId || !commanderId) {
+                alert('Please select both a player and a commander.');
+                return;
+            }
+            try {
+                const response = await fetch('/player/v1/decks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playerId, commanderId }),
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to add deck');
+                }
+                alert('Deck added successfully!');
+                fetchGroups(); // Refresh groups to reflect the new deck
+            } catch (error) {
+                console.error('Error adding deck:', error);
+                alert('Error adding deck. Please try again.');
+            }
+        }
+
         function renderGroups(groups) {
             const container = document.getElementById('groups-container');
             container.innerHTML = ''; // Clear loading text
@@ -270,13 +343,6 @@
             table.className = 'ranking-table';
 
             table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Player</th>
-                        <th>Wins</th>
-                    </tr>
-                </thead>
                 <tbody>
                     ${rankings.map((playerWin, index) => `
                         <tr>
@@ -344,6 +410,9 @@
 
         // Fetch and render groups on page load
         fetchGroups();
+
+        // Fetch players on page load
+        fetchPlayers();
     </script>
 </body>
 </html>
