@@ -245,30 +245,37 @@
 
         async function fetchCommanders(query, dropdownId) {
             try {
+                if (!query.trim()) {
+                    document.getElementById(dropdownId).innerHTML = '<option value="" disabled selected>Select a commander</option>';
+                    return;
+                }
+
                 const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch commanders');
                 }
+
                 const data = await response.json();
-                const commanders = data.data.filter(card => card.type_line.includes('Legendary') && card.type_line.includes('Creature'));
+                const commanders = data.data;
 
                 const commanderDropdown = document.getElementById(dropdownId);
                 commanderDropdown.innerHTML = '<option value="" disabled selected>Select a commander</option>';
                 commanders.forEach(commander => {
                     const option = document.createElement('option');
-                    option.value = commander.id;
+                    option.value = commander.name;
                     option.textContent = commander.name;
                     commanderDropdown.appendChild(option);
                 });
             } catch (error) {
                 console.error('Error fetching commanders:', error);
+                document.getElementById(dropdownId).innerHTML = '<option value="" disabled selected>Error loading commanders</option>';
             }
         }
 
         async function submitDeck() {
-            const playerId = document.getElementById('player-dropdown').value;
-            const commanderId = document.getElementById('commander-dropdown').value;
-            if (!playerId || !commanderId) {
+            const playerId = parseInt(document.getElementById('player-dropdown').value, 10);
+            const commander = document.getElementById('commander-dropdown').value;
+            if (!playerId || !commander) {
                 alert('Please select both a player and a commander.');
                 return;
             }
@@ -276,7 +283,7 @@
                 const response = await fetch('/player/v1/decks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ playerId, commanderId }),
+                    body: JSON.stringify({ player_id: playerId, commander: commander }),
                 });
                 if (!response.ok) {
                     throw new Error('Failed to add deck');
@@ -290,10 +297,10 @@
         }
 
         async function submitGame() {
-            const gameDate = document.getElementById('game-date').value;
+            const gameDateInput = document.getElementById('game-date').value;
             const rankings = getRankings();
 
-            if (!gameDate) {
+            if (!gameDateInput) {
                 alert('Please select a date for the game.');
                 return;
             }
@@ -303,8 +310,13 @@
                 return;
             }
 
+            // Convert the date to UTC with hour included
+            const gameDate = new Date(gameDateInput);
+            gameDate.setUTCHours(12); // Set a default hour (e.g., noon)
+
             const gameData = {
-                Date: gameDate,
+                Date: gameDate.toISOString(), // Encode as UTC time
+                group_id: 1,
                 Rankings: rankings,
             };
 
@@ -344,7 +356,6 @@
                     <!-- Deck options will be dynamically populated -->
                 </select>
                 ${isFirstEntry ? '<span class="winner-indicator">🏆</span>' : ''}
-                <button type="button" onclick="removeRanking(this)">Remove</button>
             `;
 
             rankingsContainer.appendChild(rankingEntry);
@@ -359,9 +370,9 @@
             const rankingsContainer = document.getElementById('rankings-container');
             const rankingEntries = rankingsContainer.querySelectorAll('.ranking-entry');
             return Array.from(rankingEntries).map((entry, index) => ({
-                PlayerID: entry.querySelector('.player-dropdown').value,
-                DeckID: entry.querySelector('.deck-dropdown').value,
-                Position: index + 1, // Use the order in which they are added
+                player_id: parseInt(entry.querySelector('.player-dropdown').value, 10),
+                deck_id: parseInt(entry.querySelector('.deck-dropdown').value,10),
+                position: parseInt(index + 1, 10), // Use the order in which they are added
             }));
         }
 
