@@ -289,6 +289,45 @@
             }
         }
 
+        async function submitGame() {
+            const gameDate = document.getElementById('game-date').value;
+            const rankings = getRankings();
+
+            if (!gameDate) {
+                alert('Please select a date for the game.');
+                return;
+            }
+
+            if (rankings.length < 2) {
+                alert('At least two players are required to submit a game.');
+                return;
+            }
+
+            const gameData = {
+                Date: gameDate,
+                Rankings: rankings,
+            };
+
+            try {
+                const response = await fetch('/player/v1/groups/1/games', { // Replace '1' with the actual group ID
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(gameData),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to submit game');
+                }
+
+                alert('Game submitted successfully!');
+                document.getElementById('rankings-container').innerHTML = ''; // Clear rankings
+                document.getElementById('game-date').value = ''; // Reset date
+            } catch (error) {
+                console.error('Error submitting game:', error);
+                alert('Error submitting game. Please try again.');
+            }
+        }
+
         function addRanking() {
             const rankingsContainer = document.getElementById('rankings-container');
             const isFirstEntry = rankingsContainer.querySelectorAll('.ranking-entry').length === 0;
