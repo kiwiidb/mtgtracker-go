@@ -334,6 +334,10 @@
                 alert('Game submitted successfully!');
                 document.getElementById('rankings-container').innerHTML = ''; // Clear rankings
                 document.getElementById('game-date').value = ''; // Reset date
+
+                // Reload games
+                const gamesContainer = document.querySelector(`#games-1 .games-list`); // Replace '1' with the actual group ID
+                fetchGames(1, gamesContainer);
             } catch (error) {
                 console.error('Error submitting game:', error);
                 alert('Error submitting game. Please try again.');
