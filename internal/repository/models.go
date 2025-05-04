@@ -10,11 +10,12 @@ import (
 
 type Deck struct {
 	gorm.Model
-	MoxfieldURL string
-	Commander   string
-	Image       string
-	Crop        string
-	PlayerID    uint
+	MoxfieldURL    string
+	Commander      string // in case of multi-name commanders, both names seperated by a /
+	Image          string
+	SecondaryImage string
+	Crop           string
+	PlayerID       uint
 }
 
 type Player struct {

@@ -6,7 +6,9 @@ import (
 	"mtgtracker/internal/repository"
 	"mtgtracker/internal/scryfall"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 type Service struct {
@@ -64,15 +66,27 @@ func (s *Service) AddDeckToPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the repository to add the deck to the player
-	imgUris, err := scryfall.GetCardImageURIs(request.Commander)
+	commanderCard, err := scryfall.GetCard(request.Commander)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	crop := imgUris.ArtCrop
-	img := imgUris.Normal
+	commander := commanderCard.Name
+	img := commanderCard.ImageURIs.Normal
+	secondaryImg := ""
+	// first check if the commander is a double-faced card
+	if len(commanderCard.CardFaces) > 1 {
+		img = commanderCard.CardFaces[0].ImageURIs.Normal
+		secondaryImg = commanderCard.CardFaces[1].ImageURIs.Normal
+		commander = commanderCard.CardFaces[0].Name + "/" + commanderCard.CardFaces[1].Name
+	}
+	// then check if the commander has a partner
+	if partner, ok := findPartner(commanderCard.OracleText); ok {
+		commander = strings.Join([]string{commander, partner.Name}, "/")
+		secondaryImg = partner.ImageURIs.Normal
+	}
 
-	deck, err := s.Repository.AddDeckToPlayer(request.PlayerID, request.MoxfieldURL, request.Commander, img, crop)
+	deck, err := s.Repository.AddDeckToPlayer(request.PlayerID, request.MoxfieldURL, commander, img, secondaryImg)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -84,6 +98,25 @@ func (s *Service) AddDeckToPlayer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
+}
+
+func findPartner(oracleText string) (*scryfall.Card, bool) {
+	// Use a regex to find "Partner with <partner name>"
+	re := regexp.MustCompile(`Partner with ([^\\n]+)`)
+	matches := re.FindStringSubmatch(oracleText)
+
+	if len(matches) < 2 {
+		return nil, false // No partner found
+	}
+
+	partnerName := matches[1]
+	partnerCard, err := scryfall.GetCard(partnerName)
+	if err != nil {
+		log.Printf("Failed to fetch partner card: %v", err)
+		return nil, false
+	}
+
+	return partnerCard, true
 }
 
 func (s *Service) CreateGroup(w http.ResponseWriter, r *http.Request) {

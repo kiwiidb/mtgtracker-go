@@ -19,12 +19,18 @@ type CardImageURIs struct {
 
 // Card represents the part of Scryfall's response that includes image URIs
 type Card struct {
-	Name      string        `json:"name"`
-	ImageURIs CardImageURIs `json:"image_uris"`
+	Name       string        `json:"name"`
+	ImageURIs  CardImageURIs `json:"image_uris"`
+	CardFaces  []Card        `json:"card_faces,omitempty"` // Optional for cards with multiple faces
+	OracleText string        `json:"oracle_text"`
+	Power      string        `json:"power"`
+	Toughness  string        `json:"toughness"`
+	Colors     []string      `json:"colors"`
+	ManaCost   string        `json:"mana_cost"`
+	TypeLine   string        `json:"type_line"`
 }
 
-// GetCardImageURIs fetches image URIs from Scryfall for a card with an exact name match
-func GetCardImageURIs(cardName string) (*CardImageURIs, error) {
+func GetCard(cardName string) (*Card, error) {
 	baseURL := "https://api.scryfall.com/cards/named"
 	params := url.Values{}
 	params.Add("exact", cardName)
@@ -46,5 +52,5 @@ func GetCardImageURIs(cardName string) (*CardImageURIs, error) {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
 
-	return &card.ImageURIs, nil
+	return &card, nil
 }

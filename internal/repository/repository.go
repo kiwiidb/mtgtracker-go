@@ -64,8 +64,14 @@ func (r *Repository) InsertPlayer(name string, email string, image string) (*Pla
 	return &player, result.Error
 }
 
-func (r *Repository) AddDeckToPlayer(playerID uint, moxfieldURL, commander, image, crop string) (*Deck, error) {
-	deck := Deck{MoxfieldURL: moxfieldURL, Commander: commander, Image: image, PlayerID: playerID, Crop: crop}
+func (r *Repository) AddDeckToPlayer(playerID uint, moxfieldURL, commander, img, secondaryImg string) (*Deck, error) {
+	deck := Deck{
+		MoxfieldURL:    moxfieldURL,
+		Commander:      commander,
+		Image:          img,
+		PlayerID:       playerID,
+		SecondaryImage: secondaryImg,
+	}
 	result := r.DB.Create(&deck)
 	return &deck, result.Error
 }
