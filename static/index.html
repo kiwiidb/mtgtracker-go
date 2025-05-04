@@ -15,6 +15,37 @@
             text-align: center;
             margin: 20px 0;
         }
+        .forms-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .form {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form input, .form button, .form select {
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .form button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+        .form button:hover {
+            background-color: #2980b9;
+        }
         .group {
             margin-bottom: 30px;
             padding: 15px;
@@ -23,23 +54,42 @@
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .group img {
-            max-width: 100%;
-            border-radius: 5px;
+        .tabs {
+            display: flex;
+            margin-top: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background-color: #f9f9f9;
+        }
+        .tab.active {
+            background-color: #fff;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 10px 0;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .deck-grid {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
         }
         .player {
             margin-top: 20px;
         }
-        .deck-grid {
-            display: flex;
-            gap: 5px; /* Reduce spacing between cards */
-            flex-wrap: wrap;
-        }
         .deck {
             position: relative;
             margin: 0;
-            width: 300px; /* Increased width */
-            height: 450px; /* Increased height */
+            width: 300px;
+            height: 450px;
         }
         .deck img {
             position: absolute;
@@ -48,12 +98,12 @@
             width: 100%;
             height: 100%;
             border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly larger shadow */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
         .deck img.back {
             opacity: 0;
-            transform: scale(0.95); /* Slightly smaller for staggered effect */
+            transform: scale(0.95);
         }
         .deck img.front {
             opacity: 1;
@@ -62,98 +112,33 @@
         .deck img:hover {
             cursor: pointer;
         }
-        .delete-button {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .delete-button:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-        .add-deck-form {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .add-deck-form input, .add-deck-form button, .add-deck-form select {
-            margin: 5px 0;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .add-deck-form button {
-            background-color: #3498db;
-            color: white;
-            cursor: pointer;
-        }
-        .add-deck-form button:hover {
-            background-color: #2980b9;
-        }
-        .add-game-form {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .add-game-form input, .add-game-form button, .add-game-form select {
-            margin: 5px 0;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .add-game-form button {
-            background-color: #3498db;
-            color: white;
-            cursor: pointer;
-        }
-        .add-game-form button:hover {
-            background-color: #2980b9;
-        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div style="text-align: center; margin: 20px;">
-        <a href="ranking.html" style="font-size: 18px; color: #3498db; text-decoration: none;">View Rankings</a>
-    </div>
-    <div class="add-game-form">
-        <h2>Add a Game</h2>
-        <label for="game-date">Date:</label>
-        <input type="date" id="game-date">
-        <div id="rankings-container">
-            <h3>Rankings</h3>
-            <button type="button" onclick="addRanking()">Add Player</button>
+    <div class="forms-container">
+        <div class="form add-deck-form">
+            <h2>Add Deck</h2>
+            <select id="player-dropdown">
+                <option value="" disabled selected>Select a player</option>
+                <!-- Player options will be dynamically populated -->
+            </select>
+            <input type="text" placeholder="Search Commander" id="commander-input" oninput="fetchCommanders(this.value, 'commander-dropdown')">
+            <select id="commander-dropdown">
+                <option value="" disabled selected>Select a commander</option>
+            </select>
+            <button onclick="submitDeck()">Add Deck</button>
         </div>
-        <button onclick="submitGame()">Submit Game</button>
-    </div>
-    <div class="add-deck-form">
-        <select id="player-dropdown">
-            <option value="" disabled selected>Select a player</option>
-            <!-- Player options will be dynamically populated -->
-        </select>
-        <input type="text" placeholder="Search Commander" id="commander-input" oninput="fetchCommanders(this.value, 'commander-dropdown')">
-        <select id="commander-dropdown">
-            <option value="" disabled selected>Select a commander</option>
-        </select>
-        <button onclick="submitDeck()">Add Deck</button>
+        <div class="form add-game-form">
+            <h2>Add Game</h2>
+            <label for="game-date">Date:</label>
+            <input type="date" id="game-date">
+            <div id="rankings-container">
+                <h3>Rankings</h3>
+                <button type="button" onclick="addRanking()">Add Player</button>
+            </div>
+            <button onclick="submitGame()">Submit Game</button>
+        </div>
     </div>
     <div id="groups-container">Loading...</div>
 
@@ -165,96 +150,22 @@
                     throw new Error('Failed to fetch groups');
                 }
                 const groups = await response.json();
-                populatePlayerDropdown(groups);
                 renderGroups(groups);
             } catch (error) {
                 document.getElementById('groups-container').innerText = error.message;
             }
         }
 
-        function populatePlayerDropdown(groups) {
-            const dropdown = document.getElementById('player-dropdown');
-            dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>'; // Reset options
-
-            groups.forEach(group => {
-                group.Players.forEach(player => {
-                    const option = document.createElement('option');
-                    option.value = player.ID;
-                    option.textContent = player.Name;
-                    dropdown.appendChild(option);
-                });
-            });
-        }
-
-        async function fetchCommanders(query, dropdownId) {
+        async function fetchRankings(groupId, rankingContainer) {
             try {
-                const scryfallResponse = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`);
-                if (!scryfallResponse.ok) {
-                    throw new Error('Failed to fetch commander suggestions');
-                }
-                const data = await scryfallResponse.json();
-                const dropdown = document.getElementById(dropdownId);
-                dropdown.innerHTML = '<option value="" disabled selected>Select a commander</option>'; // Clear existing options
-
-                data.data.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    dropdown.appendChild(option);
-                });
-            } catch (error) {
-                alert(error.message);
-            }
-        }
-
-        async function submitDeck() {
-            const playerId = parseInt(document.getElementById('player-dropdown').value, 10);
-            const commanderName = document.getElementById('commander-dropdown').value;
-
-            if (!playerId || !commanderName) {
-                alert('Please select a player and a commander.');
-                return;
-            }
-
-            try {
-                // Fetch card image using Scryfall's fuzzy search API
-                const scryfallResponse = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(commanderName)}`);
-                if (!scryfallResponse.ok) {
-                    throw new Error('Failed to fetch card data from Scryfall');
-                }
-                const cardData = await scryfallResponse.json();
-                const cardImage = cardData.image_uris.art_crop;
-
-                // Add deck to the player
-                const response = await fetch('/player/v1/decks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        player_id: playerId,
-                        commander: commanderName,
-                        moxfield_url: '', // Optional field
-                    }),
-                });
-
+                const response = await fetch(`/player/v1/groups/${groupId}/ranking`);
                 if (!response.ok) {
-                    throw new Error('Failed to add deck');
+                    throw new Error('Failed to fetch rankings');
                 }
-
-                fetchGroups(); // Refresh the groups after adding the deck
+                const rankings = await response.json();
+                renderRankings(rankings, rankingContainer);
             } catch (error) {
-                alert(error.message);
-            }
-        }
-
-        function toggleDeckImage(deckElement) {
-            const frontImage = deckElement.querySelector('.front');
-            const backImage = deckElement.querySelector('.back');
-
-            if (frontImage && backImage) {
-                frontImage.classList.toggle('front');
-                frontImage.classList.toggle('back');
-                backImage.classList.toggle('front');
-                backImage.classList.toggle('back');
+                rankingContainer.innerText = error.message;
             }
         }
 
@@ -269,205 +180,88 @@
                 groupDiv.innerHTML = `
                     <h2>${group.Name}</h2>
                     <img src="${group.Image}">
+                    <div class="tabs">
+                        <div class="tab active" onclick="showTab(this, 'decks-${group.ID}')">Decks</div>
+                        <div class="tab" onclick="showTab(this, 'ranking-${group.ID}')">Ranking</div>
+                    </div>
+                    <div class="tab-content active" id="decks-${group.ID}">
+                        ${group.Players.map(player => `
+                            <div class="player">
+                                <strong>${player.Name}</strong>
+                                <div class="deck-grid">
+                                    ${player.Decks.map(deck => `
+                                        <div class="deck" onclick="toggleDeckImage(this)">
+                                            <img src="${deck.Image}" class="front" alt="${deck.Commander}">
+                                            ${deck.SecondaryImage ? `<img src="${deck.SecondaryImage}" class="back" alt="${deck.Commander} (Back)">` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="tab-content" id="ranking-${group.ID}">
+                        <div class="ranking-container">Loading rankings...</div>
+                    </div>
                 `;
 
-                group.Players.forEach(player => {
-                    const playerDiv = document.createElement('div');
-                    playerDiv.className = 'player';
-
-                    playerDiv.innerHTML = `
-                        <strong>${player.Name}</strong>
-                    `;
-
-                    const deckGrid = document.createElement('div');
-                    deckGrid.className = 'deck-grid';
-
-                    player.Decks.forEach(deck => {
-                        const deckDiv = document.createElement('div');
-                        deckDiv.className = 'deck';
-                        deckDiv.innerHTML = `
-                            <button class="delete-button" onclick="deleteDeck(${deck.ID})">🗑️</button>
-                            <img src="${deck.Image}" class="front" alt="${deck.Commander}">
-                            ${deck.SecondaryImage ? `<img src="${deck.SecondaryImage}" class="back" alt="${deck.Commander} (Back)">` : ''}
-                        `;
-                        deckDiv.onclick = () => toggleDeckImage(deckDiv);
-                        deckGrid.appendChild(deckDiv);
-                    });
-
-                    playerDiv.appendChild(deckGrid);
-                    groupDiv.appendChild(playerDiv);
-                });
+                const rankingContainer = groupDiv.querySelector('.ranking-container');
+                fetchRankings(group.ID, rankingContainer);
 
                 container.appendChild(groupDiv);
             });
         }
 
-        async function deleteDeck(deckId) {
-            try {
-                const response = await fetch(`/player/v1/decks/${deckId}`, { method: 'DELETE' });
-                if (!response.ok) {
-                    throw new Error('Failed to delete deck');
-                }
-                alert('Deck deleted successfully');
-                fetchGroups(); // Refresh the groups after deletion
-            } catch (error) {
-                alert(error.message);
-            }
-        }
+        function renderRankings(rankings, container) {
+            const table = document.createElement('table');
+            table.className = 'ranking-table';
 
-        function addRanking() {
-            const rankingsContainer = document.getElementById('rankings-container');
-            const rankingDiv = document.createElement('div');
-            rankingDiv.className = 'ranking';
-
-            rankingDiv.innerHTML = `
-                <select class="player-dropdown">
-                    <option value="" disabled selected>Select a player</option>
-                    <!-- Player options will be dynamically populated -->
-                </select>
-                <select class="deck-dropdown">
-                    <option value="" disabled selected>Select a deck</option>
-                </select>
-                <button type="button" onclick="removeRanking(this)">Remove</button>
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Wins</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rankings.map((playerWin, index) => `
+                        <tr>
+                            <td class="${index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : ''}">
+                                ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                            </td>
+                            <td>${playerWin.Player.Name}</td>
+                            <td>${playerWin.Wins}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
             `;
 
-            rankingsContainer.appendChild(rankingDiv);
-            populatePlayerDropdown(rankingDiv.querySelector('.player-dropdown'));
+            container.innerHTML = '';
+            container.appendChild(table);
         }
 
-        function removeRanking(button) {
-            button.parentElement.remove();
+        function showTab(tabElement, contentId) {
+            const tabs = tabElement.parentElement.querySelectorAll('.tab');
+            const contents = tabElement.parentElement.parentElement.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            tabElement.classList.add('active');
+            document.getElementById(contentId).classList.add('active');
         }
 
-        async function submitGame() {
-            const dateInput = document.getElementById('game-date');
-            const rankingsContainer = document.getElementById('rankings-container');
+        function toggleDeckImage(deckElement) {
+            const frontImage = deckElement.querySelector('.front');
+            const backImage = deckElement.querySelector('.back');
 
-            if (!dateInput || !rankingsContainer) {
-                console.error('Required elements for submitting the game are missing.');
-                return;
-            }
-
-            const date = dateInput.value;
-            const rankings = [];
-
-            document.querySelectorAll('.ranking').forEach((rankingDiv, index) => {
-                const playerDropdown = rankingDiv.querySelector('.player-dropdown');
-                const deckDropdown = rankingDiv.querySelector('.deck-dropdown');
-
-                if (!playerDropdown || !deckDropdown) {
-                    console.error('Player or deck dropdown is missing in a ranking entry.');
-                    return;
-                }
-
-                const playerId = parseInt(playerDropdown.value, 10);
-                const deckId = parseInt(deckDropdown.value, 10);
-
-                if (playerId && deckId) {
-                    rankings.push({
-                        player_id: playerId,
-                        deck_id: deckId,
-                        position: index + 1,
-                        could_have_won: false // Default value
-                    });
-                }
-            });
-
-            if (!date || rankings.length === 0) {
-                alert('Please fill out all fields and add at least one player.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/player/v1/groups/1/games', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        group_id: 1,
-                        date: new Date(date).toISOString(),
-                        duration: 0, // Duration is optional and not included in the form
-                        comments: '',
-                        image: '',
-                        rankings: rankings
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to add game');
-                }
-
-                alert('Game added successfully');
-                fetchGroups(); // Refresh the groups after adding the game
-            } catch (error) {
-                console.error('Error submitting game:', error);
-                alert(error.message);
+            if (frontImage && backImage) {
+                frontImage.classList.toggle('front');
+                frontImage.classList.toggle('back');
+                backImage.classList.toggle('front');
+                backImage.classList.toggle('back');
             }
         }
-
-        function populatePlayerDropdown(dropdown) {
-            fetch('/player/v1/groups')
-                .then(response => response.json())
-                .then(groups => {
-                    if (!(dropdown instanceof HTMLSelectElement)) {
-                        console.error('Dropdown is not a valid HTMLSelectElement');
-                        return;
-                    }
-                    dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>';
-                    groups.forEach(group => {
-                        group.Players.forEach(player => {
-                            const option = document.createElement('option');
-                            option.value = player.ID;
-                            option.textContent = player.Name;
-                            dropdown.appendChild(option);
-                        });
-                    });
-
-                    dropdown.addEventListener('change', function () {
-                        const playerId = parseInt(this.value, 10);
-                        const deckDropdown = this.parentElement.querySelector('.deck-dropdown');
-                        populateDeckDropdown(playerId, deckDropdown);
-                    });
-                })
-                .catch(error => alert('Failed to fetch players: ' + error.message));
-        }
-
-        function populateDeckDropdown(playerId, dropdown) {
-            fetch(`/player/v1/players/${playerId}/decks`)
-                .then(response => response.json())
-                .then(decks => {
-                    dropdown.innerHTML = '<option value="" disabled selected>Select a deck</option>';
-                    decks.forEach(deck => {
-                        const option = document.createElement('option');
-                        option.value = deck.ID;
-                        option.textContent = deck.Commander;
-                        dropdown.appendChild(option);
-                    });
-                })
-                .catch(error => alert('Failed to fetch decks: ' + error.message));
-        }
-
-        function populatePlayerDropdownForAddDeck() {
-            const dropdown = document.getElementById('player-dropdown');
-            fetch('/player/v1/groups')
-                .then(response => response.json())
-                .then(groups => {
-                    dropdown.innerHTML = '<option value="" disabled selected>Select a player</option>';
-                    groups.forEach(group => {
-                        group.Players.forEach(player => {
-                            const option = document.createElement('option');
-                            option.value = player.ID;
-                            option.textContent = player.Name;
-                            dropdown.appendChild(option);
-                        });
-                    });
-                })
-                .catch(error => alert('Failed to fetch players: ' + error.message));
-        }
-
-        // Call this function on page load to populate the player dropdown for the "Add Deck" form
-        document.addEventListener('DOMContentLoaded', () => {
-            populatePlayerDropdownForAddDeck();
-        });
 
         // Fetch and render groups on page load
         fetchGroups();
