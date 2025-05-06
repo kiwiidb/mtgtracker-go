@@ -28,4 +28,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           multiPlatform: true
-          platform: linux/amd64,linux/arm64,linux/arm/v7
+          platform: linux/arm64
