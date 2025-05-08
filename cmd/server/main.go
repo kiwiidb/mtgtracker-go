@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	log.Println("starting program")
 	// Initialize the postgres database connection
 	// a local postgres dsn mtgtracker, the dsn is:
 	// export POSTGRES_DSN="host=localhost user=postgres password=postgres dbname=mtgtracker port=5432 sslmode=disable"
@@ -19,7 +20,7 @@ func main() {
 	// docker ex
 	db, err := gorm.Open(postgres.Open(os.Getenv("POSTGRES_DSN")), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to connect to database", err)
 	}
 
 	// // Initialize the repository
