@@ -224,8 +224,7 @@
                 contentType: 'application/json',
                 data: JSON.stringify(gameData),
                 success: function() {
-                    alert('Game added successfully!');
-                    loadGames();
+                    location.reload(); // Refresh the page on success
                 },
                 error: function() {
                     alert('Failed to add game.');
