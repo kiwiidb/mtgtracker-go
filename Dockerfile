@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN GOOS=linux GOARCH=arm64 go build -o server cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o server cmd/server/main.go
 
 # Use a minimal image for the final container
 FROM alpine:latest
