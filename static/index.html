@@ -267,7 +267,13 @@
                     const date = new Date(game.Date).toLocaleDateString();
                     const participants = game.Rankings.map(r => `
                         <div class="game-card">
-                            <img src="${r.Deck.Image}" alt="${r.Deck.Commander}">
+                            <img 
+                                src="${r.Deck.Image}" 
+                                alt="${r.Deck.Commander}" 
+                                data-primary="${r.Deck.Image}" 
+                                data-secondary="${r.Deck.SecondaryImage}" 
+                                onclick="toggleImage(this)"
+                            >
                             <p class="participant-name ${r.Position === 1 ? 'winner' : ''}">
                                 ${r.Position === 1 ? `👑 <span class="winner">${r.Player.Name}</span>` : r.Player.Name}
                             </p>
@@ -284,6 +290,16 @@
                 });
             });
         }
+
+        // Toggle between primary and secondary images
+        function toggleImage(imgElement) {
+            const primary = imgElement.getAttribute('data-primary');
+            const secondary = imgElement.getAttribute('data-secondary');
+            if (secondary) {
+                imgElement.src = imgElement.src === primary ? secondary : primary;
+            }
+        }
+
         loadGames();
     </script>
 </body>
