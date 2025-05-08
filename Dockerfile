@@ -16,12 +16,11 @@ COPY . .
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o server cmd/server/main.go
 
-# Use a minimal image for the final container
-FROM alpine:latest
+# --- Final minimal image ---
+FROM scratch
 
-# Install necessary packages
-RUN apk --no-cache add ca-certificates
-
+# Copy certificates
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 # Set the working directory inside the container
 WORKDIR /app
 
