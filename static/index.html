@@ -57,27 +57,43 @@
         }
         .game-results {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column; /* One row per game */
             gap: 20px;
+            padding: 10px;
+        }
+        .game-row {
+            display: flex;
+            overflow-x: auto; /* Enable horizontal scrolling for each game row */
+            gap: 20px;
+        }
+        .game-date {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
         }
         .game-card {
             background-color: #3a3a4f;
             border-radius: 10px;
             padding: 15px;
-            width: calc(33.333% - 20px);
+            width: 200px; /* Full-size card width */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            flex-shrink: 0; /* Prevent shrinking */
         }
         .game-card img {
             width: 100%;
             border-radius: 10px;
         }
-        .game-card h3 {
-            margin: 10px 0;
-            font-size: 18px;
-        }
-        .winner {
-            font-size: 16px;
+        .game-card .winner {
             color: #ffd700;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .game-card .participant-name {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #ffffff;
         }
         .player-commander-container {
             display: flex;
@@ -237,18 +253,20 @@
             $('#game-results').empty();
             $.get('/game/v1/games', function(games) {
                 games.forEach(game => {
-                    const winner = game.Rankings.find(r => r.Position === 1);
+                    const date = new Date(game.Date).toLocaleDateString();
                     const participants = game.Rankings.map(r => `
-                        <div>
+                        <div class="game-card">
                             <img src="${r.Deck.Image}" alt="${r.Deck.Commander}">
-                            <p>${r.Player.Name}</p>
+                            <p class="participant-name">${r.Player.Name}</p>
+                            ${r.Position === 1 ? '<p class="winner">👑</p>' : ''}
                         </div>
                     `).join('');
                     $('#game-results').append(`
-                        <div class="game-card">
-                            <h3>${new Date(game.Date).toLocaleDateString()}</h3>
-                            <div>${participants}</div>
-                            <p class="winner">Winner: ${winner.Player.Name} 👑</p>
+                        <div>
+                            <p class="game-date">${date}</p>
+                            <div class="game-row">
+                                ${participants}
+                            </div>
                         </div>
                     `);
                 });
