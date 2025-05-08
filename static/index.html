@@ -45,15 +45,15 @@
             color: #ffffff;
         }
         button {
-            background-color: #4caf50;
-            color: white;
+            background-color: #444466; /* Darker button color to match the theme */
+            color: #ffffff;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #555577; /* Slightly lighter hover color */
         }
         .game-results {
             display: flex;
@@ -119,6 +119,10 @@
                 <label for="group">Group</label>
                 <select id="group" required></select>
             </div>
+            <div class="form-group">
+                <label for="game-date">Game Date</label>
+                <input type="date" id="game-date" required>
+            </div>
             <div id="players-section">
                 <div class="form-group">
                     <label for="player-1">Winner 👑</label>
@@ -165,6 +169,7 @@
 
         // Populate players dropdown
         function populatePlayers(selector) {
+            $(selector).append('<option value="" disabled selected>Select a player</option>'); // Add default empty option
             $.get('/player/v1/groups', function(groups) {
                 const players = groups[0].Players; // Assuming single group for simplicity
                 players.forEach(player => {
@@ -214,12 +219,18 @@
             $(this).hide();
         });
 
+        // Set default date to today
+        $(document).ready(function() {
+            const today = new Date().toISOString().split('T')[0];
+            $('#game-date').val(today);
+        });
+
         // Submit game form
         $('#add-game-form').submit(function(e) {
             e.preventDefault();
             const gameData = {
                 group_id: parseInt($('#group').val(), 10), // Ensure group_id is an integer
-                date: new Date().toISOString(),
+                date: $('#game-date').val() + "T00:00:00Z", // Use the selected date
                 rankings: []
             };
             $('.player-select').each(function(index) {
