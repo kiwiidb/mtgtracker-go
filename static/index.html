@@ -95,7 +95,8 @@
                     <label for="player-1">Winner 👑</label>
                     <select id="player-1" class="player-select" required></select>
                     <label for="commander-1">Commander</label>
-                    <select id="commander-1" class="commander-select" required></select>
+                    <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
+                    <select id="commander-dropdown-1" class="commander-dropdown" size="5" style="display: none;"></select>
                 </div>
             </div>
             <button type="button" id="add-player">Add Another Player</button>
@@ -124,7 +125,8 @@
                     <label for="player-${playerCount}">Player ${playerCount}</label>
                     <select id="player-${playerCount}" class="player-select" required></select>
                     <label for="commander-${playerCount}">Commander</label>
-                    <select id="commander-${playerCount}" class="commander-select" required></select>
+                    <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
+                    <select id="commander-dropdown-${playerCount}" class="commander-dropdown" size="5" style="display: none;"></select>
                 </div>
             `);
             populatePlayers(`#player-${playerCount}`);
@@ -141,14 +143,30 @@
         }
         populatePlayers('#player-1');
 
-        // Fetch commanders using Scryfall API
-        $(document).on('change', '.player-select', function() {
-            const playerId = $(this).val();
-            const commanderSelect = $(this).siblings('.commander-select');
-            commanderSelect.empty();
-            $.get(`https://api.scryfall.com/cards/named?fuzzy=${playerId}`, function(card) {
-                commanderSelect.append(`<option value="${card.id}">${card.name}</option>`);
-            });
+        // Search commanders dynamically
+        $(document).on('input', '.commander-input', function() {
+            const query = $(this).val();
+            const dropdown = $(this).siblings('.commander-dropdown');
+            dropdown.empty().hide();
+
+            if (query.length > 2) {
+                $.get(`https://api.scryfall.com/cards/search?q=${query}`, function(data) {
+                    if (data.data) {
+                        data.data.forEach(card => {
+                            dropdown.append(`<option value="${card.name}" data-id="${card.id}">${card.name}</option>`);
+                        });
+                        dropdown.show();
+                    }
+                });
+            }
+        });
+
+        // Select commander from dropdown
+        $(document).on('change', '.commander-dropdown', function() {
+            const selectedOption = $(this).find('option:selected');
+            const input = $(this).siblings('.commander-input');
+            input.val(selectedOption.text());
+            $(this).hide();
         });
 
         // Submit game form
@@ -161,7 +179,7 @@
             };
             $('.player-select').each(function(index) {
                 const playerId = $(this).val();
-                const commander = $(this).siblings('.commander-select').val();
+                const commander = $(this).siblings('.commander-input').val();
                 gameData.rankings.push({
                     player_id: playerId,
                     commander: commander,
