@@ -2,6 +2,7 @@ package repository
 
 import "sort"
 
+// todo
 func (r *Repository) GetGroupRankingByWins(groupID uint) ([]PlayerWin, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings").Where("group_id = ?", groupID).Find(&games).Error
@@ -11,7 +12,7 @@ func (r *Repository) GetGroupRankingByWins(groupID uint) ([]PlayerWin, error) {
 
 	// Maps: playerID -> total wins, and playerID -> deckID -> deckWins
 	winCounts := make(map[uint]int)
-	deckBreakdown := make(map[uint]map[uint]int) // map[playerID][deckID] = wins
+	deckBreakdown := make(map[uint]map[string]int) // map[playerID][deckID] = wins
 
 	for _, game := range games {
 		for _, rank := range game.Rankings {
@@ -19,9 +20,9 @@ func (r *Repository) GetGroupRankingByWins(groupID uint) ([]PlayerWin, error) {
 				winCounts[rank.PlayerID]++
 
 				if _, ok := deckBreakdown[rank.PlayerID]; !ok {
-					deckBreakdown[rank.PlayerID] = make(map[uint]int)
+					deckBreakdown[rank.PlayerID] = make(map[string]int)
 				}
-				deckBreakdown[rank.PlayerID][rank.DeckID]++
+				deckBreakdown[rank.PlayerID][rank.Deck.Commander]++
 				break
 			}
 		}
@@ -41,9 +42,8 @@ func (r *Repository) GetGroupRankingByWins(groupID uint) ([]PlayerWin, error) {
 				return nil, err
 			}
 			deckWins = append(deckWins, DeckWin{
-				DeckID: deckID,
-				Deck:   deck,
-				Wins:   count,
+				Deck: deck,
+				Wins: count,
 			})
 		}
 

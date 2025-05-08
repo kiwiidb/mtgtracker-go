@@ -6,16 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// Models
-
 type Deck struct {
-	gorm.Model
-	MoxfieldURL    string
 	Commander      string // in case of multi-name commanders, both names seperated by a /
 	Image          string
 	SecondaryImage string
 	Crop           string
-	PlayerID       uint
 }
 
 type Player struct {
@@ -23,7 +18,6 @@ type Player struct {
 	Name   string `gorm:"unique;not null"`
 	Email  string `gorm:"unique;not null"`
 	Image  string
-	Decks  []Deck
 	Groups []Group `gorm:"many2many:group_memberships;"`
 	Games  []Game  `gorm:"many2many:game_players;"`
 }
@@ -48,18 +42,14 @@ type Game struct {
 
 type Ranking struct {
 	gorm.Model
-	GameID         uint
-	PlayerID       uint
-	DeckID         uint
-	Position       int
-	CouldHaveWon   bool
-	PlayerName     string `gorm:"-"`
-	Commander      string `gorm:"-"`
-	CommanderImage string `gorm:"-"`
-	SecondaryImage string `gorm:"-"`
+	GameID       uint
+	PlayerID     uint
+	Position     int
+	CouldHaveWon bool
+	PlayerName   string `gorm:"-"`
 
 	Player Player
-	Deck   Deck
+	Deck   Deck `gorm:"embedded"`
 }
 
 type DeckWin struct {

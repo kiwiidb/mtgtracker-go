@@ -12,15 +12,6 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (r *Repository) GetDecks(playerId uint) ([]Deck, error) {
-	var decks []Deck
-	err := r.DB.Where(Deck{PlayerID: playerId}).Find(&decks).Error
-	if err != nil {
-		return nil, err
-	}
-	return decks, nil
-}
-
 func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
@@ -28,17 +19,6 @@ func (r *Repository) GetGames() ([]Game, error) {
 	}).Order("Date desc").Find(&games).Error
 	if err != nil {
 		return nil, err
-	}
-
-	// Populate additional fields for Rankings
-	for i := range games {
-		for j := range games[i].Rankings {
-			rank := &games[i].Rankings[j]
-			rank.PlayerName = rank.Player.Name
-			rank.Commander = rank.Deck.Commander
-			rank.CommanderImage = rank.Deck.Image
-			rank.SecondaryImage = rank.Deck.SecondaryImage
-		}
 	}
 
 	return games, nil
@@ -64,7 +44,7 @@ func (r *Repository) GetGroups() ([]Group, error) {
 }
 
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Deck{}, &Group{}, &Game{}, &Ranking{})
+	err := db.AutoMigrate(&Player{}, &Group{}, &Game{}, &Ranking{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,18 +56,6 @@ func (r *Repository) InsertPlayer(name string, email string, image string) (*Pla
 	player := Player{Name: name, Email: email, Image: image}
 	result := r.DB.Create(&player)
 	return &player, result.Error
-}
-
-func (r *Repository) AddDeckToPlayer(playerID uint, moxfieldURL, commander, img, secondaryImg string) (*Deck, error) {
-	deck := Deck{
-		MoxfieldURL:    moxfieldURL,
-		Commander:      commander,
-		Image:          img,
-		PlayerID:       playerID,
-		SecondaryImage: secondaryImg,
-	}
-	result := r.DB.Create(&deck)
-	return &deck, result.Error
 }
 
 func (r *Repository) CreateGroup(creatorID uint, name string, image string) (*Group, error) {
@@ -125,10 +93,6 @@ func (r *Repository) InsertGame(groupID uint, duration int, comments, image stri
 		var player Player
 		if err := r.DB.First(&player, rank.PlayerID).Error; err != nil {
 			return nil, errors.New("invalid player ID")
-		}
-		var deck Deck
-		if err := r.DB.First(&deck, rank.DeckID).Error; err != nil {
-			return nil, errors.New("invalid deck ID")
 		}
 	}
 

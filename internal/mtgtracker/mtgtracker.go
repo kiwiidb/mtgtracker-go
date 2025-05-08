@@ -23,15 +23,12 @@ func NewService(repo *repository.Repository) *Service {
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
-	mux.HandleFunc("POST /player/v1/decks", s.AddDeckToPlayer)
 	mux.HandleFunc("POST /player/v1/groups", s.CreateGroup)
 	mux.HandleFunc("PUT /player/v1/groups/{groupId}/add/{email}", s.AddPlayerToGroup)
 	mux.HandleFunc("PUT /player/v1/groups/{groupId}/games", s.AddGame)
 	mux.HandleFunc("/player/v1/groups", s.GetGroups)
 	mux.HandleFunc("/player/v1/groups/{groupId}/games", s.GetGames)
-	mux.HandleFunc("/player/v1/players/{playerId}/decks", s.GetDecks)
 	mux.HandleFunc("DELETE /player/v1/decks/{deckId}", s.DeleteDeck)
-	mux.HandleFunc("/player/v1/groups/{groupId}/ranking", s.GetRanking)
 }
 
 func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
@@ -57,26 +54,20 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Service) AddDeckToPlayer(w http.ResponseWriter, r *http.Request) {
-	// Parse the request body
-	var request AddDeckToPlayerRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+func findCommander(name string) (*repository.Deck, error) {
 	// Call the repository to add the deck to the player
-	commanderCard, err := scryfall.GetCard(request.Commander)
+	commanderCard, err := scryfall.GetCard(name)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 	commander := commanderCard.Name
 	img := commanderCard.ImageURIs.Normal
+	crop := commanderCard.ImageURIs.ArtCrop
 	secondaryImg := ""
 	// first check if the commander is a double-faced card
 	if len(commanderCard.CardFaces) > 1 {
 		img = commanderCard.CardFaces[0].ImageURIs.Normal
+		crop = commanderCard.CardFaces[0].ImageURIs.ArtCrop
 		secondaryImg = commanderCard.CardFaces[1].ImageURIs.Normal
 		commander = commanderCard.CardFaces[0].Name + "/" + commanderCard.CardFaces[1].Name
 	}
@@ -85,19 +76,12 @@ func (s *Service) AddDeckToPlayer(w http.ResponseWriter, r *http.Request) {
 		commander = strings.Join([]string{commander, partner.Name}, "/")
 		secondaryImg = partner.ImageURIs.Normal
 	}
-
-	deck, err := s.Repository.AddDeckToPlayer(request.PlayerID, request.MoxfieldURL, commander, img, secondaryImg)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return the created deck as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(deck)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
+	return &repository.Deck{
+		Commander:      commander,
+		Image:          img,
+		Crop:           crop,
+		SecondaryImage: secondaryImg,
+	}, nil
 }
 
 func findPartner(oracleText string) (*scryfall.Card, bool) {
@@ -193,11 +177,17 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 	// Call the repository to insert the game
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
+		// first, find the full name of the commander
+		deck, err := findCommander(rank.Commander)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		rankings = append(rankings, repository.Ranking{
 			PlayerID:     rank.PlayerID,
-			DeckID:       rank.DeckID,
 			Position:     rank.Position,
 			CouldHaveWon: rank.CouldHaveWon,
+			Deck:         *deck,
 		})
 	}
 	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, request.Date, rankings)
@@ -240,48 +230,6 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 	// Return the games as a JSON response
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(games)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
-func (s *Service) GetDecks(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to get the decks
-	playerID := r.PathValue("playerId")
-	playerIDInt, err := strconv.Atoi(playerID)
-	if err != nil {
-		http.Error(w, "Invalid player ID", http.StatusBadRequest)
-		return
-	}
-	decks, err := s.Repository.GetDecks(uint(playerIDInt))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return the decks as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(decks)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
-func (s *Service) GetRanking(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to get the ranking
-	groupID := r.PathValue("groupId")
-	groupIDInt, err := strconv.Atoi(groupID)
-	if err != nil {
-		http.Error(w, "Invalid group ID", http.StatusBadRequest)
-		return
-	}
-	ranking, err := s.Repository.GetGroupRankingByWins(uint(groupIDInt))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return the ranking as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(ranking)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
