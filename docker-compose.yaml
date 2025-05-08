@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   mtgtracker:
-    image: ghcr.io/kiwiidb/kiwiidb/mtgtracker-go:latest
+    image: mtgtracker-go:latest
     container_name: mtgtracker
     environment:
       POSTGRES_DSN: "host=postgres user=postgres password=postgres dbname=mtgtracker port=5432 sslmode=disable"
