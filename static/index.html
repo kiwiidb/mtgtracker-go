@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Tracker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #1e1e2f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #2a2a3d;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #2a2a3d;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3a3a4f;
+            color: #ffffff;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .game-results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .game-card {
+            background-color: #3a3a4f;
+            border-radius: 10px;
+            padding: 15px;
+            width: calc(33.333% - 20px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .game-card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .game-card h3 {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .winner {
+            font-size: 16px;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <header>MTG Tracker</header>
+    <div class="container">
+        <h2>Submit result</h2>
+        <form id="add-game-form">
+            <div class="form-group">
+                <label for="group">Group</label>
+                <select id="group" required></select>
+            </div>
+            <div id="players-section">
+                <div class="form-group">
+                    <label for="player-1">Winner 👑</label>
+                    <select id="player-1" class="player-select" required></select>
+                    <label for="commander-1">Commander</label>
+                    <select id="commander-1" class="commander-select" required></select>
+                </div>
+            </div>
+            <button type="button" id="add-player">Add Another Player</button>
+            <button type="submit">Submit Game</button>
+        </form>
+    </div>
+    <div class="container">
+        <div class="game-results" id="game-results"></div>
+    </div>
+
+    <script>
+        let playerCount = 1;
+
+        // Fetch groups and populate dropdown
+        $.get('/player/v1/groups', function(groups) {
+            groups.forEach(group => {
+                $('#group').append(`<option value="${group.ID}">${group.Name}</option>`);
+            });
+        });
+
+        // Add another player section
+        $('#add-player').click(function() {
+            playerCount++;
+            $('#players-section').append(`
+                <div class="form-group">
+                    <label for="player-${playerCount}">Player ${playerCount}</label>
+                    <select id="player-${playerCount}" class="player-select" required></select>
+                    <label for="commander-${playerCount}">Commander</label>
+                    <select id="commander-${playerCount}" class="commander-select" required></select>
+                </div>
+            `);
+            populatePlayers(`#player-${playerCount}`);
+        });
+
+        // Populate players dropdown
+        function populatePlayers(selector) {
+            $.get('/player/v1/groups', function(groups) {
+                const players = groups[0].Players; // Assuming single group for simplicity
+                players.forEach(player => {
+                    $(selector).append(`<option value="${player.ID}">${player.Name}</option>`);
+                });
+            });
+        }
+        populatePlayers('#player-1');
+
+        // Fetch commanders using Scryfall API
+        $(document).on('change', '.player-select', function() {
+            const playerId = $(this).val();
+            const commanderSelect = $(this).siblings('.commander-select');
+            commanderSelect.empty();
+            $.get(`https://api.scryfall.com/cards/named?fuzzy=${playerId}`, function(card) {
+                commanderSelect.append(`<option value="${card.id}">${card.name}</option>`);
+            });
+        });
+
+        // Submit game form
+        $('#add-game-form').submit(function(e) {
+            e.preventDefault();
+            const gameData = {
+                group_id: $('#group').val(),
+                date: new Date().toISOString(),
+                rankings: []
+            };
+            $('.player-select').each(function(index) {
+                const playerId = $(this).val();
+                const commander = $(this).siblings('.commander-select').val();
+                gameData.rankings.push({
+                    player_id: playerId,
+                    commander: commander,
+                    position: index + 1
+                });
+            });
+            $.post('/game/v1/games', gameData, function() {
+                alert('Game added successfully!');
+                loadGames();
+            });
+        });
+
+        // Load games and display results
+        function loadGames() {
+            $('#game-results').empty();
+            $.get('/game/v1/games', function(games) {
+                games.forEach(game => {
+                    const winner = game.Rankings.find(r => r.Position === 1);
+                    const participants = game.Rankings.map(r => `
+                        <div>
+                            <img src="${r.Deck.Image}" alt="${r.Deck.Commander}">
+                            <p>${r.Player.Name}</p>
+                        </div>
+                    `).join('');
+                    $('#game-results').append(`
+                        <div class="game-card">
+                            <h3>${new Date(game.Date).toLocaleDateString()}</h3>
+                            <div>${participants}</div>
+                            <p class="winner">Winner: ${winner.Player.Name} 👑</p>
+                        </div>
+                    `);
+                });
+            });
+        }
+        loadGames();
+    </script>
+</body>
+</html>

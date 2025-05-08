@@ -1,0 +1,362 @@
+http https://api.scryfall.com/cards/named?fuzzy=henzie
+{
+  "object": "card",
+  "id": "ee228dcc-3170-4c24-80bc-28bcee07cb43",
+  "image_uris": {
+    "small": "https://cards.scryfall.io/small/front/e/e/ee228dcc-3170-4c24-80bc-28bcee07cb43.jpg?1673481644",
+    "art_crop": "https://cards.scryfall.io/art_crop/front/e/e/ee228dcc-3170-4c24-80bc-28bcee07cb43.jpg?1673481644",
+  }
+}
+http /player/v1/groups
+[
+    {
+        "CreatedAt": "2025-05-08T20:29:11.980827+02:00",
+        "ID": 1,
+        "Name": "Cardboard Crack",
+        "Players": [
+            {
+                "CreatedAt": "2025-05-08T20:29:10.31173+02:00",
+                "Email": "Kwinten",
+                "ID": 1,
+                "Image": "Kwinten",
+                "Name": "Kwinten",
+                "UpdatedAt": "2025-05-08T20:29:10.31173+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:29:10.477538+02:00",
+                "Email": "Alex",
+                "ID": 2,
+                "Image": "Alex",
+                "Name": "Alex",
+                "UpdatedAt": "2025-05-08T20:29:10.477538+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:29:10.651217+02:00",
+                "Email": "Lorin",
+                "ID": 3,
+                "Image": "Lorin",
+                "Name": "Lorin",
+                "UpdatedAt": "2025-05-08T20:29:10.651217+02:00"
+            }
+        ],
+        "UpdatedAt": "2025-05-08T20:29:13.678544+02:00"
+    }
+]
+http POST /game/v1/games
+{
+	"group_id": 1,
+	"date": "2025-05-06T12:00:00Z",
+	"rankings": [
+		{
+			"player_id": 1,
+			"commander": "Atraxa, Praetor's voice",
+			"position": 1,
+		},
+		{
+			"player_id": 2,
+			"commander": "Frodo, Adventurous Hobbit",
+			"position": 2,
+		},
+		{
+			"player_id": 3,
+			"commander": "Ms. Bumbleflower",
+			"position": 2,
+		}
+	]
+}
+
+http /game/v1/games
+
+[
+    {
+        "Comments": "",
+        "CreatedAt": "2025-05-08T20:51:44.01292+02:00",
+        "Date": "2025-05-06T14:00:00+02:00",
+        "DeletedAt": null,
+        "Duration": 0,
+        "Group": {
+            "CreatedAt": "0001-01-01T00:00:00Z",
+            "DeletedAt": null,
+            "ID": 0,
+            "Image": "",
+            "Name": "",
+            "Players": null,
+            "UpdatedAt": "0001-01-01T00:00:00Z"
+        },
+        "GroupID": 1,
+        "ID": 1,
+        "Image": "",
+        "Rankings": [
+            {
+                "CreatedAt": "2025-05-08T20:51:44.015167+02:00",
+                "Deck": {
+                    "Commander": "Atraxa, Praetors' Voice",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/d/0/d0d33d52-3d28-4635-b985-51e126289259.jpg?1599707796",
+                    "Image": "https://cards.scryfall.io/normal/front/d/0/d0d33d52-3d28-4635-b985-51e126289259.jpg?1599707796",
+                    "SecondaryImage": ""
+                },
+                "DeletedAt": null,
+                "GameID": 1,
+                "ID": 1,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.31173+02:00",
+                    "DeletedAt": null,
+                    "Email": "Kwinten",
+                    "ID": 1,
+                    "Image": "Kwinten",
+                    "Name": "Kwinten",
+                    "UpdatedAt": "2025-05-08T20:29:10.31173+02:00"
+                },
+                "PlayerID": 1,
+                "PlayerName": "",
+                "Position": 1,
+                "UpdatedAt": "2025-05-08T20:51:44.015167+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:51:44.015167+02:00",
+                "Deck": {
+                    "Commander": "Frodo, Adventurous Hobbit/Sam, Loyal Attendant",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/3/2/328df403-7428-4b17-bdd1-9759fc0f32d8.jpg?1686963703",
+                    "Image": "https://cards.scryfall.io/normal/front/3/2/328df403-7428-4b17-bdd1-9759fc0f32d8.jpg?1686963703",
+                    "SecondaryImage": "https://cards.scryfall.io/normal/front/6/8/687a2b76-3f05-4732-bd9b-513d06d16300.jpg?1686963755"
+                },
+                "DeletedAt": null,
+                "GameID": 1,
+                "ID": 2,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.477538+02:00",
+                    "DeletedAt": null,
+                    "Email": "Alex",
+                    "ID": 2,
+                    "Image": "Alex",
+                    "Name": "Alex",
+                    "UpdatedAt": "2025-05-08T20:29:10.477538+02:00"
+                },
+                "PlayerID": 2,
+                "PlayerName": "",
+                "Position": 2,
+                "UpdatedAt": "2025-05-08T20:51:44.015167+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:51:44.015167+02:00",
+                "Deck": {
+                    "Commander": "Ms. Bumbleflower",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/4/2/42bbedc1-6b83-46b4-8b3b-a4e05ce77d87.jpg?1721428140",
+                    "Image": "https://cards.scryfall.io/normal/front/4/2/42bbedc1-6b83-46b4-8b3b-a4e05ce77d87.jpg?1721428140",
+                    "SecondaryImage": ""
+                },
+                "DeletedAt": null,
+                "GameID": 1,
+                "ID": 3,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.651217+02:00",
+                    "DeletedAt": null,
+                    "Email": "Lorin",
+                    "ID": 3,
+                    "Image": "Lorin",
+                    "Name": "Lorin",
+                    "UpdatedAt": "2025-05-08T20:29:10.651217+02:00"
+                },
+                "PlayerID": 3,
+                "PlayerName": "",
+                "Position": 2,
+                "UpdatedAt": "2025-05-08T20:51:44.015167+02:00"
+            }
+        ],
+        "UpdatedAt": "2025-05-08T20:51:44.01292+02:00"
+    },
+    {
+        "Comments": "",
+        "CreatedAt": "2025-05-08T20:54:02.910188+02:00",
+        "Date": "2025-05-06T14:00:00+02:00",
+        "DeletedAt": null,
+        "Duration": 0,
+        "Group": {
+            "CreatedAt": "0001-01-01T00:00:00Z",
+            "DeletedAt": null,
+            "ID": 0,
+            "Image": "",
+            "Name": "",
+            "Players": null,
+            "UpdatedAt": "0001-01-01T00:00:00Z"
+        },
+        "GroupID": 1,
+        "ID": 2,
+        "Image": "",
+        "Rankings": [
+            {
+                "CreatedAt": "2025-05-08T20:54:02.912099+02:00",
+                "Deck": {
+                    "Commander": "Atraxa, Praetors' Voice",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/d/0/d0d33d52-3d28-4635-b985-51e126289259.jpg?1599707796",
+                    "Image": "https://cards.scryfall.io/normal/front/d/0/d0d33d52-3d28-4635-b985-51e126289259.jpg?1599707796",
+                    "SecondaryImage": ""
+                },
+                "DeletedAt": null,
+                "GameID": 2,
+                "ID": 4,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.31173+02:00",
+                    "DeletedAt": null,
+                    "Email": "Kwinten",
+                    "ID": 1,
+                    "Image": "Kwinten",
+                    "Name": "Kwinten",
+                    "UpdatedAt": "2025-05-08T20:29:10.31173+02:00"
+                },
+                "PlayerID": 1,
+                "PlayerName": "",
+                "Position": 1,
+                "UpdatedAt": "2025-05-08T20:54:02.912099+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:54:02.912099+02:00",
+                "Deck": {
+                    "Commander": "Frodo, Adventurous Hobbit/Sam, Loyal Attendant",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/3/2/328df403-7428-4b17-bdd1-9759fc0f32d8.jpg?1686963703",
+                    "Image": "https://cards.scryfall.io/normal/front/3/2/328df403-7428-4b17-bdd1-9759fc0f32d8.jpg?1686963703",
+                    "SecondaryImage": "https://cards.scryfall.io/normal/front/6/8/687a2b76-3f05-4732-bd9b-513d06d16300.jpg?1686963755"
+                },
+                "DeletedAt": null,
+                "GameID": 2,
+                "ID": 5,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.477538+02:00",
+                    "DeletedAt": null,
+                    "Email": "Alex",
+                    "ID": 2,
+                    "Image": "Alex",
+                    "Name": "Alex",
+                    "UpdatedAt": "2025-05-08T20:29:10.477538+02:00"
+                },
+                "PlayerID": 2,
+                "PlayerName": "",
+                "Position": 2,
+                "UpdatedAt": "2025-05-08T20:54:02.912099+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:54:02.912099+02:00",
+                "Deck": {
+                    "Commander": "Ms. Bumbleflower",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/4/2/42bbedc1-6b83-46b4-8b3b-a4e05ce77d87.jpg?1721428140",
+                    "Image": "https://cards.scryfall.io/normal/front/4/2/42bbedc1-6b83-46b4-8b3b-a4e05ce77d87.jpg?1721428140",
+                    "SecondaryImage": ""
+                },
+                "DeletedAt": null,
+                "GameID": 2,
+                "ID": 6,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.651217+02:00",
+                    "DeletedAt": null,
+                    "Email": "Lorin",
+                    "ID": 3,
+                    "Image": "Lorin",
+                    "Name": "Lorin",
+                    "UpdatedAt": "2025-05-08T20:29:10.651217+02:00"
+                },
+                "PlayerID": 3,
+                "PlayerName": "",
+                "Position": 2,
+                "UpdatedAt": "2025-05-08T20:54:02.912099+02:00"
+            }
+        ],
+        "UpdatedAt": "2025-05-08T20:54:02.910188+02:00"
+    },
+    {
+        "Comments": "",
+        "CreatedAt": "2025-05-08T20:54:42.88681+02:00",
+        "Date": "2025-05-06T14:00:00+02:00",
+        "DeletedAt": null,
+        "Duration": 0,
+        "Group": {
+            "CreatedAt": "0001-01-01T00:00:00Z",
+            "DeletedAt": null,
+            "ID": 0,
+            "Image": "",
+            "Name": "",
+            "Players": null,
+            "UpdatedAt": "0001-01-01T00:00:00Z"
+        },
+        "GroupID": 1,
+        "ID": 3,
+        "Image": "",
+        "Rankings": [
+            {
+                "CreatedAt": "2025-05-08T20:54:42.88949+02:00",
+                "Deck": {
+                    "Commander": "Atraxa, Praetors' Voice",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/d/0/d0d33d52-3d28-4635-b985-51e126289259.jpg?1599707796",
+                    "Image": "https://cards.scryfall.io/normal/front/d/0/d0d33d52-3d28-4635-b985-51e126289259.jpg?1599707796",
+                    "SecondaryImage": ""
+                },
+                "DeletedAt": null,
+                "GameID": 3,
+                "ID": 7,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.31173+02:00",
+                    "DeletedAt": null,
+                    "Email": "Kwinten",
+                    "ID": 1,
+                    "Image": "Kwinten",
+                    "Name": "Kwinten",
+                    "UpdatedAt": "2025-05-08T20:29:10.31173+02:00"
+                },
+                "PlayerID": 1,
+                "PlayerName": "",
+                "Position": 1,
+                "UpdatedAt": "2025-05-08T20:54:42.88949+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:54:42.88949+02:00",
+                "Deck": {
+                    "Commander": "Frodo, Adventurous Hobbit/Sam, Loyal Attendant",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/3/2/328df403-7428-4b17-bdd1-9759fc0f32d8.jpg?1686963703",
+                    "Image": "https://cards.scryfall.io/normal/front/3/2/328df403-7428-4b17-bdd1-9759fc0f32d8.jpg?1686963703",
+                    "SecondaryImage": "https://cards.scryfall.io/normal/front/6/8/687a2b76-3f05-4732-bd9b-513d06d16300.jpg?1686963755"
+                },
+                "DeletedAt": null,
+                "GameID": 3,
+                "ID": 8,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.477538+02:00",
+                    "DeletedAt": null,
+                    "Email": "Alex",
+                    "ID": 2,
+                    "Image": "Alex",
+                    "Name": "Alex",
+                    "UpdatedAt": "2025-05-08T20:29:10.477538+02:00"
+                },
+                "PlayerID": 2,
+                "PlayerName": "",
+                "Position": 2,
+                "UpdatedAt": "2025-05-08T20:54:42.88949+02:00"
+            },
+            {
+                "CreatedAt": "2025-05-08T20:54:42.88949+02:00",
+                "Deck": {
+                    "Commander": "Ms. Bumbleflower",
+                    "Crop": "https://cards.scryfall.io/art_crop/front/4/2/42bbedc1-6b83-46b4-8b3b-a4e05ce77d87.jpg?1721428140",
+                    "Image": "https://cards.scryfall.io/normal/front/4/2/42bbedc1-6b83-46b4-8b3b-a4e05ce77d87.jpg?1721428140",
+                    "SecondaryImage": ""
+                },
+                "DeletedAt": null,
+                "GameID": 3,
+                "ID": 9,
+                "Player": {
+                    "CreatedAt": "2025-05-08T20:29:10.651217+02:00",
+                    "DeletedAt": null,
+                    "Email": "Lorin",
+                    "ID": 3,
+                    "Image": "Lorin",
+                    "Name": "Lorin",
+                    "UpdatedAt": "2025-05-08T20:29:10.651217+02:00"
+                },
+                "PlayerID": 3,
+                "PlayerName": "",
+                "Position": 2,
+                "UpdatedAt": "2025-05-08T20:54:42.88949+02:00"
+            }
+        ],
+        "UpdatedAt": "2025-05-08T20:54:42.88681+02:00"
+    }
+]
