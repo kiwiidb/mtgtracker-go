@@ -153,7 +153,13 @@
                 $.get(`https://api.scryfall.com/cards/search?q=${query}`, function(data) {
                     if (data.data) {
                         data.data.forEach(card => {
-                            dropdown.append(`<option value="${card.name}" data-id="${card.id}">${card.name}</option>`);
+                            const imageUrl = card.image_uris?.art_crop || '';
+                            dropdown.append(`
+                                <option value="${card.name}" data-id="${card.id}" data-image="${imageUrl}">
+                                    <img src="${imageUrl}" alt="${card.name}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
+                                    ${card.name}
+                                </option>
+                            `);
                         });
                         dropdown.show();
                     }
@@ -165,7 +171,15 @@
         $(document).on('change', '.commander-dropdown', function() {
             const selectedOption = $(this).find('option:selected');
             const input = $(this).siblings('.commander-input');
+            const imageContainer = $(this).siblings('.commander-image');
+            const imageUrl = selectedOption.data('image');
+
             input.val(selectedOption.text());
+            if (imageContainer.length === 0) {
+                $(this).after(`<img class="commander-image" src="${imageUrl}" alt="${selectedOption.text()}" style="width: 50px; height: 50px; margin-top: 10px; border-radius: 5px;">`);
+            } else {
+                imageContainer.attr('src', imageUrl).attr('alt', selectedOption.text());
+            }
             $(this).hide();
         });
 
