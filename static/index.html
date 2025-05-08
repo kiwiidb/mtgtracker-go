@@ -76,17 +76,17 @@
             background-color: #3a3a4f;
             border-radius: 10px;
             padding: 15px;
-            width: 200px; /* Full-size card width */
+            width: 260px; /* Adjust container width to match increased image size */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
             flex-shrink: 0; /* Prevent shrinking */
         }
         .game-card img {
-            width: 100%;
+            width: 100%; /* Ensure image fits within the container */
             border-radius: 10px;
         }
         .game-card .winner {
-            color: #ffd700;
+            color: #ffd700; /* Yellow color for winner's name */
             font-weight: bold;
             margin-top: 10px;
         }
@@ -257,8 +257,9 @@
                     const participants = game.Rankings.map(r => `
                         <div class="game-card">
                             <img src="${r.Deck.Image}" alt="${r.Deck.Commander}">
-                            <p class="participant-name">${r.Player.Name}</p>
-                            ${r.Position === 1 ? '<p class="winner">👑</p>' : ''}
+                            <p class="participant-name ${r.Position === 1 ? 'winner' : ''}">
+                                ${r.Position === 1 ? `👑 <span class="winner">${r.Player.Name}</span>` : r.Player.Name}
+                            </p>
                         </div>
                     `).join('');
                     $('#game-results').append(`
