@@ -187,22 +187,34 @@
         $('#add-game-form').submit(function(e) {
             e.preventDefault();
             const gameData = {
-                group_id: $('#group').val(),
+                group_id: parseInt($('#group').val(), 10), // Ensure group_id is an integer
                 date: new Date().toISOString(),
                 rankings: []
             };
             $('.player-select').each(function(index) {
-                const playerId = $(this).val();
-                const commander = $(this).siblings('.commander-input').val();
+                const playerId = parseInt($(this).val(), 10); // Ensure player_id is an integer
+                let commander = $(this).siblings('.commander-input').val();
+                commander = commander.replace(/\++/g, ''); // Remove ++++++ from commander names
+                commander = commander.trim(); // Remove leading/trailing spaces
                 gameData.rankings.push({
                     player_id: playerId,
                     commander: commander,
                     position: index + 1
                 });
             });
-            $.post('/game/v1/games', gameData, function() {
-                alert('Game added successfully!');
-                loadGames();
+
+            $.ajax({
+                url: '/game/v1/games',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(gameData),
+                success: function() {
+                    alert('Game added successfully!');
+                    loadGames();
+                },
+                error: function() {
+                    alert('Failed to add game.');
+                }
             });
         });
 
