@@ -18,8 +18,8 @@ type Player struct {
 	Name   string `gorm:"unique;not null"`
 	Email  string `gorm:"unique;not null"`
 	Image  string
-	Groups []Group `gorm:"many2many:group_memberships;"`
-	Games  []Game  `gorm:"many2many:game_players;"`
+	Groups []Group `gorm:"many2many:group_memberships;" json:"-"`
+	Games  []Game  `gorm:"many2many:game_players;" json:"-"`
 }
 
 type Group struct {
@@ -31,7 +31,7 @@ type Group struct {
 
 type Game struct {
 	gorm.Model
-	Duration int
+	Duration *int
 	Date     *time.Time
 	Comments string
 	Image    string

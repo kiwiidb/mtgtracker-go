@@ -15,7 +15,7 @@ type Repository struct {
 func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-		return db.Preload("Player").Preload("Deck")
+		return db.Preload("Player")
 	}).Order("Date desc").Find(&games).Error
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (r *Repository) GetGroups() ([]Group, error) {
 	var groups []Group
 	// preload the players for the groups
 	// preload the decks for the players
-	err := r.DB.Preload("Players").Preload("Players.Decks").Find(&groups).Error
+	err := r.DB.Preload("Players").Find(&groups).Error
 	if err != nil {
 		return nil, err
 	}
@@ -83,17 +83,20 @@ func (r *Repository) AddPlayerToGroup(groupID uint, email string) error {
 	return r.DB.Model(&group).Association("Players").Append(&player)
 }
 
-func (r *Repository) InsertGame(groupID uint, duration int, comments, image string, date *time.Time, rankings []Ranking) (*Game, error) {
+func (r *Repository) InsertGame(groupID uint, duration *int, comments, image string, date *time.Time, rankings []Ranking) (*Game, error) {
 	var group Group
 	if err := r.DB.First(&group, groupID).Error; err != nil {
 		return nil, errors.New("invalid group ID")
 	}
 	// Ensure each ranking has valid player and deck (optional but safe)
-	for _, rank := range rankings {
+	for i, rank := range rankings {
 		var player Player
 		if err := r.DB.First(&player, rank.PlayerID).Error; err != nil {
 			return nil, errors.New("invalid player ID")
 		}
+		rank.Player = player
+		rankings[i] = rank
+
 	}
 
 	game := Game{

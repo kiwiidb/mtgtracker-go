@@ -23,7 +23,7 @@ type AddDeckToPlayerRequest struct {
 // groupID uint, duration int, comments, image string, rankings []Ranking
 type CreateGameRequest struct {
 	GroupID  uint       `json:"group_id"`
-	Duration int        `json:"duration"`
+	Duration *int       `json:"duration"`
 	Date     *time.Time `json:"date"`
 	Comments string     `json:"comments"`
 	Image    string     `json:"image"`

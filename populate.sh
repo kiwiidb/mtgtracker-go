@@ -1,21 +1,23 @@
-id=kwinten;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=alex;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=lorin;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=lucas;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=dries;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=arthur;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=brain;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=jari;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
-id=laura;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Kwinten;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Alex;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Lorin;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Lucas;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Dries;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Arthur;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Braïn;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Jari;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Laura;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
+id=Cyril;http POST localhost:8080/player/v1/signup name=$id email=$id image=$id
 
 http POST localhost:8080/player/v1/groups name="Cardboard Crack" creator_id:=1
 
-http PUT localhost:8080/player/v1/groups/1/add/brain
-http PUT localhost:8080/player/v1/groups/1/add/kwinten
-http PUT localhost:8080/player/v1/groups/1/add/alex
-http PUT localhost:8080/player/v1/groups/1/add/lorin
-http PUT localhost:8080/player/v1/groups/1/add/lucas
-http PUT localhost:8080/player/v1/groups/1/add/dries
-http PUT localhost:8080/player/v1/groups/1/add/laura
-http PUT localhost:8080/player/v1/groups/1/add/arthur
-http PUT localhost:8080/player/v1/groups/1/add/jari
+http PUT localhost:8080/player/v1/groups/1/add/Braïn
+http PUT localhost:8080/player/v1/groups/1/add/Kwinten
+http PUT localhost:8080/player/v1/groups/1/add/Alex
+http PUT localhost:8080/player/v1/groups/1/add/Lorin
+http PUT localhost:8080/player/v1/groups/1/add/Lucas
+http PUT localhost:8080/player/v1/groups/1/add/Dries
+http PUT localhost:8080/player/v1/groups/1/add/Laura
+http PUT localhost:8080/player/v1/groups/1/add/Arthur
+http PUT localhost:8080/player/v1/groups/1/add/Jari
+http PUT localhost:8080/player/v1/groups/1/add/Cyril

@@ -2,6 +2,7 @@ package mtgtracker
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"mtgtracker/internal/repository"
 	"mtgtracker/internal/scryfall"
@@ -25,10 +26,9 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
 	mux.HandleFunc("POST /player/v1/groups", s.CreateGroup)
 	mux.HandleFunc("PUT /player/v1/groups/{groupId}/add/{email}", s.AddPlayerToGroup)
-	mux.HandleFunc("PUT /player/v1/groups/{groupId}/games", s.AddGame)
+	mux.HandleFunc("POST /game/v1/games", s.AddGame)
+	mux.HandleFunc("/game/v1/games", s.GetGames)
 	mux.HandleFunc("/player/v1/groups", s.GetGroups)
-	mux.HandleFunc("/player/v1/groups/{groupId}/games", s.GetGames)
-	mux.HandleFunc("DELETE /player/v1/decks/{deckId}", s.DeleteDeck)
 }
 
 func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
@@ -180,6 +180,7 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 		// first, find the full name of the commander
 		deck, err := findCommander(rank.Commander)
 		if err != nil {
+			fmt.Println("Error finding commander:", err, rank.Commander)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
