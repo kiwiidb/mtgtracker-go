@@ -79,6 +79,19 @@
             font-size: 16px;
             color: #ffd700;
         }
+        .player-commander-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .commander-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+        }
+        .player-select, .commander-input {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -93,10 +106,11 @@
             <div id="players-section">
                 <div class="form-group">
                     <label for="player-1">Winner 👑</label>
-                    <select id="player-1" class="player-select" required></select>
-                    <label for="commander-1">Commander</label>
-                    <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
-                    <select id="commander-dropdown-1" class="commander-dropdown" size="5" style="display: none;"></select>
+                    <div class="player-commander-container">
+                        <select id="player-1" class="player-select" required></select>
+                        <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
+                        <select id="commander-dropdown-1" class="commander-dropdown" size="5" style="display: none;"></select>
+                    </div>
                 </div>
             </div>
             <button type="button" id="add-player">Add Another Player</button>
@@ -123,10 +137,11 @@
             $('#players-section').append(`
                 <div class="form-group">
                     <label for="player-${playerCount}">Player ${playerCount}</label>
-                    <select id="player-${playerCount}" class="player-select" required></select>
-                    <label for="commander-${playerCount}">Commander</label>
-                    <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
-                    <select id="commander-dropdown-${playerCount}" class="commander-dropdown" size="5" style="display: none;"></select>
+                    <div class="player-commander-container">
+                        <select id="player-${playerCount}" class="player-select" required></select>
+                        <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
+                        <select id="commander-dropdown-${playerCount}" class="commander-dropdown" size="5" style="display: none;"></select>
+                    </div>
                 </div>
             `);
             populatePlayers(`#player-${playerCount}`);
@@ -171,14 +186,14 @@
         $(document).on('change', '.commander-dropdown', function() {
             const selectedOption = $(this).find('option:selected');
             const input = $(this).siblings('.commander-input');
-            const imageContainer = $(this).siblings('.commander-image');
+            const container = $(this).closest('.player-commander-container');
             const imageUrl = selectedOption.data('image');
 
             input.val(selectedOption.text());
-            if (imageContainer.length === 0) {
-                $(this).after(`<img class="commander-image" src="${imageUrl}" alt="${selectedOption.text()}" style="width: 50px; height: 50px; margin-top: 10px; border-radius: 5px;">`);
+            if (container.find('.commander-image').length === 0) {
+                container.prepend(`<img class="commander-image" src="${imageUrl}" alt="${selectedOption.text()}">`);
             } else {
-                imageContainer.attr('src', imageUrl).attr('alt', selectedOption.text());
+                container.find('.commander-image').attr('src', imageUrl).attr('alt', selectedOption.text());
             }
             $(this).hide();
         });
