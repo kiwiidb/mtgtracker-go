@@ -108,6 +108,11 @@
         .player-select, .commander-input {
             flex: 1;
         }
+        .commander-dropdown {
+            max-width: 100%; /* Ensure dropdown does not exceed the width of the input box */
+            width: 100%; /* Match the width of the input box */
+            overflow-x: hidden; /* Prevent horizontal overflow */
+        }
     </style>
 </head>
 <body>
@@ -188,7 +193,7 @@
             if (query.length > 2) {
                 $.get(`https://api.scryfall.com/cards/search?q=${query}`, function(data) {
                     if (data.data) {
-                        data.data.forEach(card => {
+                        data.data.slice(0, 5).forEach(card => { // Limit results to the first 5
                             const imageUrl = card.image_uris?.art_crop || '';
                             dropdown.append(`
                                 <option value="${card.name}" data-id="${card.id}" data-image="${imageUrl}">
