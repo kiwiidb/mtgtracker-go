@@ -117,6 +117,24 @@
             white-space: nowrap;
             text-overflow: ellipsis;
         }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -236,6 +254,10 @@
         // Submit game form
         $('#add-game-form').submit(function(e) {
             e.preventDefault();
+
+            const submitButton = $('#add-game-form button[type="submit"]');
+            submitButton.prop('disabled', true).html('<span class="spinner"></span> Submitting...'); // Show spinner and disable button
+
             const gameData = {
                 group_id: parseInt($('#group').val(), 10), // Ensure group_id is an integer
                 date: $('#game-date').val() + "T00:00:00Z", // Use the selected date
@@ -263,6 +285,7 @@
                 },
                 error: function() {
                     alert('Failed to add game.');
+                    submitButton.prop('disabled', false).html('Submit Game'); // Re-enable button on error
                 }
             });
         });
