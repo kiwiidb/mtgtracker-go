@@ -197,7 +197,6 @@
                             const imageUrl = card.image_uris?.art_crop || '';
                             dropdown.append(`
                                 <option value="${card.name}" data-id="${card.id}" data-image="${imageUrl}">
-                                    <img src="${imageUrl}" alt="${card.name}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
                                     ${card.name}
                                 </option>
                             `);
