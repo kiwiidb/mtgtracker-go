@@ -215,7 +215,7 @@
             const container = $(this).closest('.player-commander-container');
             const imageUrl = selectedOption.data('image');
 
-            input.val(selectedOption.text());
+            input.val(selectedOption.val());
             if (container.find('.commander-image').length === 0) {
                 container.prepend(`<img class="commander-image" src="${imageUrl}" alt="${selectedOption.text()}">`);
             } else {
