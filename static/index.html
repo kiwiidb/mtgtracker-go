@@ -109,9 +109,13 @@
             flex: 1;
         }
         .commander-dropdown {
-            max-width: 100%; /* Ensure dropdown does not exceed the width of the input box */
-            width: 100%; /* Match the width of the input box */
-            overflow-x: hidden; /* Prevent horizontal overflow */
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
