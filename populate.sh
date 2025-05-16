@@ -1,4 +1,4 @@
-host=https://mtgtracker.kwintendebacker.com
+host=localhost:8080
 id=Kwinten;http POST $host/player/v1/signup name=$id email=$id image=$id
 id=Alex;http POST $host/player/v1/signup name=$id email=$id image=$id
 id=Lorin;http POST $host/player/v1/signup name=$id email=$id image=$id
