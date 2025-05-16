@@ -185,10 +185,12 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		rankings = append(rankings, repository.Ranking{
-			PlayerID:     rank.PlayerID,
-			Position:     rank.Position,
-			CouldHaveWon: rank.CouldHaveWon,
-			Deck:         *deck,
+			PlayerID:       rank.PlayerID,
+			Position:       rank.Position,
+			CouldHaveWon:   rank.CouldHaveWon,
+			EarlySolRing:   rank.EarlySolRing,
+			StartingPlayer: rank.StartingPlayer,
+			Deck:           *deck,
 		})
 	}
 	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, request.Date, rankings)

@@ -31,8 +31,10 @@ type CreateGameRequest struct {
 }
 
 type Ranking struct {
-	PlayerID     uint   `json:"player_id"`
-	Commander    string `json:"commander"`
-	Position     int    `json:"position"`
-	CouldHaveWon bool   `json:"could_have_won"`
+	PlayerID       uint   `json:"player_id"`
+	Commander      string `json:"commander"`
+	Position       int    `json:"position"`
+	CouldHaveWon   bool   `json:"could_have_won"`
+	EarlySolRing   bool   `json:"early_sol_ring"`
+	StartingPlayer bool   `json:"starting_player"`
 }
