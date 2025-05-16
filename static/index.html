@@ -80,6 +80,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
             flex-shrink: 0; /* Prevent shrinking */
+            transition: background 0.2s;
         }
         .game-card img {
             width: 100%; /* Ensure image fits within the container */
@@ -135,6 +136,11 @@
                 transform: rotate(360deg);
             }
         }
+
+        .winner-bg {
+            background: linear-gradient(90deg, #ffd700 0%, #fffbe0 100%);
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -151,8 +157,7 @@
                 <input type="date" id="game-date" required>
             </div>
             <div id="players-section">
-                <div class="form-group">
-                    <label for="player-1">Winner 👑</label>
+                <div class="form-group player-form-group">
                     <div class="player-commander-container">
                         <select id="player-1" class="player-select" required></select>
                         <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
@@ -170,6 +175,7 @@
 
     <script>
         let playerCount = 1;
+        let winnerIndex = 0; // Default winner is first player
 
         // Fetch groups and populate dropdown
         $.get('/player/v1/groups', function(groups) {
@@ -182,8 +188,7 @@
         $('#add-player').click(function() {
             playerCount++;
             $('#players-section').append(`
-                <div class="form-group">
-                    <label for="player-${playerCount}">Player ${playerCount}</label>
+                <div class="form-group player-form-group">
                     <div class="player-commander-container">
                         <select id="player-${playerCount}" class="player-select" required></select>
                         <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
@@ -245,6 +250,20 @@
             $(this).hide();
         });
 
+        // Winner selection logic for the form
+        $(document).on('mousedown touchstart', '.player-form-group', function(e) {
+            let timeoutId = setTimeout(() => {
+                $('.player-form-group').removeClass('winner-bg');
+                $(this).addClass('winner-bg');
+                winnerIndex = $(this).index();
+            }, 500); // 500ms for long press
+
+            $(this).on('mouseup mouseleave touchend touchcancel', function clear() {
+                clearTimeout(timeoutId);
+                $(this).off('mouseup mouseleave touchend touchcancel', clear);
+            });
+        });
+
         // Set default date to today
         $(document).ready(function() {
             const today = new Date().toISOString().split('T')[0];
@@ -263,16 +282,28 @@
                 date: $('#game-date').val() + "T00:00:00Z", // Use the selected date
                 rankings: []
             };
-            $('.player-select').each(function(index) {
-                const playerId = parseInt($(this).val(), 10); // Ensure player_id is an integer
-                let commander = $(this).siblings('.commander-input').val();
-                commander = commander.replace(/\++/g, ''); // Remove ++++++ from commander names
-                commander = commander.trim(); // Remove leading/trailing spaces
+
+            // Gather all players
+            const playerGroups = $('.player-form-group');
+            playerGroups.each(function(idx) {
+                const playerId = parseInt($(this).find('.player-select').val(), 10);
+                let commander = $(this).find('.commander-input').val();
+                commander = commander.replace(/\++/g, '').trim();
                 gameData.rankings.push({
                     player_id: playerId,
                     commander: commander,
-                    position: index + 1
+                    // Position will be set below
                 });
+            });
+
+            // Set winner as position 1, others as 2, 3, ...
+            gameData.rankings = gameData.rankings.map((r, idx) => {
+                if (idx === winnerIndex) {
+                    return { ...r, position: 1 };
+                } else {
+                    // Position after winner, keep order
+                    return { ...r, position: (idx < winnerIndex ? idx + 2 : idx + 1) };
+                }
             });
 
             $.ajax({
@@ -296,8 +327,10 @@
             $.get('/game/v1/games', function(games) {
                 games.forEach(game => {
                     const date = new Date(game.Date).toLocaleDateString();
-                    const participants = game.Rankings.map(r => `
-                        <div class="game-card">
+                    // Sort so winner (position 1) is first
+                    const sorted = [...game.Rankings].sort((a, b) => a.Position - b.Position);
+                    const participants = sorted.map(r => `
+                        <div class="game-card${r.Position === 1 ? ' winner-bg' : ''}">
                             <img 
                                 src="${r.Deck.Image}" 
                                 alt="${r.Deck.Commander}" 
@@ -305,8 +338,8 @@
                                 data-secondary="${r.Deck.SecondaryImage}" 
                                 onclick="toggleImage(this)"
                             >
-                            <p class="participant-name ${r.Position === 1 ? 'winner' : ''}">
-                                ${r.Position === 1 ? `👑 <span class="winner">${r.Player.Name}</span>` : r.Player.Name}
+                            <p class="participant-name${r.Position === 1 ? ' winner' : ''}">
+                                ${r.Player.Name}
                             </p>
                         </div>
                     `).join('');
