@@ -144,6 +144,44 @@
             background: linear-gradient(90deg, #bfa100 0%, #fffbe0 100%);
             border-radius: 8px;
         }
+        .player-toggles {
+            margin-top: 8px;
+            display: flex;
+            gap: 10px;
+        }
+        .toggle-emoji {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #2a2a3d;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: background 0.2s, border 0.2s;
+            user-select: none;
+            padding: 0;
+        }
+        .toggle-emoji.selected {
+            background: #444466;
+            border: 2px solid #ffd700;
+        }
+        .toggle-emoji:active {
+            background: #555577;
+        }
+        .winner-hint {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            padding: 8px 0;
+            color: #ffd700;
+            text-align: center;
+            font-size: 16px;
+            background: #2a2a3d;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -166,16 +204,16 @@
                         <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
                         <select id="commander-dropdown-1" class="commander-dropdown" size="5" style="display: none;"></select>
                     </div>
-                    <div class="player-toggles" style="margin-top:8px; display:flex; gap:10px;">
-                        <label title="Could have won"><input type="checkbox" class="toggle-could-have-won"> 🙃</label>
-                        <label title="Early Sol Ring"><input type="checkbox" class="toggle-early-sol-ring"> 💍</label>
-                        <label title="Starting Player"><input type="checkbox" class="toggle-starting-player"> ▶️</label>
+                    <div class="player-toggles">
+                        <span class="toggle-emoji" data-toggle="could-have-won" title="Could have won">🙃</span>
+                        <span class="toggle-emoji" data-toggle="early-sol-ring" title="Early Sol Ring">💍</span>
+                        <span class="toggle-emoji" data-toggle="starting-player" title="Starting Player">▶️</span>
                     </div>
                 </div>
             </div>
             <button type="button" id="add-player">Add Another Player</button>
             <button type="submit">Submit Game</button>
-            <div>Long press to mark winner</div>
+            <div class="winner-hint">Long press a player to mark as winner</div>
         </form>
     </div>
     <div class="container">
@@ -203,10 +241,10 @@
                         <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
                         <select id="commander-dropdown-${playerCount}" class="commander-dropdown" size="5" style="display: none;"></select>
                     </div>
-                    <div class="player-toggles" style="margin-top:8px; display:flex; gap:10px;">
-                        <label title="Could have won"><input type="checkbox" class="toggle-could-have-won"> 🏆</label>
-                        <label title="Early Sol Ring"><input type="checkbox" class="toggle-early-sol-ring"> 💍</label>
-                        <label title="Starting Player"><input type="checkbox" class="toggle-starting-player"> 🚀</label>
+                    <div class="player-toggles">
+                        <span class="toggle-emoji" data-toggle="could-have-won" title="Could have won">🙃</span>
+                        <span class="toggle-emoji" data-toggle="early-sol-ring" title="Early Sol Ring">💍</span>
+                        <span class="toggle-emoji" data-toggle="starting-player" title="Starting Player">▶️</span>
                     </div>
                 </div>
             `);
@@ -278,6 +316,11 @@
             });
         });
 
+        // Toggle emoji logic
+        $(document).on('click', '.toggle-emoji', function() {
+            $(this).toggleClass('selected');
+        });
+
         // Set default date to today
         $(document).ready(function() {
             const today = new Date().toISOString().split('T')[0];
@@ -299,9 +342,9 @@
                 const playerId = parseInt($(this).find('.player-select').val(), 10);
                 let commander = $(this).find('.commander-input').val();
                 commander = commander.replace(/\++/g, '').trim();
-                const couldHaveWon = $(this).find('.toggle-could-have-won').is(':checked');
-                const earlySolRing = $(this).find('.toggle-early-sol-ring').is(':checked');
-                const startingPlayer = $(this).find('.toggle-starting-player').is(':checked');
+                const couldHaveWon = $(this).find('.toggle-emoji[data-toggle="could-have-won"]').hasClass('selected');
+                const earlySolRing = $(this).find('.toggle-emoji[data-toggle="early-sol-ring"]').hasClass('selected');
+                const startingPlayer = $(this).find('.toggle-emoji[data-toggle="starting-player"]').hasClass('selected');
                 gameData.rankings.push({
                     player_id: playerId,
                     commander: commander,
@@ -345,20 +388,26 @@
                     const date = new Date(game.Date).toLocaleDateString();
                     // Sort so winner (position 1) is first
                     const sorted = [...game.Rankings].sort((a, b) => a.Position - b.Position);
-                    const participants = sorted.map(r => `
-                        <div class="game-card${r.Position === 1 ? ' winner-bg' : ''}">
-                            <img 
-                                src="${r.Deck.Image}" 
-                                alt="${r.Deck.Commander}" 
-                                data-primary="${r.Deck.Image}" 
-                                data-secondary="${r.Deck.SecondaryImage}" 
-                                onclick="toggleImage(this)"
-                            >
-                            <p class="participant-name${r.Position === 1 ? ' winner' : ''}">
-                                ${r.Player.Name}
-                            </p>
-                        </div>
-                    `).join('');
+                    const participants = sorted.map(r => {
+                        let emojis = '';
+                        if (r.CouldHaveWon) emojis += ' 🙃';
+                        if (r.EarlySolRing) emojis += ' 💍';
+                        if (r.StartingPlayer) emojis += ' ▶️';
+                        return `
+                            <div class="game-card${r.Position === 1 ? ' winner-bg' : ''}">
+                                <img 
+                                    src="${r.Deck.Image}" 
+                                    alt="${r.Deck.Commander}" 
+                                    data-primary="${r.Deck.Image}" 
+                                    data-secondary="${r.Deck.SecondaryImage}" 
+                                    onclick="toggleImage(this)"
+                                >
+                                <p class="participant-name${r.Position === 1 ? ' winner' : ''}">
+                                    ${r.Player.Name}${emojis}
+                                </p>
+                            </div>
+                        `;
+                    }).join('');
                     $('#game-results').append(`
                         <div>
                             <p class="game-date">${date}</p>
