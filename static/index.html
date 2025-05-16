@@ -166,10 +166,16 @@
                         <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
                         <select id="commander-dropdown-1" class="commander-dropdown" size="5" style="display: none;"></select>
                     </div>
+                    <div class="player-toggles" style="margin-top:8px; display:flex; gap:10px;">
+                        <label title="Could have won"><input type="checkbox" class="toggle-could-have-won"> 🙃</label>
+                        <label title="Early Sol Ring"><input type="checkbox" class="toggle-early-sol-ring"> 💍</label>
+                        <label title="Starting Player"><input type="checkbox" class="toggle-starting-player"> ▶️</label>
+                    </div>
                 </div>
             </div>
             <button type="button" id="add-player">Add Another Player</button>
             <button type="submit">Submit Game</button>
+            <div>Long press to mark winner</div>
         </form>
     </div>
     <div class="container">
@@ -196,6 +202,11 @@
                         <select id="player-${playerCount}" class="player-select" required></select>
                         <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
                         <select id="commander-dropdown-${playerCount}" class="commander-dropdown" size="5" style="display: none;"></select>
+                    </div>
+                    <div class="player-toggles" style="margin-top:8px; display:flex; gap:10px;">
+                        <label title="Could have won"><input type="checkbox" class="toggle-could-have-won"> 🏆</label>
+                        <label title="Early Sol Ring"><input type="checkbox" class="toggle-early-sol-ring"> 💍</label>
+                        <label title="Starting Player"><input type="checkbox" class="toggle-starting-player"> 🚀</label>
                     </div>
                 </div>
             `);
@@ -276,25 +287,27 @@
         // Submit game form
         $('#add-game-form').submit(function(e) {
             e.preventDefault();
-
             const submitButton = $('#add-game-form button[type="submit"]');
-            submitButton.prop('disabled', true).html('<span class="spinner"></span> Submitting...'); // Show spinner and disable button
-
+            submitButton.prop('disabled', true).html('<span class="spinner"></span> Submitting...');
             const gameData = {
-                group_id: parseInt($('#group').val(), 10), // Ensure group_id is an integer
-                date: $('#game-date').val() + "T00:00:00Z", // Use the selected date
+                group_id: parseInt($('#group').val(), 10),
+                date: $('#game-date').val() + "T00:00:00Z",
                 rankings: []
             };
-
-            // Gather all players
             const playerGroups = $('.player-form-group');
             playerGroups.each(function(idx) {
                 const playerId = parseInt($(this).find('.player-select').val(), 10);
                 let commander = $(this).find('.commander-input').val();
                 commander = commander.replace(/\++/g, '').trim();
+                const couldHaveWon = $(this).find('.toggle-could-have-won').is(':checked');
+                const earlySolRing = $(this).find('.toggle-early-sol-ring').is(':checked');
+                const startingPlayer = $(this).find('.toggle-starting-player').is(':checked');
                 gameData.rankings.push({
                     player_id: playerId,
                     commander: commander,
+                    could_have_won: couldHaveWon,
+                    early_sol_ring: earlySolRing,
+                    starting_player: startingPlayer,
                     // Position will be set below
                 });
             });
