@@ -250,7 +250,7 @@
       suggestionsBox.empty().hide();
 
       if (query.length > 2) {
-        $.get(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`, function (data) {
+        $.get(`https://api.scryfall.com/cards/search?q=type:legendary+type:creature+${encodeURIComponent(query)}`, function (data) {
           if (data.data) {
             data.data.slice(0, 5).forEach(card => {
               const img = card.image_uris?.art_crop || '';
