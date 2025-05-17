@@ -1,435 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTG Tracker</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body {
-            background-color: #1e1e2f;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            text-align: center;
-            padding: 20px;
-            background-color: #2a2a3d;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #2a2a3d;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        select, input {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #3a3a4f;
-            color: #ffffff;
-        }
-        button {
-            background-color: #444466; /* Darker button color to match the theme */
-            color: #ffffff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #555577; /* Slightly lighter hover color */
-        }
-        .game-results {
-            display: flex;
-            flex-direction: column; /* One row per game */
-            gap: 20px;
-            padding: 10px;
-        }
-        .game-row {
-            display: flex;
-            overflow-x: auto; /* Enable horizontal scrolling for each game row */
-            gap: 10px; /* Remove margin between cards */
-        }
-        .game-date {
-            font-size: 16px;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 10px;
-        }
-        .game-card {
-            background-color: #3a3a4f;
-            border-radius: 10px;
-            padding: 15px;
-            width: 240px; /* Reduce container width by 25% */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            flex-shrink: 0; /* Prevent shrinking */
-            transition: background 0.2s;
-        }
-        .game-card img {
-            width: 100%; /* Ensure image fits within the container */
-            border-radius: 10px;
-        }
-        .game-card .winner {
-            color: #ffd700; /* Yellow color for winner's name */
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .game-card .participant-name {
-            margin-top: 5px;
-            font-size: 14px;
-            color: #ffffff;
-        }
-        .player-commander-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .commander-image {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-        }
-        .player-select, .commander-input {
-            flex: 1;
-        }
-        .commander-dropdown {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-width: 0 !important;
-            box-sizing: border-box;
-            overflow-x: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #ffffff;
-            border-top: 2px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .player-form-group {
-            padding: 16px 16px 16px 16px;
-        }
-        .winner-bg {
-            background: linear-gradient(90deg, #bfa100 0%, #fffbe0 100%);
-            border-radius: 8px;
-        }
-        .player-toggles {
-            margin-top: 8px;
-            display: flex;
-            gap: 10px;
-        }
-        .toggle-emoji {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: #2a2a3d;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: background 0.2s, border 0.2s;
-            user-select: none;
-            padding: 0;
-        }
-        .toggle-emoji.selected {
-            background: #444466;
-            border: 2px solid #ffd700;
-        }
-        .toggle-emoji:active {
-            background: #555577;
-        }
-        .winner-hint {
-            margin-top: 16px;
-            margin-bottom: 8px;
-            padding: 8px 0;
-            color: #ffd700;
-            text-align: center;
-            font-size: 16px;
-            background: #2a2a3d;
-            border-radius: 8px;
-            letter-spacing: 0.5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTG Tracker</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      background-color: #1e1e2f;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+      background-color: #2a2a3d;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #2a2a3d;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #3a3a4f;
+      color: #ffffff;
+    }
+    button {
+      background-color: #444466;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #555577;
+    }
+    .game-results {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 10px;
+    }
+    .game-row {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+    }
+    .game-date {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .game-card {
+      background-color: #3a3a4f;
+      border-radius: 10px;
+      padding: 15px;
+      width: 240px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .game-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .game-card .winner {
+      color: #ffd700;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .game-card .participant-name {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #ffffff;
+    }
+    .player-commander-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+    .commander-image {
+      width: 50px;
+      height: 50px;
+      border-radius: 5px;
+    }
+    .commander-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 60px;
+      right: 0;
+      background: #3a3a4f;
+      z-index: 1000;
+      border-radius: 5px;
+      max-height: 150px;
+      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      display: none;
+    }
+    .commander-suggestion {
+      display: flex;
+      align-items: center;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .commander-suggestion:hover {
+      background-color: #555577;
+    }
+    .commander-suggestion img {
+      width: 30px;
+      height: 30px;
+      margin-right: 10px;
+      border-radius: 4px;
+    }
+    .player-form-group {
+      padding: 16px;
+    }
+    .winner-bg {
+      background: linear-gradient(90deg, #bfa100 0%, #fffbe0 100%);
+      border-radius: 8px;
+    }
+    .player-toggles {
+      margin-top: 8px;
+      display: flex;
+      gap: 10px;
+    }
+    .toggle-emoji {
+      font-size: 22px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #2a2a3d;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+    .toggle-emoji.selected {
+      background: #444466;
+      border: 2px solid #ffd700;
+    }
+    .winner-hint {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      padding: 8px 0;
+      color: #ffd700;
+      text-align: center;
+      font-size: 16px;
+      background: #2a2a3d;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-    <header>MTG Tracker</header>
-    <div class="container">
-        <h2>Submit result</h2>
-        <form id="add-game-form">
-            <div class="form-group">
-                <label for="group">Group</label>
-                <select id="group" required></select>
-            </div>
-            <div class="form-group">
-                <label for="game-date">Game Date</label>
-                <input type="date" id="game-date" required>
-            </div>
-            <div id="players-section">
-                <div class="form-group player-form-group">
-                    <div class="player-commander-container">
-                        <select id="player-1" class="player-select" required></select>
-                        <input type="text" id="commander-1" class="commander-input" placeholder="Search commander..." required>
-                        <select id="commander-dropdown-1" class="commander-dropdown" size="5" style="display: none;"></select>
-                    </div>
-                    <div class="player-toggles">
-                        <span class="toggle-emoji" data-toggle="could-have-won" title="Could have won">🙃</span>
-                        <span class="toggle-emoji" data-toggle="early-sol-ring" title="Early Sol Ring">💍</span>
-                        <span class="toggle-emoji" data-toggle="starting-player" title="Starting Player">▶️</span>
-                    </div>
+  <header>MTG Tracker</header>
+  <div class="container">
+    <h2>Submit result</h2>
+    <form id="add-game-form">
+      <div class="form-group">
+        <label for="group">Group</label>
+        <select id="group" required></select>
+      </div>
+      <div class="form-group">
+        <label for="game-date">Game Date</label>
+        <input type="date" id="game-date" required>
+      </div>
+      <div id="players-section">
+        <!-- Initial player will be added dynamically -->
+      </div>
+      <button type="button" id="add-player">Add Another Player</button>
+      <button type="submit">Submit Game</button>
+      <div class="winner-hint">Long press a player to mark as winner</div>
+    </form>
+  </div>
+  <div class="container">
+    <div class="game-results" id="game-results"></div>
+  </div>
+
+  <script>
+    let playerCount = 0;
+    let winnerIndex = 0;
+
+    function createPlayerForm(index) {
+      return `
+        <div class="form-group player-form-group">
+          <div class="player-commander-container">
+            <select id="player-${index}" class="player-select" required></select>
+            <input type="text" id="commander-${index}" class="commander-input" placeholder="Search commander..." required autocomplete="off">
+            <div class="commander-suggestions" id="commander-suggestions-${index}"></div>
+          </div>
+          <div class="player-toggles">
+            <span class="toggle-emoji" data-toggle="could-have-won" title="Could have won">🙃</span>
+            <span class="toggle-emoji" data-toggle="early-sol-ring" title="Early Sol Ring">💍</span>
+            <span class="toggle-emoji" data-toggle="starting-player" title="Starting Player">▶️</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function populatePlayers(selector) {
+      $(selector).append('<option value="" disabled selected>Select a player</option>');
+      $.get('/player/v1/groups', function(groups) {
+        const players = groups[0].Players;
+        players.forEach(player => {
+          $(selector).append(`<option value="${player.ID}">${player.Name}</option>`);
+        });
+      });
+    }
+
+    function addPlayer() {
+      playerCount++;
+      $('#players-section').append(createPlayerForm(playerCount));
+      populatePlayers(`#player-${playerCount}`);
+    }
+
+    $('#add-player').click(addPlayer);
+    $(document).ready(() => {
+      const today = new Date().toISOString().split('T')[0];
+      $('#game-date').val(today);
+      addPlayer();
+    });
+
+    // Handle commander search
+    $(document).on('input', '.commander-input', function () {
+      const query = $(this).val();
+      const suggestionsBox = $(this).siblings('.commander-suggestions');
+      suggestionsBox.empty().hide();
+
+      if (query.length > 2) {
+        $.get(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}`, function (data) {
+          if (data.data) {
+            data.data.slice(0, 5).forEach(card => {
+              const img = card.image_uris?.art_crop || '';
+              suggestionsBox.append(`
+                <div class="commander-suggestion" data-name="${card.name}" data-img="${img}">
+                  <img src="${img}" alt="${card.name}"><span>${card.name}</span>
                 </div>
+              `);
+            });
+            suggestionsBox.show();
+          }
+        });
+      }
+    });
+
+    $(document).on('click', '.commander-suggestion', function () {
+      const name = $(this).data('name');
+      const img = $(this).data('img');
+      const container = $(this).closest('.player-commander-container');
+      const input = container.find('.commander-input');
+      input.val(name);
+      const existingImg = container.find('.commander-image');
+      if (existingImg.length) {
+        existingImg.attr('src', img).attr('alt', name);
+      } else {
+        container.prepend(`<img class="commander-image" src="${img}" alt="${name}">`);
+      }
+      container.find('.commander-suggestions').hide();
+    });
+
+    $(document).on('mousedown touchstart', '.player-form-group', function () {
+      let timeoutId = setTimeout(() => {
+        $('.player-form-group').removeClass('winner-bg');
+        $(this).addClass('winner-bg');
+        winnerIndex = $(this).index();
+      }, 500);
+      $(this).on('mouseup mouseleave touchend touchcancel', function clear() {
+        clearTimeout(timeoutId);
+        $(this).off('mouseup mouseleave touchend touchcancel', clear);
+      });
+    });
+
+    $(document).on('click', '.toggle-emoji', function () {
+      $(this).toggleClass('selected');
+    });
+
+    $('#add-game-form').submit(function (e) {
+      e.preventDefault();
+      const submitButton = $('#add-game-form button[type="submit"]');
+      submitButton.prop('disabled', true).html('<span class="spinner"></span> Submitting...');
+
+      const gameData = {
+        group_id: parseInt($('#group').val(), 10),
+        date: $('#game-date').val() + "T00:00:00Z",
+        rankings: []
+      };
+
+      $('.player-form-group').each(function (idx) {
+        const playerId = parseInt($(this).find('.player-select').val(), 10);
+        let commander = $(this).find('.commander-input').val().replace(/\++/g, '').trim();
+        const couldHaveWon = $(this).find('.toggle-emoji[data-toggle="could-have-won"]').hasClass('selected');
+        const earlySolRing = $(this).find('.toggle-emoji[data-toggle="early-sol-ring"]').hasClass('selected');
+        const startingPlayer = $(this).find('.toggle-emoji[data-toggle="starting-player"]').hasClass('selected');
+
+        gameData.rankings.push({
+          player_id: playerId,
+          commander: commander,
+          could_have_won: couldHaveWon,
+          early_sol_ring: earlySolRing,
+          starting_player: startingPlayer,
+        });
+      });
+
+      gameData.rankings = gameData.rankings.map((r, idx) => {
+        return { ...r, position: idx === winnerIndex ? 1 : (idx < winnerIndex ? idx + 2 : idx + 1) };
+      });
+
+      $.ajax({
+        url: '/game/v1/games',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(gameData),
+        success: function () {
+          location.reload();
+        },
+        error: function () {
+          alert('Failed to add game.');
+          submitButton.prop('disabled', false).html('Submit Game');
+        }
+      });
+    });
+
+    function loadGames() {
+      $('#game-results').empty();
+      $.get('/game/v1/games', function (games) {
+        games.forEach(game => {
+          const date = new Date(game.Date).toLocaleDateString();
+          const sorted = [...game.Rankings].sort((a, b) => a.Position - b.Position);
+          const participants = sorted.map(r => {
+            let emojis = '';
+            if (r.CouldHaveWon) emojis += ' 🙃';
+            if (r.EarlySolRing) emojis += ' 💍';
+            if (r.StartingPlayer) emojis += ' ▶️';
+            return `
+              <div class="game-card${r.Position === 1 ? ' winner-bg' : ''}">
+                <img src="${r.Deck.Image}" alt="${r.Deck.Commander}" data-primary="${r.Deck.Image}" data-secondary="${r.Deck.SecondaryImage}" onclick="toggleImage(this)">
+                <p class="participant-name${r.Position === 1 ? ' winner' : ''}">${r.Player.Name}${emojis}</p>
+              </div>
+            `;
+          }).join('');
+          $('#game-results').append(`
+            <div>
+              <p class="game-date">${date}</p>
+              <div class="game-row">${participants}</div>
             </div>
-            <button type="button" id="add-player">Add Another Player</button>
-            <button type="submit">Submit Game</button>
-            <div class="winner-hint">Long press a player to mark as winner</div>
-        </form>
-    </div>
-    <div class="container">
-        <div class="game-results" id="game-results"></div>
-    </div>
-
-    <script>
-        let playerCount = 1;
-        let winnerIndex = 0; // Default winner is first player
-
-        // Fetch groups and populate dropdown
-        $.get('/player/v1/groups', function(groups) {
-            groups.forEach(group => {
-                $('#group').append(`<option value="${group.ID}">${group.Name}</option>`);
-            });
+          `);
         });
+      });
+    }
 
-        // Add another player section
-        $('#add-player').click(function() {
-            playerCount++;
-            $('#players-section').append(`
-                <div class="form-group player-form-group">
-                    <div class="player-commander-container">
-                        <select id="player-${playerCount}" class="player-select" required></select>
-                        <input type="text" id="commander-${playerCount}" class="commander-input" placeholder="Search commander..." required>
-                        <select id="commander-dropdown-${playerCount}" class="commander-dropdown" size="5" style="display: none;"></select>
-                    </div>
-                    <div class="player-toggles">
-                        <span class="toggle-emoji" data-toggle="could-have-won" title="Could have won">🙃</span>
-                        <span class="toggle-emoji" data-toggle="early-sol-ring" title="Early Sol Ring">💍</span>
-                        <span class="toggle-emoji" data-toggle="starting-player" title="Starting Player">▶️</span>
-                    </div>
-                </div>
-            `);
-            populatePlayers(`#player-${playerCount}`);
-        });
+    function toggleImage(imgElement) {
+      const primary = imgElement.getAttribute('data-primary');
+      const secondary = imgElement.getAttribute('data-secondary');
+      if (secondary) {
+        imgElement.src = imgElement.src === primary ? secondary : primary;
+      }
+    }
 
-        // Populate players dropdown
-        function populatePlayers(selector) {
-            $(selector).append('<option value="" disabled selected>Select a player</option>'); // Add default empty option
-            $.get('/player/v1/groups', function(groups) {
-                const players = groups[0].Players; // Assuming single group for simplicity
-                players.forEach(player => {
-                    $(selector).append(`<option value="${player.ID}">${player.Name}</option>`);
-                });
-            });
-        }
-        populatePlayers('#player-1');
-
-        // Search commanders dynamically
-        $(document).on('input', '.commander-input', function() {
-            const query = $(this).val();
-            const dropdown = $(this).siblings('.commander-dropdown');
-            dropdown.empty().hide();
-
-            if (query.length > 2) {
-                $.get(`https://api.scryfall.com/cards/search?q=${query}`, function(data) {
-                    if (data.data) {
-                        data.data.slice(0, 5).forEach(card => { // Limit results to the first 5
-                            const imageUrl = card.image_uris?.art_crop || '';
-                            dropdown.append(`
-                                <option value="${card.name}" data-id="${card.id}" data-image="${imageUrl}">
-                                    <img src="${imageUrl}" alt="${card.name}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">${card.name}
-                                </option>
-                            `);
-                        });
-                        dropdown.show();
-                    }
-                });
-            }
-        });
-
-        // Select commander from dropdown
-        $(document).on('change', '.commander-dropdown', function() {
-            const selectedOption = $(this).find('option:selected');
-            const input = $(this).siblings('.commander-input');
-            const container = $(this).closest('.player-commander-container');
-            const imageUrl = selectedOption.data('image');
-
-            input.val(selectedOption.val());
-            if (container.find('.commander-image').length === 0) {
-                container.prepend(`<img class="commander-image" src="${imageUrl}" alt="${selectedOption.text()}">`);
-            } else {
-                container.find('.commander-image').attr('src', imageUrl).attr('alt', selectedOption.text());
-            }
-            $(this).hide();
-        });
-
-        // Winner selection logic for the form
-        $(document).on('mousedown touchstart', '.player-form-group', function(e) {
-            let timeoutId = setTimeout(() => {
-                $('.player-form-group').removeClass('winner-bg');
-                $(this).addClass('winner-bg');
-                winnerIndex = $(this).index();
-            }, 500); // 500ms for long press
-
-            $(this).on('mouseup mouseleave touchend touchcancel', function clear() {
-                clearTimeout(timeoutId);
-                $(this).off('mouseup mouseleave touchend touchcancel', clear);
-            });
-        });
-
-        // Toggle emoji logic
-        $(document).on('click', '.toggle-emoji', function() {
-            $(this).toggleClass('selected');
-        });
-
-        // Set default date to today
-        $(document).ready(function() {
-            const today = new Date().toISOString().split('T')[0];
-            $('#game-date').val(today);
-        });
-
-        // Submit game form
-        $('#add-game-form').submit(function(e) {
-            e.preventDefault();
-            const submitButton = $('#add-game-form button[type="submit"]');
-            submitButton.prop('disabled', true).html('<span class="spinner"></span> Submitting...');
-            const gameData = {
-                group_id: parseInt($('#group').val(), 10),
-                date: $('#game-date').val() + "T00:00:00Z",
-                rankings: []
-            };
-            const playerGroups = $('.player-form-group');
-            playerGroups.each(function(idx) {
-                const playerId = parseInt($(this).find('.player-select').val(), 10);
-                let commander = $(this).find('.commander-input').val();
-                commander = commander.replace(/\++/g, '').trim();
-                const couldHaveWon = $(this).find('.toggle-emoji[data-toggle="could-have-won"]').hasClass('selected');
-                const earlySolRing = $(this).find('.toggle-emoji[data-toggle="early-sol-ring"]').hasClass('selected');
-                const startingPlayer = $(this).find('.toggle-emoji[data-toggle="starting-player"]').hasClass('selected');
-                gameData.rankings.push({
-                    player_id: playerId,
-                    commander: commander,
-                    could_have_won: couldHaveWon,
-                    early_sol_ring: earlySolRing,
-                    starting_player: startingPlayer,
-                    // Position will be set below
-                });
-            });
-
-            // Set winner as position 1, others as 2, 3, ...
-            gameData.rankings = gameData.rankings.map((r, idx) => {
-                if (idx === winnerIndex) {
-                    return { ...r, position: 1 };
-                } else {
-                    // Position after winner, keep order
-                    return { ...r, position: (idx < winnerIndex ? idx + 2 : idx + 1) };
-                }
-            });
-
-            $.ajax({
-                url: '/game/v1/games',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(gameData),
-                success: function() {
-                    location.reload(); // Refresh the page on success
-                },
-                error: function() {
-                    alert('Failed to add game.');
-                    submitButton.prop('disabled', false).html('Submit Game'); // Re-enable button on error
-                }
-            });
-        });
-
-        // Load games and display results
-        function loadGames() {
-            $('#game-results').empty();
-            $.get('/game/v1/games', function(games) {
-                games.forEach(game => {
-                    const date = new Date(game.Date).toLocaleDateString();
-                    // Sort so winner (position 1) is first
-                    const sorted = [...game.Rankings].sort((a, b) => a.Position - b.Position);
-                    const participants = sorted.map(r => {
-                        let emojis = '';
-                        if (r.CouldHaveWon) emojis += ' 🙃';
-                        if (r.EarlySolRing) emojis += ' 💍';
-                        if (r.StartingPlayer) emojis += ' ▶️';
-                        return `
-                            <div class="game-card${r.Position === 1 ? ' winner-bg' : ''}">
-                                <img 
-                                    src="${r.Deck.Image}" 
-                                    alt="${r.Deck.Commander}" 
-                                    data-primary="${r.Deck.Image}" 
-                                    data-secondary="${r.Deck.SecondaryImage}" 
-                                    onclick="toggleImage(this)"
-                                >
-                                <p class="participant-name${r.Position === 1 ? ' winner' : ''}">
-                                    ${r.Player.Name}${emojis}
-                                </p>
-                            </div>
-                        `;
-                    }).join('');
-                    $('#game-results').append(`
-                        <div>
-                            <p class="game-date">${date}</p>
-                            <div class="game-row">
-                                ${participants}
-                            </div>
-                        </div>
-                    `);
-                });
-            });
-        }
-
-        // Toggle between primary and secondary images
-        function toggleImage(imgElement) {
-            const primary = imgElement.getAttribute('data-primary');
-            const secondary = imgElement.getAttribute('data-secondary');
-            if (secondary) {
-                imgElement.src = imgElement.src === primary ? secondary : primary;
-            }
-        }
-
-        loadGames();
-    </script>
+    loadGames();
+  </script>
 </body>
 </html>
