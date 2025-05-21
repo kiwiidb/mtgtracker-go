@@ -39,19 +39,23 @@
     }
 
     function buildGroupedData(events) {
-      // Group by TargetPlayer
+      // Group by TargetPlayer, and keep a mapping for legend and event lookup
       const grouped = {};
+      const playerColors = {};
+      const eventMap = {}; // key: player+timestamp, value: event
       events.forEach(ev => {
-        const player = ev.TargetPlayer || ev.TargetPlayerName || ev.TargetPlayerId || ev.TargetPlayer; // fallback
+        const player = ev.TargetPlayer || ev.TargetPlayerName || ev.TargetPlayerId || ev.TargetPlayer;
         if (!player) return;
         const time = new Date(ev.CreatedAt || ev.created_at).toISOString();
         if (!grouped[player]) grouped[player] = [];
         grouped[player].push({ x: time, y: ev.TargetLifeTotalAfter });
+        eventMap[player + '|' + time] = ev;
       });
-      return grouped;
+      return { grouped, eventMap };
     }
 
-    function renderChart(groupedData) {
+    function renderChart(groupedDataObj) {
+      const { grouped, eventMap } = groupedDataObj;
       const colors = [
         'rgba(255,99,132,0.9)',
         'rgba(54,162,235,0.9)',
@@ -66,7 +70,7 @@
         'rgba(255,206,86,1)',
         'rgba(153,102,255,1)'
       ];
-      const datasets = Object.entries(groupedData).map(([player, data], index) => ({
+      const datasets = Object.entries(grouped).map(([player, data], index) => ({
         data,
         label: player,
         fill: false,
@@ -87,7 +91,13 @@
         options: {
           responsive: true,
           plugins: {
-            legend: { display: false },
+            legend: {
+              display: true,
+              labels: {
+                color: '#ffd700',
+                font: { size: 18, weight: 'bold' }
+              }
+            },
             tooltip: {
               backgroundColor: '#23233a',
               titleColor: '#ffd700',
@@ -96,7 +106,16 @@
               borderWidth: 1,
               padding: 12,
               callbacks: {
+                title: function() { return ''; }, // Remove timestamp
                 label: function(context) {
+                  // Find the event for this point
+                  const player = context.dataset.label;
+                  const time = new Date(context.parsed.x).toISOString();
+                  const ev = eventMap[player + '|' + time];
+                  if (ev && ev.SourcePlayer && ev.TargetPlayer) {
+                    return `${ev.SourcePlayer} hits ${ev.TargetPlayer} for ${ev.DamageDelta}`;
+                  }
+                  // fallback
                   return `Life: ${context.parsed.y}`;
                 }
               }
@@ -154,8 +173,8 @@
       try {
         const game = await fetchGameData(gameId);
         const events = game.GameEvents || [];
-        const groupedData = buildGroupedData(events);
-        renderChart(groupedData);
+        const groupedDataObj = buildGroupedData(events);
+        renderChart(groupedDataObj);
       } catch (e) {
         alert('Failed to load game data: ' + e.message);
       }
