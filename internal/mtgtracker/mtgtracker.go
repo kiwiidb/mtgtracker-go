@@ -214,8 +214,21 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	id := r.PathValue("gameId")
+	gameId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Invalid game ID", http.StatusBadRequest)
+		return
+	}
+	// fetch the game and check if source and target rankings are valid
+	// todo
+	_, err = s.Repository.GetGameWithEvents(uint(gameId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// Insert the event using the repository
-	event, err := s.Repository.InsertGameEvent(req.GameId, req.EventType, req.DamageDelta, req.TargetLifeTotalAfter, req.SourceRankingId, req.TargetRankingId)
+	event, err := s.Repository.InsertGameEvent(uint(gameId), req.EventType, req.DamageDelta, req.TargetLifeTotalAfter, req.SourceRankingId, req.TargetRankingId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

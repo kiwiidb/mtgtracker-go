@@ -32,7 +32,6 @@ type CreateGameRequest struct {
 }
 
 type GameEventRequest struct {
-	GameId               uint   `json:"game_id"`
 	EventType            string `json:"event_type"`
 	DamageDelta          int    `json:"damage_delta"`
 	TargetLifeTotalAfter int    `json:"life_total_after"`

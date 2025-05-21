@@ -44,7 +44,7 @@ func (r *Repository) GetGroups() ([]Group, error) {
 }
 
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Group{}, &Game{}, &Ranking{})
+	err := db.AutoMigrate(&Player{}, &Group{}, &Game{}, &Ranking{}, &GameEvent{})
 	if err != nil {
 		log.Fatal(err)
 	}
