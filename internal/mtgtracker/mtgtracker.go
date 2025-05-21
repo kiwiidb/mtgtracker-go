@@ -193,7 +193,7 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 			Deck:           *deck,
 		})
 	}
-	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, request.Date, rankings)
+	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

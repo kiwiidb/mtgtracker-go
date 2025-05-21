@@ -83,7 +83,7 @@ func (r *Repository) AddPlayerToGroup(groupID uint, email string) error {
 	return r.DB.Model(&group).Association("Players").Append(&player)
 }
 
-func (r *Repository) InsertGame(groupID uint, duration *int, comments, image string, date *time.Time, rankings []Ranking) (*Game, error) {
+func (r *Repository) InsertGame(groupID uint, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 	var group Group
 	if err := r.DB.First(&group, groupID).Error; err != nil {
 		return nil, errors.New("invalid group ID")

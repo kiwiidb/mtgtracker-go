@@ -27,6 +27,7 @@ type CreateGameRequest struct {
 	Date     *time.Time `json:"date"`
 	Comments string     `json:"comments"`
 	Image    string     `json:"image"`
+	Finished bool       `json:"finished"`
 	Rankings []Ranking  `json:"rankings"`
 }
 

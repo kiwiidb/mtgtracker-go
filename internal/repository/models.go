@@ -38,6 +38,7 @@ type Game struct {
 	Rankings []Ranking
 	GroupID  uint
 	Group    Group
+	Finished bool
 }
 
 type Ranking struct {
