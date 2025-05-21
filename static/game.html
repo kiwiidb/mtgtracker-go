@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Life Totals Over Time</title>
+  <title>Game graph</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
@@ -19,6 +19,21 @@
     }
     body {
       background: #181828;
+    }
+    .chartjs-tooltip-img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 8px;
+      vertical-align: middle;
+      border: 2px solid #ffd700;
+      background: #23233a;
+    }
+    .chartjs-tooltip-img-target {
+      margin-left: 8px;
+      margin-right: 0;
+      border: 2px solid #ffd700;
     }
   </style>
 </head>
@@ -41,8 +56,8 @@
     function buildGroupedData(events) {
       // Group by TargetPlayer, and keep a mapping for legend and event lookup
       const grouped = {};
-      const playerColors = {};
       const eventMap = {}; // key: player+timestamp, value: event
+      const playerCommanderImg = {}; // key: player, value: crop img
       events.forEach(ev => {
         const player = ev.TargetPlayer || ev.TargetPlayerName || ev.TargetPlayerId || ev.TargetPlayer;
         if (!player) return;
@@ -50,12 +65,16 @@
         if (!grouped[player]) grouped[player] = [];
         grouped[player].push({ x: time, y: ev.TargetLifeTotalAfter });
         eventMap[player + '|' + time] = ev;
+        // Save the crop image for the legend (first found)
+        if (!playerCommanderImg[player] && ev.TargetCommanderCropImg) {
+          playerCommanderImg[player] = ev.TargetCommanderCropImg;
+        }
       });
-      return { grouped, eventMap };
+      return { grouped, eventMap, playerCommanderImg };
     }
 
     function renderChart(groupedDataObj) {
-      const { grouped, eventMap } = groupedDataObj;
+      const { grouped, eventMap, playerCommanderImg } = groupedDataObj;
       const colors = [
         'rgba(255,99,132,0.9)',
         'rgba(54,162,235,0.9)',
@@ -94,8 +113,24 @@
             legend: {
               display: true,
               labels: {
-                color: '#ffd700',
-                font: { size: 18, weight: 'bold' }
+                color: '#ffd700', // Make legend text yellow
+                font: { size: 18, weight: 'bold' },
+                generateLabels: function(chart) {
+                  const datasets = chart.data.datasets || [];
+                  return datasets.map((ds, i) => {
+                    const player = ds.label;
+                    const img = playerCommanderImg[player];
+                    return {
+                      text: player,
+                      fillStyle: ds.borderColor,
+                      strokeStyle: ds.borderColor,
+                      lineWidth: 2,
+                      hidden: !chart.isDatasetVisible(i),
+                      index: i,
+                      img: img
+                    };
+                  });
+                }
               }
             },
             tooltip: {
@@ -105,17 +140,27 @@
               borderColor: '#ffd700',
               borderWidth: 1,
               padding: 12,
+              displayColors: false,
+              enabled: true,
               callbacks: {
-                title: function() { return ''; }, // Remove timestamp
+                title: function() { return ''; },
                 label: function(context) {
-                  // Find the event for this point
                   const player = context.dataset.label;
                   const time = new Date(context.parsed.x).toISOString();
                   const ev = eventMap[player + '|' + time];
                   if (ev && ev.SourcePlayer && ev.TargetPlayer) {
-                    return `${ev.SourcePlayer} hits ${ev.TargetPlayer} for ${ev.DamageDelta}`;
+                    // Compose HTML with images above the text
+                    let html = '<div style="display:flex;justify-content:center;align-items:center;margin-bottom:6px;">';
+                    if (ev.SourceCommanderCropImg) {
+                      html += `<img src="${ev.SourceCommanderCropImg}" class="chartjs-tooltip-img" style="border:2px solid #ffd700; margin-right:8px;" />`;
+                    }
+                    if (ev.TargetCommanderCropImg) {
+                      html += `<img src="${ev.TargetCommanderCropImg}" class="chartjs-tooltip-img chartjs-tooltip-img-target" style="border:2px solid #ff3333; margin-left:8px;" />`;
+                    }
+                    html += '</div>';
+                    html += `<div style="text-align:center;">${ev.SourcePlayer} hits ${ev.TargetPlayer} for ${ev.DamageDelta}</div>`;
+                    return html;
                   }
-                  // fallback
                   return `Life: ${context.parsed.y}`;
                 }
               }
@@ -160,8 +205,70 @@
               ticks: { color: '#fff', font: { size: 16 } }
             }
           }
-        }
+        },
+        plugins: [{
+          // Custom plugin to draw images in the legend
+          id: 'legendImages',
+          afterDraw(chart) {
+            const legend = chart.legend;
+            if (!legend || !legend.legendItems) return;
+            legend.legendItems.forEach((item, i) => {
+              if (item.img) {
+                const ctx = chart.ctx;
+                const y = item.top + (item.height - 24) / 2;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(item.left + 12, y + 12, 12, 0, 2 * Math.PI);
+                ctx.closePath();
+                ctx.clip();
+                const image = new window.Image();
+                image.src = item.img;
+                ctx.drawImage(image, item.left, y, 24, 24);
+                ctx.restore();
+              }
+            });
+          }
+        }]
       });
+
+      // Patch Chart.js tooltip to allow HTML (for images)
+      Chart.defaults.plugins.tooltip.callbacks.labelTextColor = () => '#fff';
+      Chart.defaults.plugins.tooltip.external = function(context) {
+        const tooltip = context.tooltip;
+        if (!tooltip || !tooltip.opacity) {
+          document.getElementById('chartjs-tooltip-html')?.remove();
+          return;
+        }
+        let tooltipEl = document.getElementById('chartjs-tooltip-html');
+        if (!tooltipEl) {
+          tooltipEl = document.createElement('div');
+          tooltipEl.id = 'chartjs-tooltip-html';
+          tooltipEl.style.position = 'absolute';
+          tooltipEl.style.pointerEvents = 'none';
+          tooltipEl.style.zIndex = 1000;
+          document.body.appendChild(tooltipEl);
+        }
+        // Set content
+        let html = '';
+        if (tooltip.body && tooltip.body.length) {
+          html = tooltip.body.map(b => b.lines).join('<br>');
+        }
+        tooltipEl.innerHTML = html;
+        // Position
+        const canvas = context.chart.canvas;
+        const rect = canvas.getBoundingClientRect();
+        tooltipEl.style.left = rect.left + window.pageXOffset + tooltip.caretX + 'px';
+        tooltipEl.style.top = rect.top + window.pageYOffset + tooltip.caretY + 'px';
+        tooltipEl.style.background = '#23233a';
+        tooltipEl.style.color = '#fff';
+        tooltipEl.style.border = '1px solid #ffd700';
+        tooltipEl.style.borderRadius = '8px';
+        tooltipEl.style.padding = '12px';
+        tooltipEl.style.fontSize = '16px';
+        tooltipEl.style.fontFamily = 'Arial, sans-serif';
+        tooltipEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+        tooltipEl.style.opacity = 1;
+      };
     }
 
     (async function() {

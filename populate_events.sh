@@ -40,6 +40,7 @@ while true; do
   [ $alive_r1 -eq 1 ] && alive_ids+=($r1) && alive_life+=($life_r1)
   [ $alive_r2 -eq 1 ] && alive_ids+=($r2) && alive_life+=($life_r2)
   [ $alive_r3 -eq 1 ] && alive_ids+=($r3) && alive_life+=($life_r3)
+  [ $alive_r4 -eq 1 ] && alive_ids+=($r4) && alive_life+=($life_r4)
 
   # Stop if only one player is alive
   if [ ${#alive_ids[@]} -le 1 ]; then

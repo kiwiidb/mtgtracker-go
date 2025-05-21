@@ -23,8 +23,8 @@ func convertGameToDto(game *repository.Game) GameDto {
 			TargetPlayer:           event.TargetRanking.Player.Name,
 			SourceCommander:        event.SourceRanking.Deck.Commander,
 			TargetCommander:        event.TargetRanking.Deck.Commander,
-			SourceCommanderCropImg: event.SourceRanking.Deck.Image,
-			TargetCommanderCropImg: event.TargetRanking.Deck.Image,
+			SourceCommanderCropImg: event.SourceRanking.Deck.Crop,
+			TargetCommanderCropImg: event.TargetRanking.Deck.Crop,
 		}
 	}
 	return result
