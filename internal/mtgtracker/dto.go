@@ -1,6 +1,8 @@
 package mtgtracker
 
-import "time"
+import (
+	"time"
+)
 
 type SignupPlayerRequest struct {
 	Name  string `json:"name"`
@@ -39,9 +41,34 @@ type GameEventRequest struct {
 	TargetRankingId      uint   `json:"target_ranking_id"`
 }
 
+type GameDto struct {
+	Id         uint
+	Duration   *int
+	Date       *time.Time
+	Comments   string
+	Image      string
+	Rankings   []Ranking
+	Finished   bool
+	GameEvents []GameEventDto
+}
+
+type GameEventDto struct {
+	GameID                 uint
+	EventType              string
+	DamageDelta            int
+	TargetLifeTotalAfter   int
+	SourcePlayer           string
+	TargetPlayer           string
+	SourceCommanderCropImg string
+	TargetCommanderCropImg string
+	SourceCommander        string
+	TargetCommander        string
+}
+
 type Ranking struct {
 	PlayerID       uint   `json:"player_id"`
 	Commander      string `json:"commander"`
+	CommanderImage string `json:"commander_image"`
 	Position       int    `json:"position"`
 	CouldHaveWon   bool   `json:"could_have_won"`
 	EarlySolRing   bool   `json:"early_sol_ring"`

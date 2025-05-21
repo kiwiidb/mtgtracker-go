@@ -252,8 +252,10 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// convert the game to a DTO
+	result := convertGameToDto(game)
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(game)
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
