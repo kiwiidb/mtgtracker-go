@@ -56,6 +56,7 @@ type GameEventDto struct {
 	GameID                 uint
 	EventType              string
 	DamageDelta            int
+	CreatedAt              time.Time
 	TargetLifeTotalAfter   int
 	SourcePlayer           string
 	TargetPlayer           string

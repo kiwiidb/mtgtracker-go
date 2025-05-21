@@ -17,6 +17,7 @@ func convertGameToDto(game *repository.Game) GameDto {
 			GameID:                 event.GameID,
 			EventType:              event.EventType,
 			DamageDelta:            event.DamageDelta,
+			CreatedAt:              event.CreatedAt,
 			TargetLifeTotalAfter:   event.TargetLifeTotalAfter,
 			SourcePlayer:           event.SourceRanking.Player.Name,
 			TargetPlayer:           event.TargetRanking.Player.Name,
