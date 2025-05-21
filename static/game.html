@@ -113,8 +113,9 @@
             legend: {
               display: true,
               labels: {
-                color: '#ffd700', // Make legend text yellow
-                font: { size: 18, weight: 'bold' },
+                boxWidth: 0, // Remove colored squares
+                boxHeight: 0,
+                usePointStyle: false,
                 generateLabels: function(chart) {
                   const datasets = chart.data.datasets || [];
                   return datasets.map((ds, i) => {
@@ -124,13 +125,21 @@
                       text: player,
                       fillStyle: ds.borderColor,
                       strokeStyle: ds.borderColor,
-                      lineWidth: 2,
+                      lineWidth: 0,
                       hidden: !chart.isDatasetVisible(i),
                       index: i,
-                      img: img
+                      img: img,
+                      fontColor: ds.borderColor, // Use player color for text
+                      font: { size: 18, weight: 'bold' }
                     };
                   });
-                }
+                },
+                color: function(ctx) {
+                  // Use the dataset color for the legend text
+                  const item = ctx.legendItem;
+                  return item && item.fontColor ? item.fontColor : '#ffd700';
+                },
+                font: { size: 18, weight: 'bold' }
               }
             },
             tooltip: {
@@ -199,7 +208,7 @@
             },
             title: {
               display: true,
-              text: 'Player Life Totals Over Time',
+              text: 'Lifetotal graph',
               color: '#ffd700',
               font: {
                 size: 28,
