@@ -104,7 +104,7 @@
         cubicInterpolationMode: 'monotone'
       }));
 
-      new Chart(document.getElementById('lifeChart'), {
+      const chart = new Chart(document.getElementById('lifeChart'), {
         type: 'line',
         data: { datasets },
         options: {
@@ -141,16 +141,33 @@
               borderWidth: 1,
               padding: 12,
               displayColors: false,
-              enabled: true,
-              callbacks: {
-                title: function() { return ''; },
-                label: function(context) {
+              enabled: false, // Disable built-in tooltip rendering
+              external: function(context) {
+                const tooltip = context.tooltip;
+                // Remove existing custom tooltip if not visible
+                let tooltipEl = document.getElementById('chartjs-tooltip-html');
+                if (!tooltip || !tooltip.opacity) {
+                  if (tooltipEl) tooltipEl.style.opacity = 0;
+                  return;
+                }
+                // Create tooltip element if not exists
+                if (!tooltipEl) {
+                  tooltipEl = document.createElement('div');
+                  tooltipEl.id = 'chartjs-tooltip-html';
+                  tooltipEl.style.position = 'absolute';
+                  tooltipEl.style.pointerEvents = 'none';
+                  tooltipEl.style.zIndex = 1000;
+                  document.body.appendChild(tooltipEl);
+                }
+                // Set content
+                let html = '';
+                if (tooltip.dataPoints && tooltip.dataPoints.length) {
+                  const context = tooltip.dataPoints[0];
                   const player = context.dataset.label;
                   const time = new Date(context.parsed.x).toISOString();
                   const ev = eventMap[player + '|' + time];
                   if (ev && ev.SourcePlayer && ev.TargetPlayer) {
-                    // Compose HTML with images above the text
-                    let html = '<div style="display:flex;justify-content:center;align-items:center;margin-bottom:6px;">';
+                    html += '<div style="display:flex;justify-content:center;align-items:center;margin-bottom:6px;">';
                     if (ev.SourceCommanderCropImg) {
                       html += `<img src="${ev.SourceCommanderCropImg}" class="chartjs-tooltip-img" style="border:2px solid #ffd700; margin-right:8px;" />`;
                     }
@@ -159,10 +176,25 @@
                     }
                     html += '</div>';
                     html += `<div style="text-align:center;">${ev.SourcePlayer} hits ${ev.TargetPlayer} for ${ev.DamageDelta}</div>`;
-                    return html;
+                  } else {
+                    html = `Life: ${context.parsed.y}`;
                   }
-                  return `Life: ${context.parsed.y}`;
                 }
+                tooltipEl.innerHTML = html;
+                // Position
+                const canvas = context.chart.canvas;
+                const rect = canvas.getBoundingClientRect();
+                tooltipEl.style.left = rect.left + window.pageXOffset + tooltip.caretX + 'px';
+                tooltipEl.style.top = rect.top + window.pageYOffset + tooltip.caretY + 'px';
+                tooltipEl.style.background = '#23233a';
+                tooltipEl.style.color = '#fff';
+                tooltipEl.style.border = '1px solid #ffd700';
+                tooltipEl.style.borderRadius = '8px';
+                tooltipEl.style.padding = '12px';
+                tooltipEl.style.fontSize = '16px';
+                tooltipEl.style.fontFamily = 'Arial, sans-serif';
+                tooltipEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+                tooltipEl.style.opacity = 1;
               }
             },
             title: {
@@ -233,42 +265,6 @@
 
       // Patch Chart.js tooltip to allow HTML (for images)
       Chart.defaults.plugins.tooltip.callbacks.labelTextColor = () => '#fff';
-      Chart.defaults.plugins.tooltip.external = function(context) {
-        const tooltip = context.tooltip;
-        if (!tooltip || !tooltip.opacity) {
-          document.getElementById('chartjs-tooltip-html')?.remove();
-          return;
-        }
-        let tooltipEl = document.getElementById('chartjs-tooltip-html');
-        if (!tooltipEl) {
-          tooltipEl = document.createElement('div');
-          tooltipEl.id = 'chartjs-tooltip-html';
-          tooltipEl.style.position = 'absolute';
-          tooltipEl.style.pointerEvents = 'none';
-          tooltipEl.style.zIndex = 1000;
-          document.body.appendChild(tooltipEl);
-        }
-        // Set content
-        let html = '';
-        if (tooltip.body && tooltip.body.length) {
-          html = tooltip.body.map(b => b.lines).join('<br>');
-        }
-        tooltipEl.innerHTML = html;
-        // Position
-        const canvas = context.chart.canvas;
-        const rect = canvas.getBoundingClientRect();
-        tooltipEl.style.left = rect.left + window.pageXOffset + tooltip.caretX + 'px';
-        tooltipEl.style.top = rect.top + window.pageYOffset + tooltip.caretY + 'px';
-        tooltipEl.style.background = '#23233a';
-        tooltipEl.style.color = '#fff';
-        tooltipEl.style.border = '1px solid #ffd700';
-        tooltipEl.style.borderRadius = '8px';
-        tooltipEl.style.padding = '12px';
-        tooltipEl.style.fontSize = '16px';
-        tooltipEl.style.fontFamily = 'Arial, sans-serif';
-        tooltipEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
-        tooltipEl.style.opacity = 1;
-      };
     }
 
     (async function() {
