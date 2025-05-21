@@ -31,14 +31,15 @@ type Group struct {
 
 type Game struct {
 	gorm.Model
-	Duration *int
-	Date     *time.Time
-	Comments string
-	Image    string
-	Rankings []Ranking
-	GroupID  uint
-	Group    Group
-	Finished bool
+	Duration   *int
+	Date       *time.Time
+	Comments   string
+	Image      string
+	Rankings   []Ranking
+	GroupID    uint
+	Group      Group
+	Finished   bool
+	GameEvents []GameEvent // Add relation: a game has many game events
 }
 
 type Ranking struct {
@@ -66,4 +67,14 @@ type PlayerWin struct {
 	Player   Player
 	Wins     int
 	DeckWins []DeckWin
+}
+
+type GameEvent struct {
+	gorm.Model
+	GameID               uint
+	EventType            string
+	DamageDelta          int
+	TargetLifeTotalAfter int
+	SourceRankingID      uint
+	TargetRankingID      uint
 }

@@ -36,8 +36,8 @@ type GameEventRequest struct {
 	EventType            string `json:"event_type"`
 	DamageDelta          int    `json:"damage_delta"`
 	TargetLifeTotalAfter int    `json:"life_total_after"`
-	TargetPlayerId       uint   `json:"target_player_id"`
-	SourcePlayerId       uint   `json:"source_player_id"`
+	SourceRankingId      uint   `json:"source_ranking_id"`
+	TargetRankingId      uint   `json:"target_ranking_id"`
 }
 
 type Ranking struct {

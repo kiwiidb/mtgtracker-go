@@ -114,3 +114,28 @@ func (r *Repository) InsertGame(groupID uint, duration *int, comments, image str
 
 	return &game, nil
 }
+
+func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta, lifeAfter int, source, target uint) (*GameEvent, error) {
+	event := GameEvent{
+		GameID:               gameId,
+		EventType:            eventType,
+		DamageDelta:          damageDelta,
+		TargetLifeTotalAfter: lifeAfter,
+		SourceRankingID:      source,
+		TargetRankingID:      target,
+	}
+	if err := r.DB.Create(&event).Error; err != nil {
+		return nil, err
+	}
+	return &event, nil
+}
+
+func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
+	var game Game
+	if err := r.DB.Preload("Rankings.Player").Preload("Rankings.Deck").
+		Preload("Group").Preload("GameEvents").
+		First(&game, gameID).Error; err != nil {
+		return nil, err
+	}
+	return &game, nil
+}

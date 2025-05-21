@@ -29,6 +29,8 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /game/v1/games", s.AddGame)
 	mux.HandleFunc("/game/v1/games", s.GetGames)
 	mux.HandleFunc("/player/v1/groups", s.GetGroups)
+	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
+	mux.HandleFunc("/game/v1/games/{gameId}", s.GetGame)                  // new
 }
 
 func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
@@ -199,6 +201,44 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(game)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
+	var req GameEventRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Insert the event using the repository
+	event, err := s.Repository.InsertGameEvent(req.GameId, req.EventType, req.DamageDelta, req.TargetLifeTotalAfter, req.SourceRankingId, req.TargetRankingId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(event)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
+	gameIdStr := r.PathValue("gameId")
+	gameId, err := strconv.Atoi(gameIdStr)
+	if err != nil {
+		http.Error(w, "Invalid game ID", http.StatusBadRequest)
+		return
+	}
+	game, err := s.Repository.GetGameWithEvents(uint(gameId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(game)
 	if err != nil {
