@@ -31,6 +31,15 @@ type CreateGameRequest struct {
 	Rankings []Ranking  `json:"rankings"`
 }
 
+type GameEventRequest struct {
+	GameId               uint   `json:"game_id"`
+	EventType            string `json:"event_type"`
+	DamageDelta          int    `json:"damage_delta"`
+	TargetLifeTotalAfter int    `json:"life_total_after"`
+	TargetPlayerId       uint   `json:"target_player_id"`
+	SourcePlayerId       uint   `json:"source_player_id"`
+}
+
 type Ranking struct {
 	PlayerID       uint   `json:"player_id"`
 	Commander      string `json:"commander"`
