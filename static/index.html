@@ -191,10 +191,12 @@
       <div class="winner-hint">Long press a player to mark as winner</div>
     </form>
   </div>
-  <div class="container">
+  <div class="container" style="max-width: 1130px;">
+    <div style="display: flex; justify-content: flex-start; margin-bottom: 10px;">
+      <a id="life-graph-link" href="game.html" style="color: #ffd700; text-decoration: underline; font-size: 16px;">Game graph</a>
+    </div>
     <div class="game-results" id="game-results"></div>
   </div>
-
   <script>
     let playerCount = 0;
     let winnerIndex = 0;
@@ -340,6 +342,12 @@
       });
     });
 
+    function getLatestGameId(games) {
+      if (!games || !games.length) return '';
+      // Assumes games are sorted by date descending
+      return games[0].ID || games[0].Id || games[0].id || '';
+    }
+
     function loadGames() {
       $('#game-results').empty();
       $.get('/game/v1/games', function (games) {
@@ -358,13 +366,19 @@
               </div>
             `;
           }).join('');
+          // Add a game graph link for each game row
           $('#game-results').append(`
             <div>
-              <p class="game-date">${date}</p>
+              <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 2px;">
+                <a href="game.html?gameId=${game.ID || game.Id || game.id}" style="color: #ffd700; text-decoration: underline; font-size: 14px; margin-right: 10px;">Graph</a>
+                <p class="game-date" style="margin: 0;">${date}</p>
+              </div>
               <div class="game-row">${participants}</div>
             </div>
           `);
         });
+        // Remove the global link, since each game now has its own
+        $('#life-graph-link').hide();
       });
     }
 
