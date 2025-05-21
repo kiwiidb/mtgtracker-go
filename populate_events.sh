@@ -1,21 +1,24 @@
-url="https://mtgtracker.kwintendebacker.com/game/v1/games/10/events"
-r1=36
-r2=38
-r3=37
+url="http://localhost:8080/game/v1/games/1/events"
+r1=1
+r2=2
+r3=3
+r4=4
 
 # Initial life totals
 life_r1=40
 life_r2=40
 life_r3=40
+life_r4=40
 
 # Players alive
 alive_r1=1
 alive_r2=1
 alive_r3=1
+alive_r4=1
 
 # Helper function to pick a random delta between 1 and 20
 rand_delta() {
-  echo $(( ( RANDOM % 20 ) + 1 ))
+  echo $(( ( RANDOM % 10 ) + 1 ))
 }
 
 # Helper function to pick a random alive player
@@ -25,6 +28,11 @@ pick_target() {
   echo "${arr[$idx]}"
 }
 
+# add an event for every player to set their life total at the start to 40
+http POST $url life_total_after:=40 source_ranking_id:=$r1 target_ranking_id:=$r1
+http POST $url life_total_after:=40 source_ranking_id:=$r2 target_ranking_id:=$r2
+http POST $url life_total_after:=40 source_ranking_id:=$r3 target_ranking_id:=$r3
+http POST $url life_total_after:=40 source_ranking_id:=$r4 target_ranking_id:=$r4
 while true; do
   # Build array of alive rankings and their life totals
   alive_ids=()
@@ -70,6 +78,9 @@ while true; do
   elif [ $tgt_id -eq $r3 ]; then
     life_r3=$new_life
     [ $life_r3 -le 0 ] && alive_r3=0
+  elif [ $tgt_id -eq $r4 ]; then
+	life_r4=$new_life
+	[ $life_r4 -le 0 ] && alive_r4=0
   fi
 
   # Sleep 1-2 seconds

@@ -23,3 +23,22 @@ http PUT $host/player/v1/groups/1/add/Laura
 http PUT $host/player/v1/groups/1/add/Arthur
 http PUT $host/player/v1/groups/1/add/Jari
 http PUT $host/player/v1/groups/1/add/Cyril
+
+# Create a game
+# Kwinten plays with Alania, Divergent Storm
+# Lorin plays with Massacre Girl, Known Killer
+# Alex plays with Teysa, Envoy of Ghosts
+# Lucas plays with Jodah, The Unifier
+
+# type CreateGameRequest struct {
+# 	GroupID  uint       `json:"group_id"`
+# 	Rankings []Ranking  `json:"rankings"`
+# }
+# type Ranking struct {
+# 	PlayerID       uint   `json:"player_id"`
+# 	Commander      string `json:"commander"`
+# 	Position       int    `json:"position"`
+# }
+http POST $host/game/v1/games \
+  group_id:=1 \
+  rankings:='[{"player_id":1,"commander":"Alania, Divergent Storm","position":1},{"player_id":2,"commander":"Massacre Girl, Known Killer","position":2},{"player_id":3,"commander":"Teysa, Envoy of Ghosts","position":3},{"player_id":4,"commander":"Jodah, The Unifier","position":4}]'

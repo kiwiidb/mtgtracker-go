@@ -77,4 +77,7 @@ type GameEvent struct {
 	TargetLifeTotalAfter int
 	SourceRankingID      uint
 	TargetRankingID      uint
+
+	SourceRanking Ranking `gorm:"foreignKey:SourceRankingID;references:ID"`
+	TargetRanking Ranking `gorm:"foreignKey:TargetRankingID;references:ID"`
 }
