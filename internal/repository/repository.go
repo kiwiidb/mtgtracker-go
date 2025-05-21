@@ -132,7 +132,7 @@ func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta,
 
 func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
 	var game Game
-	if err := r.DB.Preload("Rankings.Player").Preload("Rankings.Deck").
+	if err := r.DB.Preload("Rankings.Player").
 		Preload("Group").Preload("GameEvents").
 		First(&game, gameID).Error; err != nil {
 		return nil, err
