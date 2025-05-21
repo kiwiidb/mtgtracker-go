@@ -1,0 +1,46 @@
+package mtgtracker
+
+import "mtgtracker/internal/repository"
+
+func convertGameToDto(game *repository.Game) GameDto {
+	result := GameDto{
+		Id:         game.ID,
+		Duration:   game.Duration,
+		Date:       game.Date,
+		Comments:   game.Comments,
+		Image:      game.Image,
+		Rankings:   convertRankingsToDto(game.Rankings),
+		GameEvents: make([]GameEventDto, len(game.GameEvents)),
+	}
+	for i, event := range game.GameEvents {
+		result.GameEvents[i] = GameEventDto{
+			GameID:                 event.GameID,
+			EventType:              event.EventType,
+			DamageDelta:            event.DamageDelta,
+			TargetLifeTotalAfter:   event.TargetLifeTotalAfter,
+			SourcePlayer:           event.SourceRanking.Player.Name,
+			TargetPlayer:           event.TargetRanking.Player.Name,
+			SourceCommander:        event.SourceRanking.Deck.Commander,
+			TargetCommander:        event.TargetRanking.Deck.Commander,
+			SourceCommanderCropImg: event.SourceRanking.Deck.Image,
+			TargetCommanderCropImg: event.TargetRanking.Deck.Image,
+		}
+	}
+	return result
+}
+
+func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
+	result := make([]Ranking, len(rankings))
+	for i, rank := range rankings {
+		result[i] = Ranking{
+			PlayerID:       rank.PlayerID,
+			Position:       rank.Position,
+			CouldHaveWon:   rank.CouldHaveWon,
+			EarlySolRing:   rank.EarlySolRing,
+			StartingPlayer: rank.StartingPlayer,
+			Commander:      rank.Deck.Commander,
+			CommanderImage: rank.Deck.Image,
+		}
+	}
+	return result
+}
