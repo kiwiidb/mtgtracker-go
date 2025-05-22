@@ -14,7 +14,9 @@ type Repository struct {
 
 func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool) (*Game, error) {
 	// update the rankings
+
 	for _, rank := range rankings {
+		log.Println("updating ranking ", rank.ID, rank.PlayerID, rank.Position)
 		if err := r.DB.Model(&rank).Where("id = ?", rank.ID).Updates(rank).Error; err != nil {
 			return nil, err
 		}

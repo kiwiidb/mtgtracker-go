@@ -321,14 +321,8 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		// the only thing that can change is the position
 		for _, oldRank := range rankings {
 			if oldRank.PlayerID == rank.PlayerID {
-				newRankings = append(newRankings, repository.Ranking{
-					PlayerID:       rank.PlayerID,
-					Position:       rank.Position,
-					CouldHaveWon:   oldRank.CouldHaveWon,
-					EarlySolRing:   oldRank.EarlySolRing,
-					StartingPlayer: oldRank.StartingPlayer,
-					Deck:           oldRank.Deck,
-				})
+				oldRank.Position = rank.Position
+				newRankings = append(newRankings, oldRank)
 				break
 			}
 		}

@@ -39,10 +39,8 @@ http PUT $host/player/v1/groups/1/add/Cyril
 # 	Commander      string `json:"commander"`
 # 	Position       int    `json:"position"`
 # }
-http POST $host/game/v1/games \
-  group_id:=1 \
-  rankings:='[{"player_id":1,"commander":"Alania, Divergent Storm","position":1},{"player_id":2,"commander":"Massacre Girl, Known Killer","position":2},{"player_id":3,"commander":"Teysa, Envoy of Ghosts","position":3},{"player_id":4,"commander":"Jodah, The Unifier","position":4}]'
-
   http POST $host/game/v1/games \
   group_id:=1 \
   rankings:='[{"player_id":1,"commander":"Edgar Markov","position":1},{"player_id":2,"commander":"Tymna the Weaver","position":2},{"player_id":3,"commander":"Isshin, Two Heavens as One","position":3},{"player_id":4,"commander":"Jodah, Archmage Eternal","position":4}]'
+  http PUT localhost:8080/game/v1/games/1 \
+  rankings:='[{"player_id":1,"commander":"Edgar Markov","position":2},{"player_id":2,"commander":"Tymna the Weaver","position":1},{"player_id":3,"commander":"Isshin, Two Heavens as One","position":3},{"player_id":4,"commander":"Jodah, Archmage Eternal","position":4}]';
