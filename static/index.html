@@ -354,24 +354,27 @@
         games.forEach(game => {
           const date = new Date(game.Date).toLocaleDateString();
           const sorted = [...game.Rankings].sort((a, b) => a.Position - b.Position);
+          let notFinished = !game.Finished;
           const participants = sorted.map(r => {
             let emojis = '';
             if (r.CouldHaveWon) emojis += ' 🙃';
             if (r.EarlySolRing) emojis += ' 💍';
             if (r.StartingPlayer) emojis += ' ▶️';
+            // Only highlight winner if game is finished
+            const winnerClass = (r.Position === 1 && !notFinished) ? ' winner-bg' : '';
             return `
-              <div class="game-card${r.Position === 1 ? ' winner-bg' : ''}">
+              <div class="game-card${winnerClass}">
                 <img src="${r.Deck.Image}" alt="${r.Deck.Commander}" data-primary="${r.Deck.Image}" data-secondary="${r.Deck.SecondaryImage}" onclick="toggleImage(this)">
-                <p class="participant-name${r.Position === 1 ? ' winner' : ''}">${r.Player.Name}${emojis}</p>
+                <p class="participant-name${r.Position === 1 && !notFinished ? ' winner' : ''}">${r.Player.Name}${emojis}</p>
               </div>
             `;
           }).join('');
-          // Add a game graph link for each game row
           $('#game-results').append(`
             <div>
               <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 2px;">
                 <a href="game.html?gameId=${game.ID || game.Id || game.id}" style="color: #ffd700; text-decoration: underline; font-size: 14px; margin-right: 10px;">Graph</a>
                 <p class="game-date" style="margin: 0;">${date}</p>
+                ${notFinished ? '<span style="color:#ff6666;font-weight:bold;margin-left:16px;">(Not finished)</span>' : ''}
               </div>
               <div class="game-row">${participants}</div>
             </div>
