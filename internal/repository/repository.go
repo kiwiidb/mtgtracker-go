@@ -12,6 +12,27 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool) (*Game, error) {
+	// update the rankings
+	for _, rank := range rankings {
+		if err := r.DB.Model(&rank).Where("id = ?", rank.ID).Updates(rank).Error; err != nil {
+			return nil, err
+		}
+	}
+	// update the game as finished
+	if finished != nil {
+		if err := r.DB.Model(&Game{}).Where("id = ?", gameId).Update("finished", *finished).Error; err != nil {
+			return nil, err
+		}
+	}
+	// find the game with rankings and return it
+	res, err := r.GetGameWithEvents(gameId)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {

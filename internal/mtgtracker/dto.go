@@ -33,6 +33,12 @@ type CreateGameRequest struct {
 	Rankings []Ranking  `json:"rankings"`
 }
 
+type UpdateGameRequest struct {
+	GameID   uint      `json:"game_id"`
+	Finished *bool     `json:"finished"`
+	Rankings []Ranking `json:"rankings"`
+}
+
 type GameEventRequest struct {
 	EventType            string `json:"event_type"`
 	DamageDelta          int    `json:"damage_delta"`

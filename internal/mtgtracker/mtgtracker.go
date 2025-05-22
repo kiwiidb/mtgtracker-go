@@ -30,6 +30,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/game/v1/games", s.GetGames)
 	mux.HandleFunc("/player/v1/groups", s.GetGroups)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
+	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
 	mux.HandleFunc("/game/v1/games/{gameId}", s.GetGame)                  // new
 }
 
@@ -288,6 +289,64 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 	// Return the games as a JSON response
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(games)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+// UpdateGame updates an existing game by its ID.
+// You may need to adjust the request struct and repository method as needed.
+func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
+	gameIdStr := r.PathValue("gameId")
+	gameId, err := strconv.Atoi(gameIdStr)
+	if err != nil {
+		http.Error(w, "Invalid game ID", http.StatusBadRequest)
+		return
+	}
+
+	var request UpdateGameRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// find the rankings for that game
+	rankings := []repository.Ranking{}
+	err = s.Repository.DB.Model(&repository.Ranking{}).Where("game_id = ?", gameId).Find(&rankings).Error
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	newRankings := []repository.Ranking{}
+	for _, rank := range request.Rankings {
+		// the only thing that can change is the position
+		for _, oldRank := range rankings {
+			if oldRank.PlayerID == rank.PlayerID {
+				newRankings = append(newRankings, repository.Ranking{
+					PlayerID:       rank.PlayerID,
+					Position:       rank.Position,
+					CouldHaveWon:   oldRank.CouldHaveWon,
+					EarlySolRing:   oldRank.EarlySolRing,
+					StartingPlayer: oldRank.StartingPlayer,
+					Deck:           oldRank.Deck,
+				})
+				break
+			}
+		}
+	}
+	if len(newRankings) != len(rankings) {
+		http.Error(w, "Invalid rankings", http.StatusBadRequest)
+		return
+	}
+
+	// Call the repository to update the game (implement UpdateGame in your repository)
+	updatedGame, err := s.Repository.UpdateGame(uint(gameId), newRankings, request.Finished)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(updatedGame)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
