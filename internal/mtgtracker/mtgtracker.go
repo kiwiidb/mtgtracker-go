@@ -32,6 +32,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
 	mux.HandleFunc("/game/v1/games/{gameId}", s.GetGame)                  // new
+	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)        // new
 }
 
 func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
@@ -260,6 +261,23 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
+}
+func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
+	gameIdStr := r.PathValue("gameId")
+	gameId, err := strconv.Atoi(gameIdStr)
+	if err != nil {
+		http.Error(w, "Invalid game ID", http.StatusBadRequest)
+		return
+	}
+
+	// Call the repository to delete the game
+	err = s.Repository.DeleteGame(uint(gameId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Service) GetGroups(w http.ResponseWriter, r *http.Request) {

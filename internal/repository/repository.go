@@ -12,6 +12,28 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+func (r *Repository) DeleteGame(gameID uint) error {
+	// Use a transaction to ensure all deletions succeed or fail together
+	return r.DB.Transaction(func(tx *gorm.DB) error {
+		// First delete game events
+		if err := tx.Where("game_id = ?", gameID).Delete(&GameEvent{}).Error; err != nil {
+			return err
+		}
+
+		// Then delete rankings
+		if err := tx.Where("game_id = ?", gameID).Delete(&Ranking{}).Error; err != nil {
+			return err
+		}
+
+		// Finally delete the game itself
+		if err := tx.Delete(&Game{}, gameID).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool) (*Game, error) {
 	// update the rankings
 

@@ -116,26 +116,26 @@
                 boxWidth: 0, // Remove colored squares
                 boxHeight: 0,
                 usePointStyle: false,
+                padding: 10,
                 generateLabels: function(chart) {
                   const datasets = chart.data.datasets || [];
                   return datasets.map((ds, i) => {
                     const player = ds.label;
                     const img = playerCommanderImg[player];
                     return {
-                      text: player,
+                      text: `    ${player}`, // Add space for the image
                       fillStyle: ds.borderColor,
                       strokeStyle: ds.borderColor,
                       lineWidth: 0,
                       hidden: !chart.isDatasetVisible(i),
                       index: i,
                       img: img,
-                      fontColor: ds.borderColor, // Use player color for text
+                      fontColor: ds.borderColor,
                       font: { size: 18, weight: 'bold' }
                     };
                   });
                 },
                 color: function(ctx) {
-                  // Use the dataset color for the legend text
                   const item = ctx.legendItem;
                   return item && item.fontColor ? item.fontColor : '#ffd700';
                 },
@@ -153,13 +153,11 @@
               enabled: false, // Disable built-in tooltip rendering
               external: function(context) {
                 const tooltip = context.tooltip;
-                // Remove existing custom tooltip if not visible
                 let tooltipEl = document.getElementById('chartjs-tooltip-html');
                 if (!tooltip || !tooltip.opacity) {
                   if (tooltipEl) tooltipEl.style.opacity = 0;
                   return;
                 }
-                // Create tooltip element if not exists
                 if (!tooltipEl) {
                   tooltipEl = document.createElement('div');
                   tooltipEl.id = 'chartjs-tooltip-html';
@@ -168,7 +166,6 @@
                   tooltipEl.style.zIndex = 1000;
                   document.body.appendChild(tooltipEl);
                 }
-                // Set content
                 let html = '';
                 if (tooltip.dataPoints && tooltip.dataPoints.length) {
                   const context = tooltip.dataPoints[0];
@@ -176,15 +173,30 @@
                   const time = new Date(context.parsed.x).toISOString();
                   const ev = eventMap[player + '|' + time];
                   if (ev && ev.SourcePlayer && ev.TargetPlayer) {
-                    html += '<div style="display:flex;justify-content:center;align-items:center;margin-bottom:6px;">';
-                    if (ev.SourceCommanderCropImg) {
-                      html += `<img src="${ev.SourceCommanderCropImg}" class="chartjs-tooltip-img" style="border:2px solid #ffd700; margin-right:8px;" />`;
+                    // Check if it's life gain (negative damage)
+                    const isLifeGain = ev.DamageDelta < 0;
+                    
+                    if (!isLifeGain) {
+                      // Show both commanders for damage
+                      var delta = - ev.DamageDelta;
+                      html += '<div style="display:flex;justify-content:center;align-items:center;margin-bottom:6px;">';
+                      if (ev.SourceCommanderCropImg) {
+                        html += `<img src="${ev.SourceCommanderCropImg}" class="chartjs-tooltip-img" style="border:2px solid #ffd700; margin-right:8px;" />`;
+                      }
+                      if (ev.TargetCommanderCropImg) {
+                        html += `<img src="${ev.TargetCommanderCropImg}" class="chartjs-tooltip-img chartjs-tooltip-img-target" style="border:2px solid #ff3333; margin-left:8px;" />`;
+                      }
+                      html += '</div>';
+                      html += `<div style="text-align:center;">${ev.SourcePlayer} hits ${ev.TargetPlayer} for ${delta}</div>`;
+                    } else {
+                      // Show only target commander for life gain
+                      html += '<div style="display:flex;justify-content:center;align-items:center;margin-bottom:6px;">';
+                      if (ev.TargetCommanderCropImg) {
+                        html += `<img src="${ev.TargetCommanderCropImg}" class="chartjs-tooltip-img" style="border:2px solid #00ff00; margin:0;" />`;
+                      }
+                      html += '</div>';
+                      html += `<div style="text-align:center;">${ev.TargetPlayer} gains ${Math.abs(ev.DamageDelta)} life</div>`;
                     }
-                    if (ev.TargetCommanderCropImg) {
-                      html += `<img src="${ev.TargetCommanderCropImg}" class="chartjs-tooltip-img chartjs-tooltip-img-target" style="border:2px solid #ff3333; margin-left:8px;" />`;
-                    }
-                    html += '</div>';
-                    html += `<div style="text-align:center;">${ev.SourcePlayer} hits ${ev.TargetPlayer} for ${ev.DamageDelta}</div>`;
                   } else {
                     html = `Life: ${context.parsed.y}`;
                   }
@@ -256,15 +268,15 @@
             legend.legendItems.forEach((item, i) => {
               if (item.img) {
                 const ctx = chart.ctx;
-                const y = item.top + (item.height - 24) / 2;
+                const y = item.top + (item.height - 20) / 2;
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(item.left + 12, y + 12, 12, 0, 2 * Math.PI);
+                ctx.arc(item.left + 10, y + 10, 10, 0, 2 * Math.PI);
                 ctx.closePath();
                 ctx.clip();
                 const image = new window.Image();
                 image.src = item.img;
-                ctx.drawImage(image, item.left, y, 24, 24);
+                ctx.drawImage(image, item.left, y, 20, 20);
                 ctx.restore();
               }
             });
