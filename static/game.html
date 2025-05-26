@@ -174,7 +174,7 @@
                   const ev = eventMap[player + '|' + time];
                   if (ev && ev.SourcePlayer && ev.TargetPlayer) {
                     // Check if it's life gain (negative damage)
-                    const isLifeGain = ev.DamageDelta < 0;
+                    const isLifeGain = ev.DamageDelta > 0;
                     
                     if (!isLifeGain) {
                       // Show both commanders for damage
