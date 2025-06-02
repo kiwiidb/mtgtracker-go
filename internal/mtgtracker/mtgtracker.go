@@ -24,11 +24,9 @@ func NewService(repo *repository.Repository) *Service {
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
-	mux.HandleFunc("POST /player/v1/groups", s.CreateGroup)
-	mux.HandleFunc("PUT /player/v1/groups/{groupId}/add/{email}", s.AddPlayerToGroup)
+	mux.HandleFunc("player/v1/players", s.GetPlayers) // Assuming you have a method to get players
 	mux.HandleFunc("POST /game/v1/games", s.AddGame)
 	mux.HandleFunc("/game/v1/games", s.GetGames)
-	mux.HandleFunc("/player/v1/groups", s.GetGroups)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
 	mux.HandleFunc("/game/v1/games/{gameId}", s.GetGame)                  // new
@@ -53,6 +51,22 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 	// Return the created player as a JSON response
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(player)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
+	// Call the repository to get the players
+	players, err := s.Repository.GetPlayers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the players as a JSON response
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(players)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -108,47 +122,6 @@ func findPartner(oracleText string) (*scryfall.Card, bool) {
 	return partnerCard, true
 }
 
-func (s *Service) CreateGroup(w http.ResponseWriter, r *http.Request) {
-	// Parse the request body
-	var request CreateGroupRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Call the repository to create the group
-	group, err := s.Repository.CreateGroup(request.CreatorID, request.Name, request.Image)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return the created group as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(group)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
-func (s *Service) AddPlayerToGroup(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to add the player to the group
-	groupID := r.PathValue("groupId")
-	groupIDInt, err := strconv.Atoi(groupID)
-	if err != nil {
-		http.Error(w, "Invalid group ID", http.StatusBadRequest)
-		return
-	}
-	email := r.PathValue("email")
-	err = s.Repository.AddPlayerToGroup(uint(groupIDInt), email)
-	if err != nil {
-		log.Println("Error adding player to group:", err, email)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func (s *Service) DeleteDeck(w http.ResponseWriter, r *http.Request) {
 	// Call the repository to delete the deck
 	deckID := r.PathValue("deckId")
@@ -197,7 +170,7 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 			Deck:           *deck,
 		})
 	}
-	game, err := s.Repository.InsertGame(request.GroupID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
+	game, err := s.Repository.InsertGame(request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -278,22 +251,6 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
-
-func (s *Service) GetGroups(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to get the groups
-	groups, err := s.Repository.GetGroups()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Return the groups as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(groups)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
 }
 
 func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {

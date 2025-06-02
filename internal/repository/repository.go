@@ -12,6 +12,15 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+func (r *Repository) GetPlayers() ([]Player, error) {
+	var players []Player
+	err := r.DB.Preload("Games").Find(&players).Error
+	if err != nil {
+		return nil, err
+	}
+	return players, nil
+}
+
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
 	return r.DB.Transaction(func(tx *gorm.DB) error {
@@ -77,19 +86,8 @@ func (r *Repository) DeleteDeck(deckID uint) error {
 	return r.DB.Delete(&deck).Error
 }
 
-func (r *Repository) GetGroups() ([]Group, error) {
-	var groups []Group
-	// preload the players for the groups
-	// preload the decks for the players
-	err := r.DB.Preload("Players").Find(&groups).Error
-	if err != nil {
-		return nil, err
-	}
-	return groups, nil
-}
-
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Group{}, &Game{}, &Ranking{}, &GameEvent{})
+	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,36 +101,8 @@ func (r *Repository) InsertPlayer(name string, email string, image string) (*Pla
 	return &player, result.Error
 }
 
-func (r *Repository) CreateGroup(creatorID uint, name string, image string) (*Group, error) {
-	var creator Player
-	if err := r.DB.First(&creator, creatorID).Error; err != nil {
-		return nil, err
-	}
+func (r *Repository) InsertGame(duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 
-	group := Group{Name: name, Image: image, Players: []Player{creator}}
-	result := r.DB.Create(&group)
-	return &group, result.Error
-}
-
-func (r *Repository) AddPlayerToGroup(groupID uint, email string) error {
-	//find the player by email
-	var player Player
-	err := r.DB.Where("email = ?", email).First(&player).Error
-	if err != nil {
-		return errors.New("player not found")
-	}
-	var group Group
-	if err := r.DB.Preload("Players").First(&group, groupID).Error; err != nil {
-		return err
-	}
-	return r.DB.Model(&group).Association("Players").Append(&player)
-}
-
-func (r *Repository) InsertGame(groupID uint, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
-	var group Group
-	if err := r.DB.First(&group, groupID).Error; err != nil {
-		return nil, errors.New("invalid group ID")
-	}
 	// Ensure each ranking has valid player and deck (optional but safe)
 	for i, rank := range rankings {
 		var player Player
@@ -145,7 +115,6 @@ func (r *Repository) InsertGame(groupID uint, duration *int, comments, image str
 	}
 
 	game := Game{
-		GroupID:  groupID,
 		Duration: duration,
 		Date:     date,
 		Comments: comments,
@@ -179,7 +148,6 @@ func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
 	var game Game
 	err := r.DB.
 		Preload("Rankings.Player").
-		Preload("Group").
 		Preload("GameEvents.SourceRanking.Player").
 		Preload("GameEvents.TargetRanking.Player").
 		First(&game, gameID).Error

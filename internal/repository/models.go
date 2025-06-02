@@ -15,20 +15,11 @@ type Deck struct {
 
 type Player struct {
 	gorm.Model
-	Name   string `gorm:"unique;not null"`
-	Email  string `gorm:"unique;not null"`
-	Image  string
-	Groups []Group `gorm:"many2many:group_memberships;" json:"-"`
-	Games  []Game  `gorm:"many2many:game_players;" json:"-"`
+	Name  string `gorm:"unique;not null"`
+	Email string `gorm:"unique;not null"`
+	Image string
+	Games []Game `gorm:"many2many:game_players;" json:"-"`
 }
-
-type Group struct {
-	gorm.Model
-	Name    string
-	Image   string
-	Players []Player `gorm:"many2many:group_memberships;"`
-}
-
 type Game struct {
 	gorm.Model
 	Duration   *int
@@ -36,8 +27,6 @@ type Game struct {
 	Comments   string
 	Image      string
 	Rankings   []Ranking
-	GroupID    uint
-	Group      Group
 	Finished   bool
 	GameEvents []GameEvent // Add relation: a game has many game events
 }

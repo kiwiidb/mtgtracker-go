@@ -220,8 +220,7 @@
 
     function populatePlayers(selector) {
       $(selector).append('<option value="" disabled selected>Select a player</option>');
-      $.get('/player/v1/groups', function(groups) {
-        const players = groups[0].Players;
+      $.get('/player/v1/players', function(players) {
         players.forEach(player => {
           $(selector).append(`<option value="${player.ID}">${player.Name}</option>`);
         });
@@ -301,7 +300,6 @@
       submitButton.prop('disabled', true).html('<span class="spinner"></span> Submitting...');
 
       const gameData = {
-        group_id: 1,
         date: $('#game-date').val() + "T00:00:00Z",
         finished: true,
         rankings: []

@@ -10,21 +10,8 @@ type SignupPlayerRequest struct {
 	Image string `json:"image"`
 }
 
-type CreateGroupRequest struct {
-	CreatorID uint   `json:"creator_id"`
-	Name      string `json:"name"`
-	Image     string `json:"image"`
-}
-
-type AddDeckToPlayerRequest struct {
-	MoxfieldURL string `json:"moxfield_url"`
-	PlayerID    uint   `json:"player_id"`
-	Commander   string `json:"commander"`
-}
-
-// groupID uint, duration int, comments, image string, rankings []Ranking
+// duration int, comments, image string, rankings []Ranking
 type CreateGameRequest struct {
-	GroupID  uint       `json:"group_id"`
 	Duration *int       `json:"duration"`
 	Date     *time.Time `json:"date"`
 	Comments string     `json:"comments"`
