@@ -24,12 +24,12 @@ func NewService(repo *repository.Repository) *Service {
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
-	mux.HandleFunc("player/v1/players", s.GetPlayers) // Assuming you have a method to get players
+	mux.HandleFunc("GET /player/v1/players", s.GetPlayers) // Assuming you have a method to get players
 	mux.HandleFunc("POST /game/v1/games", s.AddGame)
-	mux.HandleFunc("/game/v1/games", s.GetGames)
+	mux.HandleFunc("GET /game/v1/games", s.GetGames)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
-	mux.HandleFunc("/game/v1/games/{gameId}", s.GetGame)                  // new
+	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)              // new
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)        // new
 }
 
