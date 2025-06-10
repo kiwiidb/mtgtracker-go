@@ -39,8 +39,12 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 			CouldHaveWon:   rank.CouldHaveWon,
 			EarlySolRing:   rank.EarlySolRing,
 			StartingPlayer: rank.StartingPlayer,
-			Commander:      rank.Deck.Commander,
-			CommanderImage: rank.Deck.Image,
+			Deck: Deck{
+				Commander:    rank.Deck.Commander,
+				Crop:         rank.Deck.Crop,
+				SecondaryImg: rank.Deck.SecondaryImage,
+				Image:        rank.Deck.Image,
+			},
 		}
 	}
 	return result

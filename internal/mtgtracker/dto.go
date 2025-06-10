@@ -61,10 +61,18 @@ type GameEventDto struct {
 
 type Ranking struct {
 	PlayerID       uint   `json:"player_id"`
-	Commander      string `json:"commander"`
-	CommanderImage string `json:"commander_image"`
 	Position       int    `json:"position"`
+	Commander      string `json:"commander"`
 	CouldHaveWon   bool   `json:"could_have_won"`
 	EarlySolRing   bool   `json:"early_sol_ring"`
 	StartingPlayer bool   `json:"starting_player"`
+	Deck           Deck   `json:"deck"`
+}
+
+type Deck struct {
+	ID           uint   `json:"id"`
+	Commander    string `json:"commander"`
+	Crop         string `json:"crop"`
+	SecondaryImg string `json:"secondary_image"`
+	Image        string `json:"image"`
 }
