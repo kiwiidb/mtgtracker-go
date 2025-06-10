@@ -315,6 +315,7 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	updatedGame.Rankings = []repository.Ranking{} // Clear rankings
 	err = json.NewEncoder(w).Encode(updatedGame)
 	if err != nil {
 		log.Println("Error encoding response:", err)
