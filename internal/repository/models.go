@@ -33,12 +33,12 @@ type Game struct {
 
 type Ranking struct {
 	gorm.Model
-	GameID         uint
-	PlayerID       uint
-	Position       int
-	CouldHaveWon   bool
-	EarlySolRing   bool
-	StartingPlayer bool
+	GameID         uint   `json:"game_id"`
+	PlayerID       uint   `json:"player_id"`
+	Position       int    `json:"position"`
+	CouldHaveWon   bool   `json:"could_have_won"`
+	EarlySolRing   bool   `json:"early_sol_ring"`
+	StartingPlayer bool   `json:"starting_player"`
 	PlayerName     string `gorm:"-"`
 
 	Player Player `json:"player"`
