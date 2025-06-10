@@ -45,6 +45,10 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 				SecondaryImg: rank.Deck.SecondaryImage,
 				Image:        rank.Deck.Image,
 			},
+			Player: Player{
+				ID:   rank.Player.ID,
+				Name: rank.Player.Name,
+			},
 		}
 	}
 	return result
