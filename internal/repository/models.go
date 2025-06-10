@@ -15,8 +15,8 @@ type Deck struct {
 
 type Player struct {
 	gorm.Model
-	Name  string `gorm:"unique;not null"`
-	Email string `gorm:"unique;not null"`
+	Name  string `gorm:"unique;not null" json:"name"`
+	Email string `gorm:"unique;not null" json:"email"`
 	Image string
 	Games []Game `gorm:"many2many:game_players;" json:"-"`
 }

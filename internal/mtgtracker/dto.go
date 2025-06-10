@@ -71,11 +71,11 @@ type Ranking struct {
 }
 
 type Player struct {
-	ID   uint   `json:"id"`
+	ID   uint   `json:"ID"`
 	Name string `json:"name"`
 }
 type Deck struct {
-	ID           uint   `json:"id"`
+	ID           uint   `json:"ID"`
 	Commander    string `json:"commander"`
 	Crop         string `json:"crop"`
 	SecondaryImg string `json:"secondary_image"`
