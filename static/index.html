@@ -355,9 +355,9 @@
           let notFinished = !game.Finished;
           const participants = sorted.map(r => {
             let emojis = '';
-            if (r.couldHaveWon) emojis += ' 🙃';
-            if (r.earlySolRing) emojis += ' 💍';
-            if (r.startingPlayer) emojis += ' ▶️';
+            if (r.could_have_won) emojis += ' 🙃';
+            if (r.early_sol_ring) emojis += ' 💍';
+            if (r.starting_player) emojis += ' ▶️';
             // Only highlight winner if game is finished
             const winnerClass = (r.position === 1 && !notFinished) ? ' winner-bg' : '';
             return `
