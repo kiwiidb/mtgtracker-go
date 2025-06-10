@@ -4,7 +4,7 @@ import "mtgtracker/internal/repository"
 
 func convertGameToDto(game *repository.Game) GameDto {
 	result := GameDto{
-		Id:         game.ID,
+		ID:         game.ID,
 		Duration:   game.Duration,
 		Date:       game.Date,
 		Comments:   game.Comments,

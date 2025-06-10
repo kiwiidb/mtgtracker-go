@@ -35,7 +35,7 @@ type GameEventRequest struct {
 }
 
 type GameDto struct {
-	Id         uint
+	ID         uint
 	Duration   *int
 	Date       *time.Time
 	Comments   string
