@@ -355,15 +355,15 @@
           let notFinished = !game.Finished;
           const participants = sorted.map(r => {
             let emojis = '';
-            if (r.CouldHaveWon) emojis += ' 🙃';
-            if (r.EarlySolRing) emojis += ' 💍';
-            if (r.StartingPlayer) emojis += ' ▶️';
+            if (r.couldHaveWon) emojis += ' 🙃';
+            if (r.earlySolRing) emojis += ' 💍';
+            if (r.startingPlayer) emojis += ' ▶️';
             // Only highlight winner if game is finished
-            const winnerClass = (r.Position === 1 && !notFinished) ? ' winner-bg' : '';
+            const winnerClass = (r.position === 1 && !notFinished) ? ' winner-bg' : '';
             return `
               <div class="game-card${winnerClass}">
-                <img src="${r.Deck.Image}" alt="${r.Deck.Commander}" data-primary="${r.Deck.Image}" data-secondary="${r.Deck.SecondaryImage}" onclick="toggleImage(this)">
-                <p class="participant-name${r.Position === 1 && !notFinished ? ' winner' : ''}">${r.Player.Name}${emojis}</p>
+                <img src="${r.deck.image}" alt="${r.deck.commander}" data-primary="${r.deck.image}" data-secondary="${r.deck.secondaryImage}" onclick="toggleImage(this)">
+                <p class="participant-name${r.position === 1 && !notFinished ? ' winner' : ''}">${r.player.name}${emojis}</p>
               </div>
             `;
           }).join('');
