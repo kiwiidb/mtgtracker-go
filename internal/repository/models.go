@@ -7,10 +7,10 @@ import (
 )
 
 type Deck struct {
-	Commander      string // in case of multi-name commanders, both names seperated by a /
-	Image          string
-	SecondaryImage string
-	Crop           string
+	Commander      string `json:"commander"`
+	Image          string `json:"image"`
+	SecondaryImage string `json:"secondary_image"`
+	Crop           string `json:"crop"`
 }
 
 type Player struct {
@@ -41,8 +41,8 @@ type Ranking struct {
 	StartingPlayer bool
 	PlayerName     string `gorm:"-"`
 
-	Player Player
-	Deck   Deck `gorm:"embedded"`
+	Player Player `json:"player"`
+	Deck   Deck   `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
 }
 
 type DeckWin struct {

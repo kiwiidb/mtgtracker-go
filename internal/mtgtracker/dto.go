@@ -67,8 +67,13 @@ type Ranking struct {
 	EarlySolRing   bool   `json:"early_sol_ring"`
 	StartingPlayer bool   `json:"starting_player"`
 	Deck           Deck   `json:"deck"`
+	Player         Player `json:"player,omitempty"` // Optional, can be omitted if not needed
 }
 
+type Player struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
 type Deck struct {
 	ID           uint   `json:"id"`
 	Commander    string `json:"commander"`
