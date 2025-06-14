@@ -10,18 +10,20 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/kiwiidb/utils/pkg/storage"
 )
 
+type Storage interface {
+	GeneratePresignedUploadURL(fileName string, contentType string) (string, error)
+}
 type Service struct {
 	Repository *repository.Repository
-	Storage    *storage.Storage
+	Storage    Storage
 }
 
-func NewService(repo *repository.Repository) *Service {
+func NewService(repo *repository.Repository, storage Storage) *Service {
 	return &Service{
 		Repository: repo,
+		Storage:    storage,
 	}
 }
 

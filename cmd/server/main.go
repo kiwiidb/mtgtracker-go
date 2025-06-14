@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/kiwiidb/utils/pkg/storage"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -26,8 +27,11 @@ func main() {
 	// // Initialize the repository
 	repo := repository.NewRepository(db)
 
+	// // Initialize the S3 storage
+	storage := storage.InitStorage()
+
 	// // Initialize the service
-	service := mtgtracker.NewService(repo)
+	service := mtgtracker.NewService(repo, storage)
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
 
