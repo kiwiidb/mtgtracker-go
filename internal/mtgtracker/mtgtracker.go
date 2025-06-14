@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Storage interface {
@@ -210,8 +211,9 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 
 	var uploadImgUrl string
 	// If this is an image event, generate a presigned upload URL
+	// add the current timestamp to the filename to avoid conflicts
 	if req.EventType == repository.EventTypeImage {
-		filename := fmt.Sprintf("game_%d_event.jpg", gameId)
+		filename := fmt.Sprintf("game_%d_event_%d.jpg", gameId, time.Now().Unix())
 		uploadURL, err := s.Storage.GeneratePresignedUploadURL(filename, "image/jpeg")
 		if err != nil {
 			http.Error(w, "Error generating upload URL", http.StatusInternalServerError)
