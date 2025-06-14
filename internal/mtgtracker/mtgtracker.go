@@ -10,10 +10,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/kiwiidb/utils/pkg/storage"
 )
 
 type Service struct {
 	Repository *repository.Repository
+	Storage    *storage.Storage
 }
 
 func NewService(repo *repository.Repository) *Service {

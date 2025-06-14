@@ -6,6 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	EventTypeIncrement = "increment"
+	EventTypeDecrement = "decrement"
+	EventTypeImage     = "image"
+	EventTypeScoop     = "scoop"
+)
+
 type Deck struct {
 	Commander      string `json:"commander"`
 	Image          string `json:"image"`
