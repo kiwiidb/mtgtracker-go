@@ -47,7 +47,8 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEventDt
 		TargetCommander:        targetCommander,
 		SourceCommanderCropImg: sourceCropImg,
 		TargetCommanderCropImg: targetCropImg,
-		ImageUrl:               uploadUrl,
+		ImageUrl:               event.ImageUrl,
+		UploadImageUrl:         uploadUrl,
 	}
 }
 
