@@ -19,18 +19,34 @@ func convertGameToDto(game *repository.Game) GameDto {
 }
 
 func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEventDto {
+	var sourcePlayer, targetPlayer string
+	var sourceCommander, targetCommander string
+	var sourceCropImg, targetCropImg string
+
+	if event.SourceRanking != nil {
+		sourcePlayer = event.SourceRanking.Player.Name
+		sourceCommander = event.SourceRanking.Deck.Commander
+		sourceCropImg = event.SourceRanking.Deck.Crop
+	}
+
+	if event.TargetRanking != nil {
+		targetPlayer = event.TargetRanking.Player.Name
+		targetCommander = event.TargetRanking.Deck.Commander
+		targetCropImg = event.TargetRanking.Deck.Crop
+	}
+
 	return GameEventDto{
 		GameID:                 event.GameID,
 		EventType:              event.EventType,
 		DamageDelta:            event.DamageDelta,
 		CreatedAt:              event.CreatedAt,
 		TargetLifeTotalAfter:   event.TargetLifeTotalAfter,
-		SourcePlayer:           event.SourceRanking.Player.Name,
-		TargetPlayer:           event.TargetRanking.Player.Name,
-		SourceCommander:        event.SourceRanking.Deck.Commander,
-		TargetCommander:        event.TargetRanking.Deck.Commander,
-		SourceCommanderCropImg: event.SourceRanking.Deck.Crop,
-		TargetCommanderCropImg: event.TargetRanking.Deck.Crop,
+		SourcePlayer:           sourcePlayer,
+		TargetPlayer:           targetPlayer,
+		SourceCommander:        sourceCommander,
+		TargetCommander:        targetCommander,
+		SourceCommanderCropImg: sourceCropImg,
+		TargetCommanderCropImg: targetCropImg,
 		ImageUrl:               uploadUrl,
 	}
 }

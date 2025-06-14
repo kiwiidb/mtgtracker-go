@@ -129,7 +129,7 @@ func (r *Repository) InsertGame(duration *int, comments, image string, date *tim
 	return &game, nil
 }
 
-func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta, lifeAfter int, source, target uint, imageUrl string) (*GameEvent, error) {
+func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta, lifeAfter int, source, target *uint, imageUrl string) (*GameEvent, error) {
 	event := GameEvent{
 		GameID:               gameId,
 		EventType:            eventType,
