@@ -181,8 +181,9 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	result := convertGameToDto(game)
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(game)
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
