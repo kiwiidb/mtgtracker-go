@@ -13,21 +13,26 @@ func convertGameToDto(game *repository.Game) GameDto {
 		GameEvents: make([]GameEventDto, len(game.GameEvents)),
 	}
 	for i, event := range game.GameEvents {
-		result.GameEvents[i] = GameEventDto{
-			GameID:                 event.GameID,
-			EventType:              event.EventType,
-			DamageDelta:            event.DamageDelta,
-			CreatedAt:              event.CreatedAt,
-			TargetLifeTotalAfter:   event.TargetLifeTotalAfter,
-			SourcePlayer:           event.SourceRanking.Player.Name,
-			TargetPlayer:           event.TargetRanking.Player.Name,
-			SourceCommander:        event.SourceRanking.Deck.Commander,
-			TargetCommander:        event.TargetRanking.Deck.Commander,
-			SourceCommanderCropImg: event.SourceRanking.Deck.Crop,
-			TargetCommanderCropImg: event.TargetRanking.Deck.Crop,
-		}
+		result.GameEvents[i] = convertGameEvent(&event, "")
 	}
 	return result
+}
+
+func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEventDto {
+	return GameEventDto{
+		GameID:                 event.GameID,
+		EventType:              event.EventType,
+		DamageDelta:            event.DamageDelta,
+		CreatedAt:              event.CreatedAt,
+		TargetLifeTotalAfter:   event.TargetLifeTotalAfter,
+		SourcePlayer:           event.SourceRanking.Player.Name,
+		TargetPlayer:           event.TargetRanking.Player.Name,
+		SourceCommander:        event.SourceRanking.Deck.Commander,
+		TargetCommander:        event.TargetRanking.Deck.Commander,
+		SourceCommanderCropImg: event.SourceRanking.Deck.Crop,
+		TargetCommanderCropImg: event.TargetRanking.Deck.Crop,
+		ImageUrl:               uploadUrl,
+	}
 }
 
 func convertRankingsToDto(rankings []repository.Ranking) []Ranking {

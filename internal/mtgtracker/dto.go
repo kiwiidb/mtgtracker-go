@@ -57,6 +57,8 @@ type GameEventDto struct {
 	TargetCommanderCropImg string
 	SourceCommander        string
 	TargetCommander        string
+	ImageUrl               string // New field for uploaded image URL
+	UploadImageUrl         string // Optional, can be used for image upload
 }
 
 type Ranking struct {

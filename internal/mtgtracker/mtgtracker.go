@@ -201,20 +201,34 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fetch the game and check if source and target rankings are valid
-	// todo
 	_, err = s.Repository.GetGameWithEvents(uint(gameId))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	var uploadImgUrl string
+	// If this is an image event, generate a presigned upload URL
+	if req.EventType == repository.EventTypeImage {
+		filename := fmt.Sprintf("game_%d_event.jpg", gameId)
+		uploadURL, err := s.Storage.GeneratePresignedUploadURL(filename, "image/jpeg")
+		if err != nil {
+			http.Error(w, "Error generating upload URL", http.StatusInternalServerError)
+			return
+		}
+		uploadImgUrl = uploadURL
+	}
+
 	// Insert the event using the repository
-	event, err := s.Repository.InsertGameEvent(uint(gameId), req.EventType, req.DamageDelta, req.TargetLifeTotalAfter, req.SourceRankingId, req.TargetRankingId)
+	event, err := s.Repository.InsertGameEvent(uint(gameId), req.EventType, req.DamageDelta, req.TargetLifeTotalAfter, req.SourceRankingId, req.TargetRankingId, strings.Split(uploadImgUrl, "?")[0])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	eventDto := convertGameEvent(event, uploadImgUrl)
+
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(event)
+	err = json.NewEncoder(w).Encode(eventDto)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}

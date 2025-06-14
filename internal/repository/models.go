@@ -73,6 +73,7 @@ type GameEvent struct {
 	TargetLifeTotalAfter int
 	SourceRankingID      uint
 	TargetRankingID      uint
+	ImageUrl             string // New field for uploaded image URL
 
 	SourceRanking Ranking `gorm:"foreignKey:SourceRankingID;references:ID"`
 	TargetRanking Ranking `gorm:"foreignKey:TargetRankingID;references:ID"`
