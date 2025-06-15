@@ -7,10 +7,10 @@ import (
 	"mtgtracker/internal/repository"
 	"mtgtracker/internal/scryfall"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type Storage interface {
@@ -213,8 +213,11 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 	// If this is an image event, generate a presigned upload URL
 	// add the current timestamp to the filename to avoid conflicts
 	if req.EventType == repository.EventTypeImage {
-		filename := fmt.Sprintf("game_%d_event_%d.jpg", gameId, time.Now().Unix())
-		uploadURL, err := s.Storage.GeneratePresignedUploadURL(filename, "image/jpeg")
+		if req.EventImageName == nil {
+			http.Error(w, "Event image name is required for image events", http.StatusBadRequest)
+			return
+		}
+		uploadURL, err := s.Storage.GeneratePresignedUploadURL(*req.EventImageName, getImgContentType(*req.EventImageName))
 		if err != nil {
 			http.Error(w, "Error generating upload URL", http.StatusInternalServerError)
 			return
@@ -234,6 +237,19 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(eventDto)
 	if err != nil {
 		log.Println("Error encoding response:", err)
+	}
+}
+
+func getImgContentType(s string) string {
+	switch filepath.Ext(s) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	default:
+		return "application/octet-stream"
 	}
 }
 

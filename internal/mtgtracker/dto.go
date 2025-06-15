@@ -27,11 +27,12 @@ type UpdateGameRequest struct {
 }
 
 type GameEventRequest struct {
-	EventType            string `json:"event_type"`
-	DamageDelta          int    `json:"damage_delta"`
-	TargetLifeTotalAfter int    `json:"life_total_after"`
-	SourceRankingId      *uint  `json:"source_ranking_id,omitempty"` // Made nullable with pointer
-	TargetRankingId      *uint  `json:"target_ranking_id,omitempty"` // Made nullable with pointer
+	EventType            string  `json:"event_type"`
+	EventImageName       *string `json:"event_image_name,omitempty"` // Optional field for image upload
+	DamageDelta          int     `json:"damage_delta"`
+	TargetLifeTotalAfter int     `json:"life_total_after"`
+	SourceRankingId      *uint   `json:"source_ranking_id,omitempty"` // Made nullable with pointer
+	TargetRankingId      *uint   `json:"target_ranking_id,omitempty"` // Made nullable with pointer
 }
 
 type GameDto struct {
