@@ -35,6 +35,18 @@ type GameEventRequest struct {
 	TargetRankingId      *uint   `json:"target_ranking_id,omitempty"` // Made nullable with pointer
 }
 
+type PlayerDto struct {
+	ID   uint   `json:"ID"`
+	Name string `json:"name"`
+	//WinrateMonthly    float64 `json:"winrate_monthly"`
+	WinrateAllTime       float64 `json:"winrate_all_time"`
+	NumberofGamesAllTime int     `json:"number_of_games_all_time"`
+	//CommandersMonthly []Deck  `json:"commanders_monthly"`
+	DecksAllTime     []Deck    `json:"decks_all_time"`
+	CoPlayersAllTime []Player  `json:"co_players_all_time"`
+	Games            []GameDto `json:"games"`
+}
+
 type GameDto struct {
 	ID         uint
 	Duration   *int

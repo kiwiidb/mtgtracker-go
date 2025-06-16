@@ -21,6 +21,18 @@ func (r *Repository) GetPlayers() ([]Player, error) {
 	return players, nil
 }
 
+func (r *Repository) GetPlayerByID(id uint) (*Player, error) {
+	var player Player
+	err := r.DB.Preload("Games").Preload("Games.Rankings").Preload("Games.Rankings.Player").Preload("Games.Rankings.Deck").First(&player, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("player not found")
+		}
+		return nil, err
+	}
+	return &player, nil
+}
+
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
 	return r.DB.Transaction(func(tx *gorm.DB) error {

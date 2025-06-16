@@ -76,3 +76,79 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 	}
 	return result
 }
+
+func convertPlayerToDto(player *repository.Player) PlayerDto {
+	result := PlayerDto{
+		ID:   player.ID,
+		Name: player.Name,
+	}
+
+	// Calculate winrate and game statistics
+	totalGames := len(player.Games)
+	wins := 0
+	deckMap := make(map[string]Deck)
+	coPlayerMap := make(map[uint]Player)
+	games := make([]GameDto, len(player.Games))
+
+	for i, game := range player.Games {
+		// Convert game to DTO
+		games[i] = convertGameToDto(&game)
+
+		// Find this player's ranking in the game
+		for _, ranking := range game.Rankings {
+			if ranking.PlayerID == player.ID {
+				// Count wins (position 1)
+				if ranking.Position == 1 {
+					wins++
+				}
+
+				// Collect unique decks
+				deckKey := ranking.Deck.Commander
+				if _, exists := deckMap[deckKey]; !exists {
+					deckMap[deckKey] = Deck{
+						Commander:    ranking.Deck.Commander,
+						Crop:         ranking.Deck.Crop,
+						SecondaryImg: ranking.Deck.SecondaryImage,
+						Image:        ranking.Deck.Image,
+					}
+				}
+				break
+			}
+		}
+
+		// Collect co-players
+		for _, ranking := range game.Rankings {
+			if ranking.PlayerID != player.ID {
+				coPlayerMap[ranking.Player.ID] = Player{
+					ID:   ranking.Player.ID,
+					Name: ranking.Player.Name,
+				}
+			}
+		}
+	}
+
+	// Calculate winrate
+	var winrate float64
+	if totalGames > 0 {
+		winrate = float64(wins) / float64(totalGames) * 100
+	}
+
+	// Convert maps to slices
+	decks := make([]Deck, 0, len(deckMap))
+	for _, deck := range deckMap {
+		decks = append(decks, deck)
+	}
+
+	coPlayers := make([]Player, 0, len(coPlayerMap))
+	for _, coPlayer := range coPlayerMap {
+		coPlayers = append(coPlayers, coPlayer)
+	}
+
+	result.WinrateAllTime = winrate
+	result.NumberofGamesAllTime = totalGames
+	result.DecksAllTime = decks
+	result.CoPlayersAllTime = coPlayers
+	result.Games = games
+
+	return result
+}

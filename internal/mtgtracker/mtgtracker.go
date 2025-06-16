@@ -30,7 +30,8 @@ func NewService(repo *repository.Repository, storage Storage) *Service {
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
-	mux.HandleFunc("GET /player/v1/players", s.GetPlayers) // Assuming you have a method to get players
+	mux.HandleFunc("GET /player/v1/players", s.GetPlayers)
+	mux.HandleFunc("GET /player/v1/player/{playerId}", s.GetPlayer)
 	mux.HandleFunc("POST /game/v1/games", s.AddGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
@@ -75,6 +76,29 @@ func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(players)
 	if err != nil {
 		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
+	playerID := r.PathValue("playerId")
+	playerIDInt, err := strconv.Atoi(playerID)
+	if err != nil {
+		http.Error(w, "Invalid player ID", http.StatusBadRequest)
+		return
+	}
+	// Call the repository to get the player
+	player, err := s.Repository.GetPlayerByID(uint(playerIDInt))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	result := convertPlayerToDto(player)
+	// Return the player as a JSON response
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+		return
 	}
 }
 
