@@ -14,7 +14,7 @@ type Repository struct {
 
 func (r *Repository) GetPlayers() ([]Player, error) {
 	var players []Player
-	err := r.DB.Preload("Games").Find(&players).Error
+	err := r.DB.Find(&players).Error
 	if err != nil {
 		return nil, err
 	}

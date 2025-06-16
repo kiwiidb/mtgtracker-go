@@ -25,7 +25,7 @@ type Player struct {
 	Name  string `gorm:"unique;not null" json:"name"`
 	Email string `gorm:"unique;not null" json:"email"`
 	Image string
-	Games []Game `json:"-"` // Populated manually through rankings
+	Games []Game `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
 }
 type Game struct {
 	gorm.Model
