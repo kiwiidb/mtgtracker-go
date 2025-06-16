@@ -9,6 +9,7 @@ func convertGameToDto(game *repository.Game) GameDto {
 		Date:       game.Date,
 		Comments:   game.Comments,
 		Image:      game.Image,
+		Finished:   game.Finished,
 		Rankings:   convertRankingsToDto(game.Rankings),
 		GameEvents: make([]GameEventDto, len(game.GameEvents)),
 	}
