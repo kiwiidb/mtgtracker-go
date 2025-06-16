@@ -70,7 +70,7 @@ func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
 		return db.Preload("Player")
-	}).Order("Date desc").Find(&games).Error
+	}).Preload("GameEvents").Order("Date desc").Find(&games).Error
 	if err != nil {
 		return nil, err
 	}
