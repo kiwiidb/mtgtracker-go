@@ -23,13 +23,43 @@ func (r *Repository) GetPlayers() ([]Player, error) {
 
 func (r *Repository) GetPlayerByID(id uint) (*Player, error) {
 	var player Player
-	err := r.DB.Preload("Games").Preload("Games.Rankings").Preload("Games.Rankings.Player").Preload("Games.Rankings.Deck").First(&player, id).Error
+	err := r.DB.First(&player, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("player not found")
 		}
 		return nil, err
 	}
+
+	// Get games through rankings
+	var rankings []Ranking
+	err = r.DB.Preload("Player").Where("player_id = ?", id).Find(&rankings).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Get unique game IDs
+	gameIDs := make(map[uint]bool)
+	for _, ranking := range rankings {
+		gameIDs[ranking.GameID] = true
+	}
+
+	// Convert map keys to slice
+	gameIDSlice := make([]uint, 0, len(gameIDs))
+	for gameID := range gameIDs {
+		gameIDSlice = append(gameIDSlice, gameID)
+	}
+
+	// Get games with all their rankings and related data
+	var games []Game
+	if len(gameIDSlice) > 0 {
+		err = r.DB.Preload("Rankings.Player").Preload("GameEvents").Where("id IN ?", gameIDSlice).Order("date desc").Find(&games).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	player.Games = games
 	return &player, nil
 }
 
