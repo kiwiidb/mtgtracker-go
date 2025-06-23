@@ -222,7 +222,7 @@
       $(selector).append('<option value="" disabled selected>Select a player</option>');
       $.get('/player/v1/players', function(players) {
         players.forEach(player => {
-          $(selector).append(`<option value="${player.ID}">${player.Name}</option>`);
+          $(selector).append(`<option value="${player.ID}">${player.name}</option>`);
         });
       });
     }
