@@ -12,8 +12,16 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (r *Repository) GetPlayers() ([]Player, error) {
+func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	var players []Player
+	// If search is provided, filter players by name or email
+	if search != "" {
+		err := r.DB.Where("name LIKE ?", "%"+search+"%").Find(&players).Error
+		if err != nil {
+			return nil, err
+		}
+		return players, nil
+	}
 	err := r.DB.Find(&players).Error
 	if err != nil {
 		return nil, err

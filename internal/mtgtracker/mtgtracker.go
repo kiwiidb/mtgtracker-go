@@ -2,13 +2,9 @@ package mtgtracker
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"mtgtracker/internal/repository"
-	"mtgtracker/internal/scryfall"
 	"net/http"
-	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -32,13 +28,16 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
 	mux.HandleFunc("GET /player/v1/players", s.GetPlayers)
 	mux.HandleFunc("GET /player/v1/players/{playerId}", s.GetPlayer)
-	mux.HandleFunc("POST /game/v1/games", s.AddGame)
+	mux.HandleFunc("GET /player/v1/profile", s.GetProfile)
+	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)              // new
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)        // new
 }
+
+func (s *Service) GetProfile(w http.ResponseWriter, r *http.Request) {}
 
 func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body
@@ -55,9 +54,8 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return the created player as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(player)
+	result := convertPlayerToDto(player)
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -65,15 +63,20 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	// Call the repository to get the players
-	players, err := s.Repository.GetPlayers()
+	// use the search query parameters if needed
+	search := r.URL.Query().Get("search")
+	players, err := s.Repository.GetPlayers(search)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Return the players as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(players)
+	result := make([]Player, 0, len(players))
+	for i, player := range players {
+		// Convert the player to a DTO
+		result[i] = convertPlayerToDto(&player)
+	}
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -93,63 +96,11 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	result := convertPlayerToDto(player)
-	// Return the player as a JSON response
-	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 		return
 	}
-}
-
-func findCommander(name string) (*repository.Deck, error) {
-	// Call the repository to add the deck to the player
-	commanderCard, err := scryfall.GetCard(name)
-	if err != nil {
-		return nil, err
-	}
-	commander := commanderCard.Name
-	img := commanderCard.ImageURIs.Normal
-	crop := commanderCard.ImageURIs.ArtCrop
-	secondaryImg := ""
-	// first check if the commander is a double-faced card
-	if len(commanderCard.CardFaces) > 1 {
-		img = commanderCard.CardFaces[0].ImageURIs.Normal
-		crop = commanderCard.CardFaces[0].ImageURIs.ArtCrop
-		secondaryImg = commanderCard.CardFaces[1].ImageURIs.Normal
-		commander = commanderCard.CardFaces[0].Name + "/" + commanderCard.CardFaces[1].Name
-	}
-	// then check if the commander has a partner
-	if partner, ok := findPartner(commanderCard.OracleText); ok {
-		commander = strings.Join([]string{commander, partner.Name}, "/")
-		secondaryImg = partner.ImageURIs.Normal
-	}
-	return &repository.Deck{
-		Commander:      commander,
-		Image:          img,
-		Crop:           crop,
-		SecondaryImage: secondaryImg,
-	}, nil
-}
-
-func findPartner(oracleText string) (*scryfall.Card, bool) {
-	// Use a regex to find "Partner with <partner name>"
-	re := regexp.MustCompile(`Partner with ([^\n]+)`)
-	matches := re.FindStringSubmatch(oracleText)
-
-	if len(matches) < 2 {
-		return nil, false // No partner found
-	}
-
-	partnerName := matches[1]
-	log.Println("Partner found:", partnerName)
-	partnerCard, err := scryfall.GetCard(partnerName)
-	if err != nil {
-		log.Printf("Failed to fetch partner card: %v", err)
-		return nil, false
-	}
-
-	return partnerCard, true
 }
 
 func (s *Service) DeleteDeck(w http.ResponseWriter, r *http.Request) {
@@ -165,11 +116,10 @@ func (s *Service) DeleteDeck(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
+func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body
 	var request CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -184,20 +134,11 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 	// Call the repository to insert the game
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
-		// first, find the full name of the commander
-		deck, err := findCommander(rank.Commander)
-		if err != nil {
-			fmt.Println("Error finding commander:", err, rank.Commander)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+
 		rankings = append(rankings, repository.Ranking{
-			PlayerID:       rank.PlayerID,
-			Position:       rank.Position,
-			CouldHaveWon:   rank.CouldHaveWon,
-			EarlySolRing:   rank.EarlySolRing,
-			StartingPlayer: rank.StartingPlayer,
-			Deck:           *deck,
+			PlayerID: rank.PlayerID,
+			Position: rank.Position,
+			Deck:     convertDeck(rank.Deck),
 		})
 	}
 	game, err := s.Repository.InsertGame(request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
@@ -207,7 +148,6 @@ func (s *Service) AddGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := convertGameToDto(game)
-	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -257,23 +197,9 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	eventDto := convertGameEvent(event, uploadImgUrl)
 
-	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(eventDto)
 	if err != nil {
 		log.Println("Error encoding response:", err)
-	}
-}
-
-func getImgContentType(s string) string {
-	switch filepath.Ext(s) {
-	case ".jpg", ".jpeg":
-		return "image/jpeg"
-	case ".png":
-		return "image/png"
-	case ".gif":
-		return "image/gif"
-	default:
-		return "application/octet-stream"
 	}
 }
 
@@ -291,7 +217,6 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 	}
 	// convert the game to a DTO
 	result := convertGameToDto(game)
-	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -323,9 +248,12 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return the games as a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(games)
+	result := make([]Game, 0, len(games))
+	for i, game := range games {
+		// Convert the game to a DTO
+		result[i] = convertGameToDto(&game)
+	}
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -376,9 +304,9 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	updatedGame.GameEvents = []repository.GameEvent{} // Clear event
-	err = json.NewEncoder(w).Encode(updatedGame)
+	result := convertGameToDto(updatedGame)
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}

@@ -1,9 +1,12 @@
 package mtgtracker
 
-import "mtgtracker/internal/repository"
+import (
+	"mtgtracker/internal/repository"
+	"path/filepath"
+)
 
-func convertGameToDto(game *repository.Game) GameDto {
-	result := GameDto{
+func convertGameToDto(game *repository.Game) Game {
+	result := Game{
 		ID:         game.ID,
 		Duration:   game.Duration,
 		Date:       game.Date,
@@ -11,7 +14,7 @@ func convertGameToDto(game *repository.Game) GameDto {
 		Image:      game.Image,
 		Finished:   game.Finished,
 		Rankings:   convertRankingsToDto(game.Rankings),
-		GameEvents: make([]GameEventDto, len(game.GameEvents)),
+		GameEvents: make([]GameEvent, len(game.GameEvents)),
 	}
 	for i, event := range game.GameEvents {
 		result.GameEvents[i] = convertGameEvent(&event, "")
@@ -19,37 +22,41 @@ func convertGameToDto(game *repository.Game) GameDto {
 	return result
 }
 
-func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEventDto {
+func convertDeck(deck Deck) repository.Deck {
+	return repository.Deck{
+		Commander:      deck.Commander,
+		Image:          deck.Image,
+		SecondaryImage: deck.SecondaryImg,
+		Crop:           deck.Crop,
+	}
+}
+
+func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 	var sourcePlayer, targetPlayer string
 	var sourceCommander, targetCommander string
-	var sourceCropImg, targetCropImg string
 
 	if event.SourceRanking != nil {
 		sourcePlayer = event.SourceRanking.Player.Name
 		sourceCommander = event.SourceRanking.Deck.Commander
-		sourceCropImg = event.SourceRanking.Deck.Crop
 	}
 
 	if event.TargetRanking != nil {
 		targetPlayer = event.TargetRanking.Player.Name
 		targetCommander = event.TargetRanking.Deck.Commander
-		targetCropImg = event.TargetRanking.Deck.Crop
 	}
 
-	return GameEventDto{
-		GameID:                 event.GameID,
-		EventType:              event.EventType,
-		DamageDelta:            event.DamageDelta,
-		CreatedAt:              event.CreatedAt,
-		TargetLifeTotalAfter:   event.TargetLifeTotalAfter,
-		SourcePlayer:           sourcePlayer,
-		TargetPlayer:           targetPlayer,
-		SourceCommander:        sourceCommander,
-		TargetCommander:        targetCommander,
-		SourceCommanderCropImg: sourceCropImg,
-		TargetCommanderCropImg: targetCropImg,
-		ImageUrl:               event.ImageUrl,
-		UploadImageUrl:         uploadUrl,
+	return GameEvent{
+		GameID:               event.GameID,
+		EventType:            event.EventType,
+		DamageDelta:          event.DamageDelta,
+		CreatedAt:            event.CreatedAt,
+		TargetLifeTotalAfter: event.TargetLifeTotalAfter,
+		SourcePlayer:         sourcePlayer,
+		TargetPlayer:         targetPlayer,
+		SourceCommander:      sourceCommander,
+		TargetCommander:      targetCommander,
+		ImageUrl:             event.ImageUrl,
+		UploadImageUrl:       uploadUrl,
 	}
 }
 
@@ -57,12 +64,9 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 	result := make([]Ranking, len(rankings))
 	for i, rank := range rankings {
 		result[i] = Ranking{
-			ID:             rank.ID,
-			PlayerID:       rank.PlayerID,
-			Position:       rank.Position,
-			CouldHaveWon:   rank.CouldHaveWon,
-			EarlySolRing:   rank.EarlySolRing,
-			StartingPlayer: rank.StartingPlayer,
+			ID:       rank.ID,
+			PlayerID: rank.PlayerID,
+			Position: rank.Position,
 			Deck: Deck{
 				Commander:    rank.Deck.Commander,
 				Crop:         rank.Deck.Crop,
@@ -78,8 +82,8 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 	return result
 }
 
-func convertPlayerToDto(player *repository.Player) PlayerDto {
-	result := PlayerDto{
+func convertPlayerToDto(player *repository.Player) Player {
+	result := Player{
 		ID:   player.ID,
 		Name: player.Name,
 	}
@@ -89,7 +93,7 @@ func convertPlayerToDto(player *repository.Player) PlayerDto {
 	wins := 0
 	deckMap := make(map[string]Deck)
 	coPlayerMap := make(map[uint]Player)
-	games := make([]GameDto, len(player.Games))
+	games := make([]Game, len(player.Games))
 
 	for i, game := range player.Games {
 		// Convert game to DTO
@@ -152,4 +156,17 @@ func convertPlayerToDto(player *repository.Player) PlayerDto {
 	result.Games = games
 
 	return result
+}
+
+func getImgContentType(s string) string {
+	switch filepath.Ext(s) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	default:
+		return "application/octet-stream"
+	}
 }

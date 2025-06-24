@@ -35,19 +35,18 @@ type GameEventRequest struct {
 	TargetRankingId      *uint   `json:"target_ranking_id,omitempty"` // Made nullable with pointer
 }
 
-type PlayerDto struct {
-	ID   uint   `json:"ID"`
-	Name string `json:"name"`
-	//WinrateMonthly    float64 `json:"winrate_monthly"`
-	WinrateAllTime       float64 `json:"winrate_all_time"`
-	NumberofGamesAllTime int     `json:"number_of_games_all_time"`
-	//CommandersMonthly []Deck  `json:"commanders_monthly"`
-	DecksAllTime     []Deck    `json:"decks_all_time"`
-	CoPlayersAllTime []Player  `json:"co_players_all_time"`
-	Games            []GameDto `json:"games"`
+type Player struct {
+	ID                   uint     `json:"ID"`
+	Name                 string   `json:"name"`
+	WinrateAllTime       float64  `json:"winrate_all_time"`
+	NumberofGamesAllTime int      `json:"number_of_games_all_time"`
+	DecksAllTime         []Deck   `json:"decks_all_time"`
+	CoPlayersAllTime     []Player `json:"co_players_all_time"`
+	Games                []Game   `json:"games"`
+	CurrentGame          *Game    `json:"current_game,omitempty"`
 }
 
-type GameDto struct {
+type Game struct {
 	ID         uint
 	Duration   *int
 	Date       *time.Time
@@ -55,41 +54,32 @@ type GameDto struct {
 	Image      string
 	Rankings   []Ranking
 	Finished   bool
-	GameEvents []GameEventDto
+	GameEvents []GameEvent
 }
 
-type GameEventDto struct {
-	GameID                 uint
-	EventType              string
-	DamageDelta            int
-	CreatedAt              time.Time
-	TargetLifeTotalAfter   int
-	SourcePlayer           string
-	TargetPlayer           string
-	SourceCommanderCropImg string
-	TargetCommanderCropImg string
-	SourceCommander        string
-	TargetCommander        string
-	ImageUrl               string // New field for uploaded image URL
-	UploadImageUrl         string // Optional, can be used for image upload
+type GameEvent struct {
+	GameID               uint      `json:"game_id"`
+	EventType            string    `json:"event_type"`
+	DamageDelta          int       `json:"damage_delta"`
+	CreatedAt            time.Time `json:"created_at"`
+	TargetLifeTotalAfter int       `json:"target_life_total_after"`
+	SourcePlayer         string    `json:"source_player"`
+	TargetPlayer         string    `json:"target_player"`
+	SourceCommander      string    `json:"source_commander"`
+	TargetCommander      string    `json:"target_commander"`
+	ImageUrl             string    `json:"image_url"`                  // URL of the uploaded image
+	UploadImageUrl       string    `json:"upload_image_url,omitempty"` // Presigned URL for image upload
 }
 
 type Ranking struct {
-	ID             uint   `json:"ID"`
-	PlayerID       uint   `json:"player_id"`
-	Position       int    `json:"position"`
-	Commander      string `json:"commander"`
-	CouldHaveWon   bool   `json:"could_have_won"`
-	EarlySolRing   bool   `json:"early_sol_ring"`
-	StartingPlayer bool   `json:"starting_player"`
-	Deck           Deck   `json:"deck"`
-	Player         Player `json:"player,omitempty"` // Optional, can be omitted if not needed
+	ID        uint   `json:"ID"`
+	PlayerID  uint   `json:"player_id"`
+	Position  int    `json:"position"`
+	LifeTotal *uint  `json:"life_total,omitempty"`
+	Deck      Deck   `json:"deck"`
+	Player    Player `json:"player,omitempty"` // Optional, can be omitted if not needed
 }
 
-type Player struct {
-	ID   uint   `json:"ID"`
-	Name string `json:"name"`
-}
 type Deck struct {
 	ID           uint   `json:"ID"`
 	Commander    string `json:"commander"`
