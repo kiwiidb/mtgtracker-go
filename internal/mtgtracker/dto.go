@@ -35,15 +35,23 @@ type GameEventRequest struct {
 	TargetRankingId      *uint   `json:"target_ranking_id,omitempty"` // Made nullable with pointer
 }
 
+type PlayerWithCount struct {
+	Player Player `json:"player"`
+	Count  int    `json:"count"`
+}
+type DeckWithCount struct {
+	Deck  Deck `json:"deck"`
+	Count int  `json:"count"`
+}
 type Player struct {
-	ID                   uint     `json:"ID"`
-	Name                 string   `json:"name"`
-	WinrateAllTime       float64  `json:"winrate_all_time"`
-	NumberofGamesAllTime int      `json:"number_of_games_all_time"`
-	DecksAllTime         []Deck   `json:"decks_all_time"`
-	CoPlayersAllTime     []Player `json:"co_players_all_time"`
-	Games                []Game   `json:"games"`
-	CurrentGame          *Game    `json:"current_game,omitempty"`
+	ID                   uint              `json:"ID"`
+	Name                 string            `json:"name"`
+	WinrateAllTime       float64           `json:"winrate_all_time"`
+	NumberofGamesAllTime int               `json:"number_of_games_all_time"`
+	DecksAllTime         []DeckWithCount   `json:"decks_all_time"`
+	CoPlayersAllTime     []PlayerWithCount `json:"co_players_all_time"`
+	Games                []Game            `json:"games"`
+	CurrentGame          *Game             `json:"current_game,omitempty"`
 }
 
 type Game struct {

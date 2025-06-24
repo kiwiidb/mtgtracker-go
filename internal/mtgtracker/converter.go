@@ -91,8 +91,8 @@ func convertPlayerToDto(player *repository.Player) Player {
 	// Calculate winrate and game statistics
 	totalGames := len(player.Games)
 	wins := 0
-	deckMap := make(map[string]Deck)
-	coPlayerMap := make(map[uint]Player)
+	deckMap := make(map[string]DeckWithCount)
+	coPlayerMap := make(map[uint]PlayerWithCount)
 	games := make([]Game, len(player.Games))
 
 	for i, game := range player.Games {
@@ -116,11 +116,17 @@ func convertPlayerToDto(player *repository.Player) Player {
 				// Collect unique decks
 				deckKey := ranking.Deck.Commander
 				if _, exists := deckMap[deckKey]; !exists {
-					deckMap[deckKey] = Deck{
+					deckMap[deckKey] = DeckWithCount{Deck: Deck{
 						Commander:    ranking.Deck.Commander,
 						Crop:         ranking.Deck.Crop,
 						SecondaryImg: ranking.Deck.SecondaryImage,
 						Image:        ranking.Deck.Image,
+					},
+					}
+				} else {
+					deckMap[deckKey] = DeckWithCount{
+						Deck:  deckMap[deckKey].Deck,
+						Count: deckMap[deckKey].Count + 1,
 					}
 				}
 				break
@@ -130,9 +136,17 @@ func convertPlayerToDto(player *repository.Player) Player {
 		// Collect co-players
 		for _, ranking := range game.Rankings {
 			if ranking.PlayerID != player.ID {
-				coPlayerMap[ranking.Player.ID] = Player{
-					ID:   ranking.Player.ID,
-					Name: ranking.Player.Name,
+				if coPlayer, exists := coPlayerMap[ranking.PlayerID]; exists {
+					coPlayer.Count++
+					coPlayerMap[ranking.PlayerID] = coPlayer
+				} else {
+					coPlayerMap[ranking.PlayerID] = PlayerWithCount{
+						Player: Player{
+							ID:   ranking.Player.ID,
+							Name: ranking.Player.Name,
+						},
+						Count: 1,
+					}
 				}
 			}
 		}
@@ -145,12 +159,12 @@ func convertPlayerToDto(player *repository.Player) Player {
 	}
 
 	// Convert maps to slices
-	decks := make([]Deck, 0, len(deckMap))
+	decks := make([]DeckWithCount, 0, len(deckMap))
 	for _, deck := range deckMap {
 		decks = append(decks, deck)
 	}
 
-	coPlayers := make([]Player, 0, len(coPlayerMap))
+	coPlayers := make([]PlayerWithCount, 0, len(coPlayerMap))
 	for _, coPlayer := range coPlayerMap {
 		coPlayers = append(coPlayers, coPlayer)
 	}
