@@ -155,8 +155,8 @@ func NewRepository(db *gorm.DB) *Repository {
 		DB: db,
 	}
 }
-func (r *Repository) InsertPlayer(name string, email string, image string) (*Player, error) {
-	player := Player{Name: name, Email: email, Image: image}
+func (r *Repository) InsertPlayer(name string, email string, userId string) (*Player, error) {
+	player := Player{Name: name, Email: email, FirebaseID: userId}
 	result := r.DB.Create(&player)
 	return &player, result.Error
 }

@@ -7,7 +7,6 @@ import (
 type SignupPlayerRequest struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
-	Image string `json:"image"`
 }
 
 // duration int, comments, image string, rankings []Ranking

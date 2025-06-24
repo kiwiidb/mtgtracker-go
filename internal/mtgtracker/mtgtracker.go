@@ -68,8 +68,13 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Call the repository to insert the player
-	player, err := s.Repository.InsertPlayer(request.Name, request.Email, request.Image)
+	// get the firebase user id from the context
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	player, err := s.Repository.InsertPlayer(request.Name, request.Email, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
