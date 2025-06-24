@@ -22,10 +22,11 @@ type Deck struct {
 
 type Player struct {
 	gorm.Model
-	Name  string `gorm:"unique;not null" json:"name"`
-	Email string `gorm:"unique;not null" json:"email"`
-	Image string
-	Games []Game `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
+	FirebaseID string `gorm:"unique;not null" json:"firebase_id"`
+	Name       string `gorm:"unique;not null" json:"name"`
+	Email      string `gorm:"unique;not null" json:"email"`
+	Image      string
+	Games      []Game `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
 }
 type Game struct {
 	gorm.Model

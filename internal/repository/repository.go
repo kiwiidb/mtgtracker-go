@@ -12,6 +12,16 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
+	var player Player
+	// add games that are not finished
+	err := r.DB.Preload("Games").Where("firebase_id = ?", userID).First(&player).Error
+	if err != nil {
+		return nil, err
+	}
+	return &player, nil
+}
+
 func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	var players []Player
 	// If search is provided, filter players by name or email

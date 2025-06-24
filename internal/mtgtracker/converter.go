@@ -99,6 +99,12 @@ func convertPlayerToDto(player *repository.Player) Player {
 		// Convert game to DTO
 		games[i] = convertGameToDto(&game)
 
+		// Normally you will only have 1 game in progress at a time
+		if !game.Finished {
+			result.CurrentGame = &games[i]
+			continue
+		}
+
 		// Find this player's ranking in the game
 		for _, ranking := range game.Rankings {
 			if ranking.PlayerID == player.ID {

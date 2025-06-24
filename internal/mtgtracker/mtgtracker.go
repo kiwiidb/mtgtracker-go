@@ -3,6 +3,7 @@ package mtgtracker
 import (
 	"encoding/json"
 	"log"
+	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/repository"
 	"net/http"
 	"strconv"
@@ -28,16 +29,36 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
 	mux.HandleFunc("GET /player/v1/players", s.GetPlayers)
 	mux.HandleFunc("GET /player/v1/players/{playerId}", s.GetPlayer)
-	mux.HandleFunc("GET /player/v1/profile", s.GetProfile)
+	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
-	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)              // new
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)        // new
+	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
 }
 
-func (s *Service) GetProfile(w http.ResponseWriter, r *http.Request) {}
+func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
+	// Get the user ID from the context
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Call the repository to get the player by Firebase ID
+	player, err := s.Repository.GetPlayerByFirebaseID(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := convertPlayerToDto(player)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
 
 func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body
