@@ -74,7 +74,9 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	player, err := s.Repository.InsertPlayer(request.Name, request.Email, userID)
+	//to do: get email from firebase
+	email := ""
+	player, err := s.Repository.InsertPlayer(request.Name, email, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

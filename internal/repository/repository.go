@@ -24,7 +24,7 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 
 func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	var players []Player
-	// If search is provided, filter players by name or email
+	// If search is provided, filter players by name
 	if search != "" {
 		err := r.DB.Where("name LIKE ?", "%"+search+"%").Find(&players).Error
 		if err != nil {

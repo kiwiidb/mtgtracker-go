@@ -1,0 +1,35 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'game_event.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+GameEvent _$GameEventFromJson(Map<String, dynamic> json) => GameEvent(
+      gameId: (json['game_id'] as num).toInt(),
+      eventType: json['event_type'] as String,
+      damageDelta: (json['damage_delta'] as num).toInt(),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      targetLifeTotalAfter: (json['target_life_total_after'] as num).toInt(),
+      sourcePlayer: json['source_player'] as String,
+      targetPlayer: json['target_player'] as String,
+      sourceCommander: json['source_commander'] as String,
+      targetCommander: json['target_commander'] as String,
+      imageUrl: json['image_url'] as String,
+      uploadImageUrl: json['upload_image_url'] as String?,
+    );
+
+Map<String, dynamic> _$GameEventToJson(GameEvent instance) => <String, dynamic>{
+      'game_id': instance.gameId,
+      'event_type': instance.eventType,
+      'damage_delta': instance.damageDelta,
+      'created_at': instance.createdAt.toIso8601String(),
+      'target_life_total_after': instance.targetLifeTotalAfter,
+      'source_player': instance.sourcePlayer,
+      'target_player': instance.targetPlayer,
+      'source_commander': instance.sourceCommander,
+      'target_commander': instance.targetCommander,
+      'image_url': instance.imageUrl,
+      'upload_image_url': instance.uploadImageUrl,
+    };

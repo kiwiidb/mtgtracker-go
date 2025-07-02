@@ -1,0 +1,15 @@
+name: mtgtracker_client
+description: Dart HTTP client for MTG Tracker API
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  http: ^1.1.0
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  build_runner: ^2.4.7
+  json_serializable: ^6.8.0
+  test: ^1.24.0
