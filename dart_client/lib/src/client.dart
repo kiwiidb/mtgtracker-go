@@ -149,6 +149,43 @@ class MTGTrackerClient {
     return _handleResponse(response, GameEvent.fromJson);
   }
 
+  // Ranking endpoints
+  Future<List<Ranking>> getPendingRankings() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/ranking/v1/rankings/pending'),
+      headers: _headers,
+    );
+    return _handleListResponse(response, Ranking.fromJson);
+  }
+
+  Future<void> acceptRanking(int rankingId) async {
+    final response = await _httpClient.put(
+      Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId/accept'),
+      headers: _headers,
+    );
+    
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
+  Future<void> declineRanking(int rankingId) async {
+    final response = await _httpClient.put(
+      Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId/decline'),
+      headers: _headers,
+    );
+    
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   void dispose() {
     _httpClient.close();
   }

@@ -36,6 +36,66 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)              // new
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)        // new
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
+	mux.HandleFunc("GET /ranking/v1/rankings/pending", s.GetPendingRankings)
+	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/accept", s.AcceptRanking)
+	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/decline", s.DeclineRanking)
+}
+
+func (s *Service) GetPendingRankings(w http.ResponseWriter, r *http.Request) {
+	// Get the user ID from the context
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Call the repository to get the rankings to accept
+	rankings, err := s.Repository.GetPendingRankings(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = json.NewEncoder(w).Encode(rankings)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+
+}
+
+func (s *Service) AcceptRanking(w http.ResponseWriter, r *http.Request) {
+	rankingID := r.PathValue("rankingId")
+	rankingIDInt, err := strconv.Atoi(rankingID)
+	if err != nil {
+		http.Error(w, "Invalid ranking ID", http.StatusBadRequest)
+		return
+	}
+
+	// Call the repository to accept the ranking
+	err = s.Repository.AcceptRanking(uint(rankingIDInt))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Service) DeclineRanking(w http.ResponseWriter, r *http.Request) {
+	rankingID := r.PathValue("rankingId")
+	rankingIDInt, err := strconv.Atoi(rankingID)
+	if err != nil {
+		http.Error(w, "Invalid ranking ID", http.StatusBadRequest)
+		return
+	}
+
+	// Call the repository to decline the ranking
+	err = s.Repository.DeclineRanking(uint(rankingIDInt))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {

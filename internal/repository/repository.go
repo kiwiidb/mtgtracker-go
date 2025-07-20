@@ -12,6 +12,55 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+func (r *Repository) GetPendingRankings(firebaseID string) ([]Ranking, error) {
+	var rankings []Ranking
+	err := r.DB.Where("status = ? AND firebase_id = ?", StatusPending, firebaseID).Preload("Player").Find(&rankings).Error
+	if err != nil {
+		return nil, err
+	}
+	return rankings, nil
+}
+
+// todo: check if ranking is for this user
+func (r *Repository) AcceptRanking(rankingID uint) error {
+	var ranking Ranking
+	err := r.DB.First(&ranking, rankingID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("ranking not found")
+		}
+		return err
+	}
+
+	// Update the ranking status
+	ranking.Status = StatusAccepted
+	err = r.DB.Save(&ranking).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// todo: check if ranking is for this user
+func (r *Repository) DeclineRanking(rankingID uint) error {
+	var ranking Ranking
+	err := r.DB.First(&ranking, rankingID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("ranking not found")
+		}
+		return err
+	}
+
+	// Update the ranking status
+	ranking.Status = StatusDeclined
+	err = r.DB.Save(&ranking).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	var player Player
 	// add games that are not finished

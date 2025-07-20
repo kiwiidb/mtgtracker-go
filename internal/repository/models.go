@@ -39,15 +39,24 @@ type Game struct {
 	GameEvents []GameEvent // Add relation: a game has many game events
 }
 
+type RankingStatus string
+
+const (
+	StatusPending  RankingStatus = "pending"
+	StatusAccepted RankingStatus = "accepted"
+	StatusDeclined RankingStatus = "declined"
+)
+
 type Ranking struct {
 	gorm.Model
-	GameID         uint   `json:"game_id"`
-	PlayerID       uint   `json:"player_id"`
-	Position       int    `json:"position"`
-	CouldHaveWon   bool   `json:"could_have_won"`
-	EarlySolRing   bool   `json:"early_sol_ring"`
-	StartingPlayer bool   `json:"starting_player"`
-	PlayerName     string `gorm:"-"`
+	GameID         uint          `json:"game_id"`
+	PlayerID       uint          `json:"player_id"`
+	Position       int           `json:"position"`
+	CouldHaveWon   bool          `json:"could_have_won"`
+	EarlySolRing   bool          `json:"early_sol_ring"`
+	StartingPlayer bool          `json:"starting_player"`
+	Status         RankingStatus `json:"status"`
+	PlayerName     string        `gorm:"-"`
 
 	Player Player `json:"player"`
 	Deck   Deck   `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
