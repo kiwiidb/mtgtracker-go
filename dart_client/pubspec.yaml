@@ -8,6 +8,10 @@ environment:
 dependencies:
   http: ^1.1.0
   json_annotation: ^4.9.0
+  args: ^2.4.2
+
+executables:
+  mtg_cli:
 
 dev_dependencies:
   build_runner: ^2.4.7
