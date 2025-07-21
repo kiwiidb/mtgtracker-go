@@ -10,6 +10,7 @@ import (
 	"os"
 
 	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/auth"
 	"github.com/kiwiidb/utils/pkg/storage"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,14 +21,17 @@ func main() {
 
 	// Initialize Firebase app
 	ctx := context.Background()
-	app, err := firebase.NewApp(ctx, nil)
-	if err != nil {
-		log.Fatal("failed to initialize Firebase app", err)
-	}
+	var authClient *auth.Client
+	if os.Getenv("FIREBASE_CONFIG") != "" {
+		app, err := firebase.NewApp(ctx, nil)
+		if err != nil {
+			log.Fatal("failed to initialize Firebase app", err)
+		}
 
-	authClient, err := app.Auth(ctx)
-	if err != nil {
-		log.Fatal("failed to initialize Firebase auth client", err)
+		authClient, err = app.Auth(ctx)
+		if err != nil {
+			log.Fatal("failed to initialize Firebase auth client", err)
+		}
 	}
 
 	// Initialize the postgres database connection
@@ -55,7 +59,13 @@ func main() {
 	// add cors middleware on all routes
 	handler := middleware.CorsMw(mux)
 	handler = middleware.JsonMw(handler)
-	handler = middleware.FirebaseAuthMw(authClient, handler)
+	if authClient != nil {
+		// Use Firebase Auth middleware if authClient is available
+		handler = middleware.FirebaseAuthMw(authClient, handler)
+	} else {
+		// Use mock Firebase Auth middleware if authClient is not available
+		handler = middleware.MockFirebaseAuthMw(handler)
+	}
 
 	//serve static files
 	mux.Handle("/", http.FileServer(http.Dir("static")))

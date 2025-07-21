@@ -13,6 +13,31 @@ type contextKey string
 
 const userIDKey contextKey = "userID"
 
+// write a mock firebase auth middleware that checks the Authorization header for a Bearer token
+// and just uses this token as the user ID in the context
+func MockFirebaseAuthMw(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+			return
+		}
+		userID := parts[1]
+
+		// Add user ID to context
+		ctx := context.WithValue(r.Context(), userIDKey, userID)
+		r = r.WithContext(ctx)
+
+		log.Printf("Mock Firebase Auth: User %s authenticated for %s", userID, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
+
 func FirebaseAuthMw(authClient *auth.Client, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")

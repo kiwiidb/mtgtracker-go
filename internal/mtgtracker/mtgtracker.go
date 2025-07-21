@@ -32,10 +32,10 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
-	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)           // new
-	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)              // new
-	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)        // new
-	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent) // new
+	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
+	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
+	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
+	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
 	mux.HandleFunc("GET /ranking/v1/rankings/pending", s.GetPendingRankings)
 	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/accept", s.AcceptRanking)
 	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/decline", s.DeclineRanking)
