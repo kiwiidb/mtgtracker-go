@@ -88,3 +88,12 @@ type GameEvent struct {
 	SourceRanking *Ranking `gorm:"foreignKey:SourceRankingID;references:ID"` // Made nullable with pointer
 	TargetRanking *Ranking `gorm:"foreignKey:TargetRankingID;references:ID"` // Made nullable with pointer
 }
+
+type Follow struct {
+	gorm.Model
+	Player1ID uint `gorm:"not null" json:"player1_id"`
+	Player2ID uint `gorm:"not null" json:"player2_id"`
+
+	Player1 Player `gorm:"foreignKey:Player1ID;references:ID" json:"player1"`
+	Player2 Player `gorm:"foreignKey:Player2ID;references:ID" json:"player2"`
+}

@@ -39,6 +39,9 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /ranking/v1/rankings/pending", s.GetPendingRankings)
 	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/accept", s.AcceptRanking)
 	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/decline", s.DeclineRanking)
+	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
+	mux.HandleFunc("GET /follow/v1/follows", s.GetMyFollows)
+	mux.HandleFunc("GET /follow/v1/follows/{playerId}", s.GetPlayerFollows)
 }
 
 func (s *Service) GetPendingRankings(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +74,7 @@ func (s *Service) AcceptRanking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the repository to accept the ranking
-	err = s.Repository.AcceptRanking(uint(rankingIDInt))
+	_, err = s.Repository.AcceptRanking(uint(rankingIDInt))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -394,6 +397,97 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 
 	updatedGame.GameEvents = []repository.GameEvent{} // Clear event
 	result := convertGameToDto(updatedGame)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+
+func (s *Service) DeleteFollow(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	targetPlayerIDStr := r.PathValue("playerId")
+	targetPlayerID, err := strconv.Atoi(targetPlayerIDStr)
+	if err != nil {
+		http.Error(w, "Invalid player ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get the current user's player record
+	currentPlayer, err := s.Repository.GetPlayerByFirebaseID(userID)
+	if err != nil {
+		http.Error(w, "Player not found", http.StatusNotFound)
+		return
+	}
+
+	err = s.Repository.DeleteFollow(currentPlayer.ID, uint(targetPlayerID))
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Get the current user's player record
+	currentPlayer, err := s.Repository.GetPlayerByFirebaseID(userID)
+	if err != nil {
+		http.Error(w, "Player not found", http.StatusNotFound)
+		return
+	}
+
+	follows, err := s.Repository.GetFollows(currentPlayer.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := make([]Player, 0, len(follows))
+	for _, player := range follows {
+		result = append(result, convertPlayerToDto(&player))
+	}
+
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
+	playerIDStr := r.PathValue("playerId")
+	playerID, err := strconv.Atoi(playerIDStr)
+	if err != nil {
+		http.Error(w, "Invalid player ID", http.StatusBadRequest)
+		return
+	}
+
+	follows, err := s.Repository.GetFollows(uint(playerID))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := make([]Player, 0, len(follows))
+	for _, player := range follows {
+		result = append(result, convertPlayerToDto(&player))
+	}
+
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
