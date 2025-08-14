@@ -12,6 +12,7 @@ import (
 type contextKey string
 
 const userIDKey contextKey = "userID"
+const userEmailKey contextKey = "userEmail"
 
 // write a mock firebase auth middleware that checks the Authorization header for a Bearer token
 // and just uses this token as the user ID in the context
@@ -31,6 +32,8 @@ func MockFirebaseAuthMw(next http.Handler) http.Handler {
 
 		// Add user ID to context
 		ctx := context.WithValue(r.Context(), userIDKey, userID)
+		// Add mock email from user id to context
+		ctx = context.WithValue(ctx, userEmailKey, userID+"@example.com")
 		r = r.WithContext(ctx)
 
 		log.Printf("Mock Firebase Auth: User %s authenticated for %s", userID, r.URL.Path)
@@ -62,6 +65,10 @@ func FirebaseAuthMw(authClient *auth.Client, next http.Handler) http.Handler {
 
 		// Add user ID to context
 		ctx := context.WithValue(r.Context(), userIDKey, token.UID)
+
+		// Add user email to context
+		// todo: find out how to actually do this
+		ctx = context.WithValue(ctx, userEmailKey, token.Claims["email"])
 		r = r.WithContext(ctx)
 
 		log.Printf("Firebase Auth: User %s authenticated for %s", token.UID, r.URL.Path)
@@ -73,6 +80,13 @@ func FirebaseAuthMw(authClient *auth.Client, next http.Handler) http.Handler {
 func GetUserID(r *http.Request) string {
 	if userID, ok := r.Context().Value(userIDKey).(string); ok {
 		return userID
+	}
+	return ""
+}
+
+func GetUserEmail(r *http.Request) string {
+	if userEmail, ok := r.Context().Value(userEmailKey).(string); ok {
+		return userEmail
 	}
 	return ""
 }

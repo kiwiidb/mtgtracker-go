@@ -9,14 +9,12 @@ part of 'requests.dart';
 SignupPlayerRequest _$SignupPlayerRequestFromJson(Map<String, dynamic> json) =>
     SignupPlayerRequest(
       name: json['name'] as String,
-      email: json['email'] as String,
     );
 
 Map<String, dynamic> _$SignupPlayerRequestToJson(
         SignupPlayerRequest instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'email': instance.email,
     };
 
 CreateGameRequest _$CreateGameRequestFromJson(Map<String, dynamic> json) =>

@@ -138,7 +138,11 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//to do: get email from firebase
-	email := ""
+	email := middleware.GetUserEmail(r)
+	if email == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	player, err := s.Repository.InsertPlayer(request.Name, email, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,9 +167,9 @@ func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := make([]Player, 0, len(players))
-	for i, player := range players {
+	for _, player := range players {
 		// Convert the player to a DTO
-		result[i] = convertPlayerToDto(&player)
+		result = append(result, convertPlayerToDto(&player))
 	}
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
@@ -402,7 +406,6 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error encoding response:", err)
 	}
 }
-
 
 func (s *Service) DeleteFollow(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r)

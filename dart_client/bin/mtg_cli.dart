@@ -67,15 +67,15 @@ void printUsage(ArgParser argParser) {
 
 Future<void> main(List<String> arguments) async {
   final ArgParser argParser = buildParser();
-  
+
   try {
     final ArgResults results = argParser.parse(arguments);
-    
+
     if (results['help'] == true) {
       printUsage(argParser);
       return;
     }
-    
+
     if (results['version'] == true) {
       print('MTG Tracker CLI version: $version');
       return;
@@ -126,7 +126,8 @@ Future<void> main(List<String> arguments) async {
   }
 }
 
-Future<void> handlePlayerCommand(MTGTrackerClient client, List<String> args) async {
+Future<void> handlePlayerCommand(
+    MTGTrackerClient client, List<String> args) async {
   if (args.isEmpty) {
     print('Error: No player subcommand specified.');
     print('Available subcommands: signup, list, get, me');
@@ -135,18 +136,17 @@ Future<void> handlePlayerCommand(MTGTrackerClient client, List<String> args) asy
 
   switch (args[0]) {
     case 'signup':
-      if (args.length < 3) {
-        print('Error: Player name and email required for signup.');
-        print('Usage: player signup <name> <email>');
+      if (args.length < 2) {
+        print('Error: Player name required for signup.');
+        print('Usage: player signup <name>');
         exit(1);
       }
       final player = await client.signupPlayer(SignupPlayerRequest(
         name: args[1],
-        email: args[2],
       ));
       print('Player created: ${player.name} (ID: ${player.id})');
       break;
-      
+
     case 'list':
       final search = args.length > 1 ? args[1] : null;
       final players = await client.getPlayers(search: search);
@@ -159,7 +159,7 @@ Future<void> handlePlayerCommand(MTGTrackerClient client, List<String> args) asy
         }
       }
       break;
-      
+
     case 'get':
       if (args.length < 2) {
         print('Error: Player ID required.');
@@ -173,12 +173,12 @@ Future<void> handlePlayerCommand(MTGTrackerClient client, List<String> args) asy
       final player = await client.getPlayer(playerId);
       print('Player: ${player.name} (ID: ${player.id})');
       break;
-      
+
     case 'me':
       final player = await client.getMyPlayer();
       print('Current player: ${player.name} (ID: ${player.id})');
       break;
-      
+
     default:
       print('Error: Unknown player subcommand "${args[0]}".');
       print('Available subcommands: signup, list, get, me');
@@ -186,7 +186,8 @@ Future<void> handlePlayerCommand(MTGTrackerClient client, List<String> args) asy
   }
 }
 
-Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async {
+Future<void> handleGameCommand(
+    MTGTrackerClient client, List<String> args) async {
   if (args.isEmpty) {
     print('Error: No game subcommand specified.');
     print('Available subcommands: create, list, get, update, delete, event');
@@ -207,7 +208,7 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
       ));
       print('Game created with ID: ${game.id}');
       break;
-      
+
     case 'list':
       final games = await client.getGames();
       if (games.isEmpty) {
@@ -220,7 +221,7 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
         }
       }
       break;
-      
+
     case 'get':
       if (args.length < 2) {
         print('Error: Game ID required.');
@@ -235,7 +236,7 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
       final status = game.finished ? 'finished' : 'active';
       print('Game: ${game.comments} (ID: ${game.id}) - Status: $status');
       break;
-      
+
     case 'update':
       if (args.length < 3) {
         print('Error: Game ID and field required for update.');
@@ -248,9 +249,9 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
         print('Error: Invalid game ID "${args[1]}".');
         exit(1);
       }
-      
+
       final field = args[2];
-      
+
       UpdateGameRequest request;
       switch (field) {
         case 'finish':
@@ -268,15 +269,17 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
           );
           break;
         default:
-          print('Error: Unknown field "$field". Available fields: finish, reopen');
+          print(
+              'Error: Unknown field "$field". Available fields: finish, reopen');
           exit(1);
       }
-      
+
       final game = await client.updateGame(gameId, request);
       final status = game.finished ? 'finished' : 'active';
-      print('Game updated: ${game.comments} (ID: ${game.id}) - Status: $status');
+      print(
+          'Game updated: ${game.comments} (ID: ${game.id}) - Status: $status');
       break;
-      
+
     case 'delete':
       if (args.length < 2) {
         print('Error: Game ID required for deletion.');
@@ -290,11 +293,13 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
       await client.deleteGame(gameId);
       print('Game $gameId deleted successfully.');
       break;
-      
+
     case 'event':
       if (args.length < 5) {
-        print('Error: Game ID, event type, damage delta, and target life total required.');
-        print('Usage: game event <game_id> <event_type> <damage_delta> <target_life_total>');
+        print(
+            'Error: Game ID, event type, damage delta, and target life total required.');
+        print(
+            'Usage: game event <game_id> <event_type> <damage_delta> <target_life_total>');
         exit(1);
       }
       final gameId = int.tryParse(args[1]);
@@ -302,24 +307,26 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
         print('Error: Invalid game ID "${args[1]}".');
         exit(1);
       }
-      
+
       final eventType = args[2];
       final damageDelta = int.tryParse(args[3]);
       final targetLifeTotal = int.tryParse(args[4]);
-      
+
       if (damageDelta == null || targetLifeTotal == null) {
         print('Error: Damage delta and target life total must be integers.');
         exit(1);
       }
-      
-      final event = await client.addGameEvent(gameId, GameEventRequest(
-        eventType: eventType,
-        damageDelta: damageDelta,
-        targetLifeTotalAfter: targetLifeTotal,
-      ));
+
+      final event = await client.addGameEvent(
+          gameId,
+          GameEventRequest(
+            eventType: eventType,
+            damageDelta: damageDelta,
+            targetLifeTotalAfter: targetLifeTotal,
+          ));
       print('Event added to game $gameId: ${event.eventType}');
       break;
-      
+
     default:
       print('Error: Unknown game subcommand "${args[0]}".');
       print('Available subcommands: create, list, get, update, delete, event');
@@ -327,7 +334,8 @@ Future<void> handleGameCommand(MTGTrackerClient client, List<String> args) async
   }
 }
 
-Future<void> handleRankingCommand(MTGTrackerClient client, List<String> args) async {
+Future<void> handleRankingCommand(
+    MTGTrackerClient client, List<String> args) async {
   if (args.isEmpty) {
     print('Error: No ranking subcommand specified.');
     print('Available subcommands: pending, accept, decline');
@@ -342,11 +350,12 @@ Future<void> handleRankingCommand(MTGTrackerClient client, List<String> args) as
       } else {
         print('Pending rankings:');
         for (final ranking in rankings) {
-          print('  ${ranking.id}: Player ${ranking.playerId} - Position ${ranking.position}');
+          print(
+              '  ${ranking.id}: Player ${ranking.playerId} - Position ${ranking.position}');
         }
       }
       break;
-      
+
     case 'accept':
       if (args.length < 2) {
         print('Error: Ranking ID required.');
@@ -360,7 +369,7 @@ Future<void> handleRankingCommand(MTGTrackerClient client, List<String> args) as
       await client.acceptRanking(rankingId);
       print('Ranking $rankingId accepted.');
       break;
-      
+
     case 'decline':
       if (args.length < 2) {
         print('Error: Ranking ID required.');
@@ -374,7 +383,7 @@ Future<void> handleRankingCommand(MTGTrackerClient client, List<String> args) as
       await client.declineRanking(rankingId);
       print('Ranking $rankingId declined.');
       break;
-      
+
     default:
       print('Error: Unknown ranking subcommand "${args[0]}".');
       print('Available subcommands: pending, accept, decline');

@@ -12,7 +12,6 @@ void main() async {
     print('Signing up a new player...');
     final signupRequest = SignupPlayerRequest(
       name: 'Alice Smith',
-      email: 'alice@example.com',
     );
     final newPlayer = await client.signupPlayer(signupRequest);
     print('New player created: ${newPlayer.name} (ID: ${newPlayer.id})');

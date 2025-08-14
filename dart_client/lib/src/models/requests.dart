@@ -6,11 +6,9 @@ part 'requests.g.dart';
 @JsonSerializable()
 class SignupPlayerRequest {
   final String name;
-  final String email;
 
   const SignupPlayerRequest({
     required this.name,
-    required this.email,
   });
 
   factory SignupPlayerRequest.fromJson(Map<String, dynamic> json) => _$SignupPlayerRequestFromJson(json);
