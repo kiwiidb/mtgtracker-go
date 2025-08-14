@@ -47,6 +47,7 @@ void printUsage(ArgParser argParser) {
   print('');
   print('  game                     Manage games');
   print('    create <comments>      Create a new game');
+  print('    mock-game <players>    Create a mock Commander game (2-4 players)');
   print('    list                   List all games');
   print('    get <id>               Get game by ID');
   print('    update <id> <field>    Update game field (finish|reopen)');
@@ -190,7 +191,8 @@ Future<void> handleGameCommand(
     MTGTrackerClient client, List<String> args) async {
   if (args.isEmpty) {
     print('Error: No game subcommand specified.');
-    print('Available subcommands: create, list, get, update, delete, event');
+    print(
+        'Available subcommands: create, mock-game, list, get, update, delete, event');
     exit(1);
   }
 
@@ -207,6 +209,94 @@ Future<void> handleGameCommand(
         rankings: [],
       ));
       print('Game created with ID: ${game.id}');
+      break;
+
+    case 'mock-game':
+      if (args.length < 2) {
+        print('Error: Number of players required for mock game.');
+        print('Usage: game mock-game <players>');
+        print('Players must be between 2 and 4.');
+        exit(1);
+      }
+      
+      final playerCount = int.tryParse(args[1]);
+      if (playerCount == null || playerCount < 2 || playerCount > 4) {
+        print('Error: Invalid player count "${args[1]}".');
+        print('Players must be between 2 and 4.');
+        exit(1);
+      }
+
+      // Create a mock Commander game with decks
+      final allMockRankings = [
+        Ranking(
+          id: 0,
+          playerId: 1,
+          position: 1,
+          lifeTotal: 40,
+          deck: Deck(
+            id: 0,
+            commander: 'Teysa Karlov',
+            crop: 'https://cards.scryfall.io/art_crop/front/c/d/cd14f1ce-7fcd-485c-b7ca-01c5b45fdc01.jpg?1689999296',
+            secondaryImg: '',
+            image: 'https://cards.scryfall.io/normal/front/c/d/cd14f1ce-7fcd-485c-b7ca-01c5b45fdc01.jpg?1689999296',
+          ),
+        ),
+        Ranking(
+          id: 0,
+          playerId: 2,
+          position: 2,
+          lifeTotal: 40,
+          deck: Deck(
+            id: 0,
+            commander: 'Ojer Axonil, Deepest Might',
+            crop: 'https://cards.scryfall.io/art_crop/front/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
+            secondaryImg: 'https://cards.scryfall.io/art_crop/back/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
+            image: 'https://cards.scryfall.io/normal/front/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
+          ),
+        ),
+        Ranking(
+          id: 0,
+          playerId: 3,
+          position: 3,
+          lifeTotal: 40,
+          deck: Deck(
+            id: 0,
+            commander: 'Queen Marchesa',
+            crop: 'https://cards.scryfall.io/art_crop/front/0/f/0fdae05f-7bdc-45fb-b9b9-e5ec3766f965.jpg?1712354769',
+            secondaryImg: '',
+            image: 'https://cards.scryfall.io/normal/front/0/f/0fdae05f-7bdc-45fb-b9b9-e5ec3766f965.jpg?1712354769',
+          ),
+        ),
+        Ranking(
+          id: 0,
+          playerId: 4,
+          position: 4,
+          lifeTotal: 40,
+          deck: Deck(
+            id: 0,
+            commander: 'Lord Windgrace',
+            crop: 'https://cards.scryfall.io/art_crop/front/2/1/213d6fb8-5624-4804-b263-51f339482754.jpg?1592710275',
+            secondaryImg: '',
+            image: 'https://cards.scryfall.io/normal/front/2/1/213d6fb8-5624-4804-b263-51f339482754.jpg?1592710275',
+          ),
+        ),
+      ];
+
+      final selectedRankings = allMockRankings.take(playerCount).toList();
+
+      final mockGame = await client.createGame(CreateGameRequest(
+        comments: 'Mock Commander Game - $playerCount players',
+        image: '',
+        finished: false,
+        rankings: selectedRankings,
+      ));
+      print('Mock game created with ID: ${mockGame.id}');
+      print('Players:');
+      
+      final commanders = ['Teysa Karlov', 'Ojer Axonil, Deepest Might', 'Queen Marchesa', 'Lord Windgrace'];
+      for (int i = 0; i < playerCount; i++) {
+        print('  ${i + 1}. ${commanders[i]} (Player ${i + 1})');
+      }
       break;
 
     case 'list':
@@ -329,7 +419,8 @@ Future<void> handleGameCommand(
 
     default:
       print('Error: Unknown game subcommand "${args[0]}".');
-      print('Available subcommands: create, list, get, update, delete, event');
+      print(
+          'Available subcommands: create, mock-game, list, get, update, delete, event');
       exit(1);
   }
 }
