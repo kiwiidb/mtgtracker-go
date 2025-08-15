@@ -14,7 +14,9 @@ type Repository struct {
 
 func (r *Repository) GetPendingRankings(firebaseID string) ([]Ranking, error) {
 	var rankings []Ranking
-	err := r.DB.Where("status = ? AND firebase_id = ?", StatusPending, firebaseID).Preload("Player").Find(&rankings).Error
+	err := r.DB.Joins("JOIN players ON rankings.player_id = players.id").
+		Where("rankings.status = ? AND players.firebase_id = ?", StatusPending, firebaseID).
+		Preload("Player").Find(&rankings).Error
 	if err != nil {
 		return nil, err
 	}

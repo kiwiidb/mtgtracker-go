@@ -233,6 +233,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		rankings = append(rankings, repository.Ranking{
 			PlayerID: rank.PlayerID,
 			Position: rank.Position,
+			Status:   repository.StatusPending,
 			Deck:     convertDeck(rank.Deck),
 		})
 	}

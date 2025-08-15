@@ -341,10 +341,8 @@ Future<void> handleGameCommand(
               final commander = ranking.deck.commander;
               final image = ranking.deck.image;
               final position = ranking.position;
-              final lifeTotal = ranking.lifeTotal;
 
-              print(
-                  '      ${position}. $playerName - $commander (Life: $lifeTotal)');
+              print('      ${position}. $playerName - $commander ');
               print('         Image: $image');
             }
           }
