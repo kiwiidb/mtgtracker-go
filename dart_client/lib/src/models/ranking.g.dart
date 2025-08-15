@@ -7,7 +7,7 @@ part of 'ranking.dart';
 // **************************************************************************
 
 Ranking _$RankingFromJson(Map<String, dynamic> json) => Ranking(
-      id: (json['ID'] as num).toInt(),
+      id: (json['id'] as num).toInt(),
       playerId: (json['player_id'] as num).toInt(),
       position: (json['position'] as num).toInt(),
       lifeTotal: (json['life_total'] as num?)?.toInt(),
@@ -18,7 +18,7 @@ Ranking _$RankingFromJson(Map<String, dynamic> json) => Ranking(
     );
 
 Map<String, dynamic> _$RankingToJson(Ranking instance) => <String, dynamic>{
-      'ID': instance.id,
+      'id': instance.id,
       'player_id': instance.playerId,
       'position': instance.position,
       'life_total': instance.lifeTotal,

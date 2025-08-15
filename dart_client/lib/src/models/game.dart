@@ -6,16 +6,15 @@ part 'game.g.dart';
 
 @JsonSerializable()
 class Game {
-  @JsonKey(name: 'ID')
   final int id;
   final int? duration;
   final DateTime? date;
-  final String comments;
-  final String image;
+  final String? comments;
+  final String? image;
   final List<Ranking> rankings;
-  final bool finished;
-  @JsonKey(name: 'GameEvents')
-  final List<GameEvent> gameEvents;
+  final bool? finished;
+  @JsonKey(name: 'game_events')
+  final List<GameEvent>? gameEvents;
 
   const Game({
     required this.id,

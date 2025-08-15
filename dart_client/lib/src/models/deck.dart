@@ -4,7 +4,6 @@ part 'deck.g.dart';
 
 @JsonSerializable()
 class Deck {
-  @JsonKey(name: 'ID')
   final int id;
   final String commander;
   final String crop;
@@ -34,6 +33,7 @@ class DeckWithCount {
     required this.count,
   });
 
-  factory DeckWithCount.fromJson(Map<String, dynamic> json) => _$DeckWithCountFromJson(json);
+  factory DeckWithCount.fromJson(Map<String, dynamic> json) =>
+      _$DeckWithCountFromJson(json);
   Map<String, dynamic> toJson() => _$DeckWithCountToJson(this);
 }

@@ -6,7 +6,6 @@ part 'player.g.dart';
 
 @JsonSerializable()
 class Player {
-  @JsonKey(name: 'ID')
   final int id;
   final String name;
   @JsonKey(name: 'winrate_all_time')
@@ -14,10 +13,10 @@ class Player {
   @JsonKey(name: 'number_of_games_all_time')
   final int numberOfGamesAllTime;
   @JsonKey(name: 'decks_all_time')
-  final List<DeckWithCount> decksAllTime;
+  final List<DeckWithCount>? decksAllTime;
   @JsonKey(name: 'co_players_all_time')
-  final List<PlayerWithCount> coPlayersAllTime;
-  final List<Game> games;
+  final List<PlayerWithCount>? coPlayersAllTime;
+  final List<Game>? games;
   @JsonKey(name: 'current_game')
   final Game? currentGame;
 
@@ -46,6 +45,7 @@ class PlayerWithCount {
     required this.count,
   });
 
-  factory PlayerWithCount.fromJson(Map<String, dynamic> json) => _$PlayerWithCountFromJson(json);
+  factory PlayerWithCount.fromJson(Map<String, dynamic> json) =>
+      _$PlayerWithCountFromJson(json);
   Map<String, dynamic> toJson() => _$PlayerWithCountToJson(this);
 }

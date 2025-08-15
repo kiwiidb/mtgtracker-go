@@ -344,9 +344,9 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := make([]Game, 0, len(games))
-	for i, game := range games {
+	for _, game := range games {
 		// Convert the game to a DTO
-		result[i] = convertGameToDto(&game)
+		result = append(result, convertGameToDto(&game))
 	}
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
@@ -396,6 +396,10 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 	updatedGame, err := s.Repository.UpdateGame(uint(gameId), newRankings, request.Finished)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if updatedGame == nil {
+		http.Error(w, "Game not found", http.StatusNotFound)
 		return
 	}
 

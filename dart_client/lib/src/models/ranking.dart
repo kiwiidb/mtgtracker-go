@@ -6,7 +6,6 @@ part 'ranking.g.dart';
 
 @JsonSerializable()
 class Ranking {
-  @JsonKey(name: 'ID')
   final int id;
   @JsonKey(name: 'player_id')
   final int playerId;
@@ -25,6 +24,7 @@ class Ranking {
     this.player,
   });
 
-  factory Ranking.fromJson(Map<String, dynamic> json) => _$RankingFromJson(json);
+  factory Ranking.fromJson(Map<String, dynamic> json) =>
+      _$RankingFromJson(json);
   Map<String, dynamic> toJson() => _$RankingToJson(this);
 }
