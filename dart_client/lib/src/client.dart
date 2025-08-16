@@ -150,12 +150,20 @@ class MTGTrackerClient {
   }
 
   // Ranking endpoints
-  Future<List<Ranking>> getPendingRankings() async {
+  Future<List<Game>> getPendingGames() async {
     final response = await _httpClient.get(
-      Uri.parse('$baseUrl/ranking/v1/rankings/pending'),
+      Uri.parse('$baseUrl/ranking/v1/games/pending'),
       headers: _headers,
     );
-    return _handleListResponse(response, Ranking.fromJson);
+    return _handleListResponse(response, Game.fromJson);
+  }
+
+  Future<List<Game>> getActiveGames() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/game/v1/games/active'),
+      headers: _headers,
+    );
+    return _handleListResponse(response, Game.fromJson);
   }
 
   Future<void> acceptRanking(int rankingId) async {

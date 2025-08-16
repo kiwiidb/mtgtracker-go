@@ -14,6 +14,7 @@ class Ranking {
   final int? lifeTotal;
   final Deck deck;
   final Player? player;
+  final String? status;
 
   const Ranking({
     required this.id,
@@ -22,6 +23,7 @@ class Ranking {
     this.lifeTotal,
     required this.deck,
     this.player,
+    this.status,
   });
 
   factory Ranking.fromJson(Map<String, dynamic> json) =>

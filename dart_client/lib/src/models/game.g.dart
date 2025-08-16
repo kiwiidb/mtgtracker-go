@@ -12,12 +12,11 @@ Game _$GameFromJson(Map<String, dynamic> json) => Game(
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
       comments: json['comments'] as String?,
-      image: json['image'] as String?,
       rankings: (json['rankings'] as List<dynamic>)
           .map((e) => Ranking.fromJson(e as Map<String, dynamic>))
           .toList(),
       finished: json['finished'] as bool?,
-      gameEvents: (json['GameEvents'] as List<dynamic>?)
+      gameEvents: (json['game_events'] as List<dynamic>?)
           ?.map((e) => GameEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -27,8 +26,7 @@ Map<String, dynamic> _$GameToJson(Game instance) => <String, dynamic>{
       'duration': instance.duration,
       'date': instance.date?.toIso8601String(),
       'comments': instance.comments,
-      'image': instance.image,
       'rankings': instance.rankings,
       'finished': instance.finished,
-      'GameEvents': instance.gameEvents,
+      'game_events': instance.gameEvents,
     };

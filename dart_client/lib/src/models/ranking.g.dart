@@ -15,6 +15,7 @@ Ranking _$RankingFromJson(Map<String, dynamic> json) => Ranking(
       player: json['player'] == null
           ? null
           : Player.fromJson(json['player'] as Map<String, dynamic>),
+      status: json['status'] as String?,
     );
 
 Map<String, dynamic> _$RankingToJson(Ranking instance) => <String, dynamic>{
@@ -24,4 +25,5 @@ Map<String, dynamic> _$RankingToJson(Ranking instance) => <String, dynamic>{
       'life_total': instance.lifeTotal,
       'deck': instance.deck,
       'player': instance.player,
+      'status': instance.status,
     };

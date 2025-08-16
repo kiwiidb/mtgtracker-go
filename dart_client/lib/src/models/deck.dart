@@ -4,7 +4,6 @@ part 'deck.g.dart';
 
 @JsonSerializable()
 class Deck {
-  final int id;
   final String commander;
   final String crop;
   @JsonKey(name: 'secondary_image')
@@ -12,7 +11,6 @@ class Deck {
   final String image;
 
   const Deck({
-    required this.id,
     required this.commander,
     required this.crop,
     required this.secondaryImg,

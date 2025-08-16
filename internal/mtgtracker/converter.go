@@ -11,7 +11,6 @@ func convertGameToDto(game *repository.Game) Game {
 		Duration:   game.Duration,
 		Date:       game.Date,
 		Comments:   game.Comments,
-		Image:      game.Image,
 		Finished:   game.Finished,
 		Rankings:   convertRankingsToDto(game.Rankings),
 		GameEvents: make([]GameEvent, len(game.GameEvents)),
@@ -67,6 +66,7 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 			ID:       rank.ID,
 			PlayerID: rank.PlayerID,
 			Position: rank.Position,
+			Status:   RankingStatus(rank.Status),
 			Deck: Deck{
 				Commander:    rank.Deck.Commander,
 				Crop:         rank.Deck.Crop,

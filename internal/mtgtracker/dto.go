@@ -58,9 +58,8 @@ type Game struct {
 	Duration   *int        `json:"duration,omitempty"`
 	Date       *time.Time  `json:"date,omitempty"`
 	Comments   string      `json:"comments,omitempty"`
-	Image      string      `json:"image,omitempty"`
 	Rankings   []Ranking   `json:"rankings,omitempty"`
-	Finished   bool        `json:"finished,omitempty"`
+	Finished   bool        `json:"finished"`
 	GameEvents []GameEvent `json:"game_events,omitempty"`
 }
 
@@ -79,16 +78,24 @@ type GameEvent struct {
 }
 
 type Ranking struct {
-	ID        uint   `json:"id"`
-	PlayerID  uint   `json:"player_id"`
-	Position  int    `json:"position"`
-	LifeTotal *uint  `json:"life_total,omitempty"`
-	Deck      Deck   `json:"deck"`
-	Player    Player `json:"player,omitempty"` // Optional, can be omitted if not needed
+	ID        uint          `json:"id"`
+	PlayerID  uint          `json:"player_id"`
+	Position  int           `json:"position"`
+	LifeTotal *uint         `json:"life_total,omitempty"`
+	Deck      Deck          `json:"deck"`
+	Player    Player        `json:"player,omitempty"` // Optional, can be omitted if not needed
+	Status    RankingStatus `json:"status,omitempty"` // Optional, can be omitted if not needed
 }
 
+type RankingStatus string
+
+const (
+	StatusPending  RankingStatus = "pending"
+	StatusAccepted RankingStatus = "accepted"
+	StatusDeclined RankingStatus = "declined"
+)
+
 type Deck struct {
-	ID           uint   `json:"id"`
 	Commander    string `json:"commander"`
 	Crop         string `json:"crop"`
 	SecondaryImg string `json:"secondary_image"`

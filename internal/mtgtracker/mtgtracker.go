@@ -32,11 +32,12 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
+	mux.HandleFunc("GET /game/v1/games/active", s.GetActiveGames)
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
-	mux.HandleFunc("GET /ranking/v1/rankings/pending", s.GetPendingRankings)
+	mux.HandleFunc("GET /ranking/v1/games/pending", s.GetPendingGames)
 	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/accept", s.AcceptRanking)
 	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/decline", s.DeclineRanking)
 	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
@@ -44,7 +45,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /follow/v1/follows/{playerId}", s.GetPlayerFollows)
 }
 
-func (s *Service) GetPendingRankings(w http.ResponseWriter, r *http.Request) {
+func (s *Service) GetPendingGames(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the context
 	userID := middleware.GetUserID(r)
 	if userID == "" {
@@ -52,13 +53,46 @@ func (s *Service) GetPendingRankings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Call the repository to get the rankings to accept
-	rankings, err := s.Repository.GetPendingRankings(userID)
+	// Call the repository to get the games with pending rankings
+	games, err := s.Repository.GetPendingGames(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(w).Encode(rankings)
+
+	// Convert games to DTOs
+	result := make([]Game, 0, len(games))
+	for _, game := range games {
+		result = append(result, convertGameToDto(&game))
+	}
+
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
+	// Get the user ID from the context
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Call the repository to get the games with active rankings
+	games, err := s.Repository.GetActiveGames(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert games to DTOs
+	result := make([]Game, 0, len(games))
+	for _, game := range games {
+		result = append(result, convertGameToDto(&game))
+	}
+
+	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}

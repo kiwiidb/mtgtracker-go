@@ -10,7 +10,6 @@ class Game {
   final int? duration;
   final DateTime? date;
   final String? comments;
-  final String? image;
   final List<Ranking> rankings;
   final bool? finished;
   @JsonKey(name: 'game_events')
@@ -21,7 +20,6 @@ class Game {
     this.duration,
     this.date,
     required this.comments,
-    required this.image,
     required this.rankings,
     required this.finished,
     required this.gameEvents,

@@ -12,15 +12,39 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (r *Repository) GetPendingRankings(firebaseID string) ([]Ranking, error) {
-	var rankings []Ranking
-	err := r.DB.Joins("JOIN players ON rankings.player_id = players.id").
+func (r *Repository) GetPendingGames(firebaseID string) ([]Game, error) {
+	var games []Game
+	err := r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
+		Joins("JOIN players ON rankings.player_id = players.id").
 		Where("rankings.status = ? AND players.firebase_id = ?", StatusPending, firebaseID).
-		Preload("Player").Find(&rankings).Error
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents").
+		Distinct().
+		Find(&games).Error
 	if err != nil {
 		return nil, err
 	}
-	return rankings, nil
+	return games, nil
+}
+
+// get games of user id with finished = false
+func (r *Repository) GetActiveGames(firebaseID string) ([]Game, error) {
+	var games []Game
+	err := r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
+		Joins("JOIN players ON rankings.player_id = players.id").
+		Where("players.firebase_id = ? AND games.finished = ?", firebaseID, false).
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents").
+		Distinct().
+		Find(&games).Error
+	if err != nil {
+		return nil, err
+	}
+	return games, nil
 }
 
 // todo: check if ranking is for this user
@@ -40,7 +64,7 @@ func (r *Repository) AcceptRanking(rankingID uint) (*Ranking, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Get all other accepted players in the same game
 	acceptedPlayerIDs, err := r.GetAcceptedPlayersInGame(ranking.GameID)
 	if err != nil {
@@ -58,7 +82,7 @@ func (r *Repository) AcceptRanking(rankingID uint) (*Ranking, error) {
 			}
 		}
 	}
-	
+
 	return &ranking, nil
 }
 
@@ -84,11 +108,29 @@ func (r *Repository) DeclineRanking(rankingID uint) error {
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	var player Player
-	// add games that are not finished
-	err := r.DB.Preload("Games").Where("firebase_id = ?", userID).First(&player).Error
+	err := r.DB.Where("firebase_id = ?", userID).First(&player).Error
 	if err != nil {
 		return nil, err
 	}
+	
+	// Manually load games for this player since Games field has gorm:"-"
+	// We need to find games where this player has rankings
+	var games []Game
+	err = r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
+		Where("rankings.player_id = ?", player.ID).
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents").
+		Distinct().
+		Find(&games).Error
+	if err != nil {
+		return nil, err
+	}
+	
+	// Populate the Games field manually
+	player.Games = games
+	
 	return &player, nil
 }
 
@@ -221,11 +263,11 @@ func NewRepository(db *gorm.DB) *Repository {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// Add unique constraint for symmetrical follows
 	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_follow_pair 
 		ON follows (LEAST(player1_id, player2_id), GREATEST(player1_id, player2_id))`)
-	
+
 	return &Repository{
 		DB: db,
 	}
@@ -297,26 +339,26 @@ func (r *Repository) CreateFollow(player1ID, player2ID uint) (*Follow, error) {
 	if player1ID == player2ID {
 		return nil, errors.New("cannot follow yourself")
 	}
-	
+
 	// Ensure consistent ordering for symmetrical relationship
 	if player1ID > player2ID {
 		player1ID, player2ID = player2ID, player1ID
 	}
-	
+
 	follow := Follow{
 		Player1ID: player1ID,
 		Player2ID: player2ID,
 	}
-	
+
 	if err := r.DB.Create(&follow).Error; err != nil {
 		return nil, err
 	}
-	
+
 	// Load the related players
 	if err := r.DB.Preload("Player1").Preload("Player2").First(&follow, follow.ID).Error; err != nil {
 		return nil, err
 	}
-	
+
 	return &follow, nil
 }
 
@@ -324,27 +366,27 @@ func (r *Repository) DeleteFollow(player1ID, player2ID uint) error {
 	if player1ID == player2ID {
 		return errors.New("invalid follow relationship")
 	}
-	
+
 	// Ensure consistent ordering for symmetrical relationship
 	if player1ID > player2ID {
 		player1ID, player2ID = player2ID, player1ID
 	}
-	
+
 	result := r.DB.Where("player1_id = ? AND player2_id = ?", player1ID, player2ID).Delete(&Follow{})
 	if result.Error != nil {
 		return result.Error
 	}
-	
+
 	if result.RowsAffected == 0 {
 		return errors.New("follow relationship not found")
 	}
-	
+
 	return nil
 }
 
 func (r *Repository) GetFollows(playerID uint) ([]Player, error) {
 	var follows []Follow
-	
+
 	// Get all follows where the player is either player1 or player2
 	err := r.DB.Preload("Player1").Preload("Player2").
 		Where("player1_id = ? OR player2_id = ?", playerID, playerID).
@@ -352,7 +394,7 @@ func (r *Repository) GetFollows(playerID uint) ([]Player, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var followedPlayers []Player
 	for _, follow := range follows {
 		if follow.Player1ID == playerID {
@@ -361,7 +403,7 @@ func (r *Repository) GetFollows(playerID uint) ([]Player, error) {
 			followedPlayers = append(followedPlayers, follow.Player1)
 		}
 	}
-	
+
 	return followedPlayers, nil
 }
 
@@ -369,18 +411,18 @@ func (r *Repository) IsFollowing(player1ID, player2ID uint) (bool, error) {
 	if player1ID == player2ID {
 		return false, nil
 	}
-	
+
 	// Ensure consistent ordering for symmetrical relationship
 	if player1ID > player2ID {
 		player1ID, player2ID = player2ID, player1ID
 	}
-	
+
 	var count int64
 	err := r.DB.Model(&Follow{}).Where("player1_id = ? AND player2_id = ?", player1ID, player2ID).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
-	
+
 	return count > 0, nil
 }
 
@@ -390,11 +432,11 @@ func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]uint, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	playerIDs := make([]uint, 0, len(rankings))
 	for _, ranking := range rankings {
 		playerIDs = append(playerIDs, ranking.PlayerID)
 	}
-	
+
 	return playerIDs, nil
 }

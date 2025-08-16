@@ -7,7 +7,6 @@ part of 'deck.dart';
 // **************************************************************************
 
 Deck _$DeckFromJson(Map<String, dynamic> json) => Deck(
-      id: (json['id'] as num).toInt(),
       commander: json['commander'] as String,
       crop: json['crop'] as String,
       secondaryImg: json['secondary_image'] as String,
@@ -15,7 +14,6 @@ Deck _$DeckFromJson(Map<String, dynamic> json) => Deck(
     );
 
 Map<String, dynamic> _$DeckToJson(Deck instance) => <String, dynamic>{
-      'id': instance.id,
       'commander': instance.commander,
       'crop': instance.crop,
       'secondary_image': instance.secondaryImg,

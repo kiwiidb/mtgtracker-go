@@ -1,5 +1,6 @@
 #!/usr/bin/env dart
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:args/args.dart';
 import '../lib/mtgtracker_client.dart';
@@ -50,6 +51,7 @@ void printUsage(ArgParser argParser) {
   print(
       '    mock-game <players>    Create a mock Commander game (2-4 players)');
   print('    list                   List all games');
+  print('    active                 List active games');
   print('    get <id>               Get game by ID');
   print('    update <id> <field>    Update game field (finish|reopen)');
   print('    delete <id>            Delete a game');
@@ -147,20 +149,13 @@ Future<void> handlePlayerCommand(
       final player = await client.signupPlayer(SignupPlayerRequest(
         name: args[1],
       ));
-      print('Player created: ${player.name} (ID: ${player.id})');
+      print(jsonEncode(player.toJson()));
       break;
 
     case 'list':
       final search = args.length > 1 ? args[1] : null;
       final players = await client.getPlayers(search: search);
-      if (players.isEmpty) {
-        print('No players found.');
-      } else {
-        print('Players:');
-        for (final player in players) {
-          print('  ${player.id}: ${player.name}');
-        }
-      }
+      print(jsonEncode(players.map((p) => p.toJson()).toList()));
       break;
 
     case 'get':
@@ -174,12 +169,12 @@ Future<void> handlePlayerCommand(
         exit(1);
       }
       final player = await client.getPlayer(playerId);
-      print('Player: ${player.name} (ID: ${player.id})');
+      print(jsonEncode(player.toJson()));
       break;
 
     case 'me':
       final player = await client.getMyPlayer();
-      print('Current player: ${player.name} (ID: ${player.id})');
+      print(jsonEncode(player.toJson()));
       break;
 
     default:
@@ -194,7 +189,7 @@ Future<void> handleGameCommand(
   if (args.isEmpty) {
     print('Error: No game subcommand specified.');
     print(
-        'Available subcommands: create, mock-game, list, get, update, delete, event');
+        'Available subcommands: create, mock-game, list, active, get, update, delete, event');
     exit(1);
   }
 
@@ -210,7 +205,7 @@ Future<void> handleGameCommand(
         finished: false,
         rankings: [],
       ));
-      print('Game created with ID: ${game.id}');
+      print(jsonEncode(game.toJson()));
       break;
 
     case 'mock-game':
@@ -236,7 +231,6 @@ Future<void> handleGameCommand(
           position: 1,
           lifeTotal: 40,
           deck: Deck(
-            id: 0,
             commander: 'Teysa Karlov',
             crop:
                 'https://cards.scryfall.io/art_crop/front/c/d/cd14f1ce-7fcd-485c-b7ca-01c5b45fdc01.jpg?1689999296',
@@ -252,7 +246,6 @@ Future<void> handleGameCommand(
           position: 2,
           lifeTotal: 40,
           deck: Deck(
-            id: 0,
             commander: 'Ojer Axonil, Deepest Might',
             crop:
                 'https://cards.scryfall.io/art_crop/front/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
@@ -269,7 +262,6 @@ Future<void> handleGameCommand(
           position: 3,
           lifeTotal: 40,
           deck: Deck(
-            id: 0,
             commander: 'Queen Marchesa',
             crop:
                 'https://cards.scryfall.io/art_crop/front/0/f/0fdae05f-7bdc-45fb-b9b9-e5ec3766f965.jpg?1712354769',
@@ -285,7 +277,6 @@ Future<void> handleGameCommand(
           position: 4,
           lifeTotal: 40,
           deck: Deck(
-            id: 0,
             commander: 'Lord Windgrace',
             crop:
                 'https://cards.scryfall.io/art_crop/front/2/1/213d6fb8-5624-4804-b263-51f339482754.jpg?1592710275',
@@ -311,44 +302,17 @@ Future<void> handleGameCommand(
         finished: false,
         rankings: selectedRankings,
       ));
-      print('Mock game created with ID: ${mockGame.id}');
-      print('Players:');
-
-      final commanders = [
-        'Teysa Karlov',
-        'Ojer Axonil, Deepest Might',
-        'Queen Marchesa',
-        'Lord Windgrace'
-      ];
-      for (int i = 0; i < playerCount; i++) {
-        print('  ${i + 1}. ${commanders[i]} (Player ${i + 1})');
-      }
+      print(jsonEncode(mockGame.toJson()));
       break;
 
     case 'list':
       final games = await client.getGames();
-      if (games.isEmpty) {
-        print('No games found.');
-      } else {
-        for (final game in games) {
-          final status = game.finished == true ? 'finished' : 'active';
-          print('  Game ${game.id}: ${game.comments} - $status');
+      print(jsonEncode(games.map((g) => g.toJson()).toList()));
+      break;
 
-          if (game.rankings.isNotEmpty) {
-            for (final ranking in game.rankings) {
-              final playerName =
-                  ranking.player?.name ?? 'Player ${ranking.playerId}';
-              final commander = ranking.deck.commander;
-              final image = ranking.deck.image;
-              final position = ranking.position;
-
-              print('      ${position}. $playerName - $commander ');
-              print('         Image: $image');
-            }
-          }
-          print(''); // Empty line for better separation between games
-        }
-      }
+    case 'active':
+      final games = await client.getActiveGames();
+      print(jsonEncode(games.map((g) => g.toJson()).toList()));
       break;
 
     case 'get':
@@ -362,7 +326,7 @@ Future<void> handleGameCommand(
         exit(1);
       }
       final game = await client.getGame(gameId);
-      print('Game: ${game.comments} (ID: ${game.id})');
+      print(jsonEncode(game.toJson()));
       break;
 
     case 'update':
@@ -380,20 +344,23 @@ Future<void> handleGameCommand(
 
       final field = args[2];
 
+      // Fetch the current game to get its rankings
+      final currentGame = await client.getGame(gameId);
+
       UpdateGameRequest request;
       switch (field) {
         case 'finish':
           request = UpdateGameRequest(
             gameId: gameId,
             finished: true,
-            rankings: [],
+            rankings: currentGame.rankings,
           );
           break;
         case 'reopen':
           request = UpdateGameRequest(
             gameId: gameId,
             finished: false,
-            rankings: [],
+            rankings: currentGame.rankings,
           );
           break;
         default:
@@ -403,7 +370,7 @@ Future<void> handleGameCommand(
       }
 
       final game = await client.updateGame(gameId, request);
-      print('Game updated: ${game.comments} (ID: ${game.id})');
+      print(jsonEncode(game.toJson()));
       break;
 
     case 'delete':
@@ -417,7 +384,7 @@ Future<void> handleGameCommand(
         exit(1);
       }
       await client.deleteGame(gameId);
-      print('Game $gameId deleted successfully.');
+      print(jsonEncode({'success': true, 'message': 'Game $gameId deleted successfully'}));
       break;
 
     case 'event':
@@ -450,13 +417,13 @@ Future<void> handleGameCommand(
             damageDelta: damageDelta,
             targetLifeTotalAfter: targetLifeTotal,
           ));
-      print('Event added to game $gameId: ${event.eventType}');
+      print(jsonEncode(event.toJson()));
       break;
 
     default:
       print('Error: Unknown game subcommand "${args[0]}".');
       print(
-          'Available subcommands: create, mock-game, list, get, update, delete, event');
+          'Available subcommands: create, mock-game, list, active, get, update, delete, event');
       exit(1);
   }
 }
@@ -471,16 +438,8 @@ Future<void> handleRankingCommand(
 
   switch (args[0]) {
     case 'pending':
-      final rankings = await client.getPendingRankings();
-      if (rankings.isEmpty) {
-        print('No pending rankings found.');
-      } else {
-        print('Pending rankings:');
-        for (final ranking in rankings) {
-          print(
-              '  ${ranking.id}: Player ${ranking.playerId} - Position ${ranking.position}');
-        }
-      }
+      final games = await client.getPendingGames();
+      print(jsonEncode(games.map((g) => g.toJson()).toList()));
       break;
 
     case 'accept':
@@ -494,7 +453,7 @@ Future<void> handleRankingCommand(
         exit(1);
       }
       await client.acceptRanking(rankingId);
-      print('Ranking $rankingId accepted.');
+      print(jsonEncode({'success': true, 'message': 'Ranking $rankingId accepted'}));
       break;
 
     case 'decline':
@@ -508,7 +467,7 @@ Future<void> handleRankingCommand(
         exit(1);
       }
       await client.declineRanking(rankingId);
-      print('Ranking $rankingId declined.');
+      print(jsonEncode({'success': true, 'message': 'Ranking $rankingId declined'}));
       break;
 
     default:
