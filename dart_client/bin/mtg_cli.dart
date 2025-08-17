@@ -289,12 +289,6 @@ Future<void> handleGameCommand(
       ];
 
       final selectedRankings = allMockRankings.take(playerCount).toList();
-
-      print('Debug: Creating game with ${selectedRankings.length} rankings');
-      for (var ranking in selectedRankings) {
-        print('Debug: Ranking ${ranking.position} - ${ranking.deck.commander}');
-      }
-
       final mockGame = await client.createGame(CreateGameRequest(
         comments: 'Mock Commander Game - $playerCount players',
         image:
@@ -384,7 +378,8 @@ Future<void> handleGameCommand(
         exit(1);
       }
       await client.deleteGame(gameId);
-      print(jsonEncode({'success': true, 'message': 'Game $gameId deleted successfully'}));
+      print(jsonEncode(
+          {'success': true, 'message': 'Game $gameId deleted successfully'}));
       break;
 
     case 'event':
@@ -453,7 +448,8 @@ Future<void> handleRankingCommand(
         exit(1);
       }
       await client.acceptRanking(rankingId);
-      print(jsonEncode({'success': true, 'message': 'Ranking $rankingId accepted'}));
+      print(jsonEncode(
+          {'success': true, 'message': 'Ranking $rankingId accepted'}));
       break;
 
     case 'decline':
@@ -467,7 +463,8 @@ Future<void> handleRankingCommand(
         exit(1);
       }
       await client.declineRanking(rankingId);
-      print(jsonEncode({'success': true, 'message': 'Ranking $rankingId declined'}));
+      print(jsonEncode(
+          {'success': true, 'message': 'Ranking $rankingId declined'}));
       break;
 
     default:

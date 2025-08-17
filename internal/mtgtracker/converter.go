@@ -122,6 +122,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 						SecondaryImg: ranking.Deck.SecondaryImage,
 						Image:        ranking.Deck.Image,
 					},
+						Count: 1,
 					}
 				} else {
 					deckMap[deckKey] = DeckWithCount{
