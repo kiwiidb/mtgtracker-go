@@ -2,8 +2,10 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:args/args.dart';
 import '../lib/mtgtracker_client.dart';
+import '../lib/src/mock_game.dart';
 
 const String version = '1.0.0';
 
@@ -201,7 +203,6 @@ Future<void> handleGameCommand(
       }
       final game = await client.createGame(CreateGameRequest(
         comments: args.isNotEmpty ? args[0] : '',
-        image: '',
         finished: false,
         rankings: [],
       ));
@@ -223,78 +224,13 @@ Future<void> handleGameCommand(
         exit(1);
       }
 
-      // Create a mock Commander game with decks
-      final allMockRankings = [
-        Ranking(
-          id: 0,
-          playerId: 1,
-          position: 1,
-          lifeTotal: 40,
-          deck: Deck(
-            commander: 'Teysa Karlov',
-            crop:
-                'https://cards.scryfall.io/art_crop/front/c/d/cd14f1ce-7fcd-485c-b7ca-01c5b45fdc01.jpg?1689999296',
-            secondaryImg: '',
-            image:
-                'https://cards.scryfall.io/normal/front/c/d/cd14f1ce-7fcd-485c-b7ca-01c5b45fdc01.jpg?1689999296',
-          ),
-          player: null,
-        ),
-        Ranking(
-          id: 0,
-          playerId: 2,
-          position: 2,
-          lifeTotal: 40,
-          deck: Deck(
-            commander: 'Ojer Axonil, Deepest Might',
-            crop:
-                'https://cards.scryfall.io/art_crop/front/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
-            secondaryImg:
-                'https://cards.scryfall.io/art_crop/back/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
-            image:
-                'https://cards.scryfall.io/normal/front/5/0/50f8e2b6-98c7-4f28-bb39-e1fbe841f1ee.jpg?1699044315',
-          ),
-          player: null,
-        ),
-        Ranking(
-          id: 0,
-          playerId: 3,
-          position: 3,
-          lifeTotal: 40,
-          deck: Deck(
-            commander: 'Queen Marchesa',
-            crop:
-                'https://cards.scryfall.io/art_crop/front/0/f/0fdae05f-7bdc-45fb-b9b9-e5ec3766f965.jpg?1712354769',
-            secondaryImg: '',
-            image:
-                'https://cards.scryfall.io/normal/front/0/f/0fdae05f-7bdc-45fb-b9b9-e5ec3766f965.jpg?1712354769',
-          ),
-          player: null,
-        ),
-        Ranking(
-          id: 0,
-          playerId: 4,
-          position: 4,
-          lifeTotal: 40,
-          deck: Deck(
-            commander: 'Lord Windgrace',
-            crop:
-                'https://cards.scryfall.io/art_crop/front/2/1/213d6fb8-5624-4804-b263-51f339482754.jpg?1592710275',
-            secondaryImg: '',
-            image:
-                'https://cards.scryfall.io/normal/front/2/1/213d6fb8-5624-4804-b263-51f339482754.jpg?1592710275',
-          ),
-          player: null,
-        ),
-      ];
+      // Generate randomized mock rankings
+      final mockRankings = MockGameGenerator.generateMockRankings(playerCount);
 
-      final selectedRankings = allMockRankings.take(playerCount).toList();
       final mockGame = await client.createGame(CreateGameRequest(
         comments: 'Mock Commander Game - $playerCount players',
-        image:
-            'https://cards.scryfall.io/art_crop/front/c/d/cd14f1ce-7fcd-485c-b7ca-01c5b45fdc01.jpg?1689999296',
         finished: false,
-        rankings: selectedRankings,
+        rankings: mockRankings,
       ));
       print(jsonEncode(mockGame.toJson()));
       break;
@@ -342,6 +278,13 @@ Future<void> handleGameCommand(
       final currentGame = await client.getGame(gameId);
 
       UpdateGameRequest request;
+      List<int> randomizedPositions =
+          currentGame.rankings.map((r) => r.position).toList();
+      currentGame.rankings.forEach((r) {
+        r.position = randomizedPositions
+            .removeAt(Random().nextInt(randomizedPositions.length));
+      });
+
       switch (field) {
         case 'finish':
           request = UpdateGameRequest(

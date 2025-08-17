@@ -11,7 +11,8 @@ class SignupPlayerRequest {
     required this.name,
   });
 
-  factory SignupPlayerRequest.fromJson(Map<String, dynamic> json) => _$SignupPlayerRequestFromJson(json);
+  factory SignupPlayerRequest.fromJson(Map<String, dynamic> json) =>
+      _$SignupPlayerRequestFromJson(json);
   Map<String, dynamic> toJson() => _$SignupPlayerRequestToJson(this);
 }
 
@@ -20,7 +21,6 @@ class CreateGameRequest {
   final int? duration;
   final DateTime? date;
   final String comments;
-  final String image;
   final bool finished;
   final List<Ranking> rankings;
 
@@ -28,12 +28,12 @@ class CreateGameRequest {
     this.duration,
     this.date,
     required this.comments,
-    required this.image,
     required this.finished,
     required this.rankings,
   });
 
-  factory CreateGameRequest.fromJson(Map<String, dynamic> json) => _$CreateGameRequestFromJson(json);
+  factory CreateGameRequest.fromJson(Map<String, dynamic> json) =>
+      _$CreateGameRequestFromJson(json);
   Map<String, dynamic> toJson() => _$CreateGameRequestToJson(this);
 }
 
@@ -50,7 +50,8 @@ class UpdateGameRequest {
     required this.rankings,
   });
 
-  factory UpdateGameRequest.fromJson(Map<String, dynamic> json) => _$UpdateGameRequestFromJson(json);
+  factory UpdateGameRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateGameRequestFromJson(json);
   Map<String, dynamic> toJson() => _$UpdateGameRequestToJson(this);
 }
 
@@ -80,6 +81,7 @@ class GameEventRequest {
     this.targetRankingId,
   });
 
-  factory GameEventRequest.fromJson(Map<String, dynamic> json) => _$GameEventRequestFromJson(json);
+  factory GameEventRequest.fromJson(Map<String, dynamic> json) =>
+      _$GameEventRequestFromJson(json);
   Map<String, dynamic> toJson() => _$GameEventRequestToJson(this);
 }

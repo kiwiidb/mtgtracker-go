@@ -9,14 +9,14 @@ class Ranking {
   final int id;
   @JsonKey(name: 'player_id')
   final int playerId;
-  final int position;
+  int position;
   @JsonKey(name: 'life_total')
   final int? lifeTotal;
   final Deck deck;
   final Player? player;
   final String? status;
 
-  const Ranking({
+  Ranking({
     required this.id,
     required this.playerId,
     required this.position,
