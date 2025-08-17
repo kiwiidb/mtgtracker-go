@@ -124,13 +124,18 @@ func convertPlayerToDto(player *repository.Player) Player {
 					},
 						Count: 1,
 					}
+
 				} else {
 					deckMap[deckKey] = DeckWithCount{
 						Deck:  deckMap[deckKey].Deck,
 						Count: deckMap[deckKey].Count + 1,
 					}
 				}
-				break
+				if ranking.Position == 1 {
+					entry := deckMap[deckKey]
+					entry.Wins++
+					deckMap[deckKey] = entry
+				}
 			}
 		}
 

@@ -41,6 +41,7 @@ type PlayerWithCount struct {
 type DeckWithCount struct {
 	Deck  Deck `json:"deck"`
 	Count int  `json:"count"`
+	Wins  int  `json:"wins"`
 }
 type Player struct {
 	ID                   uint              `json:"id"`
