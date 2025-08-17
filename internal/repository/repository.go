@@ -112,7 +112,7 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Manually load games for this player since Games field has gorm:"-"
 	// We need to find games where this player has rankings
 	var games []Game
@@ -127,10 +127,10 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Populate the Games field manually
 	player.Games = games
-	
+
 	return &player, nil
 }
 
@@ -248,14 +248,6 @@ func (r *Repository) GetGames() ([]Game, error) {
 	}
 
 	return games, nil
-}
-
-func (r *Repository) DeleteDeck(deckID uint) error {
-	var deck Deck
-	if err := r.DB.First(&deck, deckID).Error; err != nil {
-		return errors.New("deck not found")
-	}
-	return r.DB.Delete(&deck).Error
 }
 
 func NewRepository(db *gorm.DB) *Repository {

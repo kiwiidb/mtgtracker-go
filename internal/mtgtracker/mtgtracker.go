@@ -78,7 +78,7 @@ func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Call the repository to get the games with active rankings
+	// Call the repository to get the games that are not finished
 	games, err := s.Repository.GetActiveGames(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -230,23 +230,6 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-func (s *Service) DeleteDeck(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to delete the deck
-	deckID := r.PathValue("deckId")
-	deckIDInt, err := strconv.Atoi(deckID)
-	if err != nil {
-		http.Error(w, "Invalid deck ID", http.StatusBadRequest)
-		return
-	}
-	err = s.Repository.DeleteDeck(uint(deckIDInt))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body
 	var request CreateGameRequest
@@ -351,6 +334,7 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error encoding response:", err)
 	}
 }
+
 func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 	gameIdStr := r.PathValue("gameId")
 	gameId, err := strconv.Atoi(gameIdStr)
@@ -437,7 +421,6 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedGame.GameEvents = []repository.GameEvent{} // Clear event
 	result := convertGameToDto(updatedGame)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
