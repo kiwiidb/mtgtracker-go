@@ -108,12 +108,6 @@ func convertPlayerToDto(player *repository.Player) Player {
 		// Find this player's ranking in the game
 		for _, ranking := range game.Rankings {
 			if ranking.PlayerID == player.ID {
-				// Count wins (position 1)
-				if ranking.Position == 1 {
-					wins++
-				}
-
-				// Collect unique decks
 				deckKey := ranking.Deck.Commander
 				if _, exists := deckMap[deckKey]; !exists {
 					deckMap[deckKey] = DeckWithCount{Deck: Deck{
@@ -129,9 +123,11 @@ func convertPlayerToDto(player *repository.Player) Player {
 					deckMap[deckKey] = DeckWithCount{
 						Deck:  deckMap[deckKey].Deck,
 						Count: deckMap[deckKey].Count + 1,
+						Wins:  deckMap[deckKey].Wins, // Keep the wins count intact
 					}
 				}
 				if ranking.Position == 1 {
+					wins++
 					entry := deckMap[deckKey]
 					entry.Wins++
 					deckMap[deckKey] = entry

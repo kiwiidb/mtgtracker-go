@@ -20,10 +20,12 @@ DeckWithCount _$DeckWithCountFromJson(Map<String, dynamic> json) =>
     DeckWithCount(
       deck: Deck.fromJson(json['deck'] as Map<String, dynamic>),
       count: (json['count'] as num).toInt(),
+      wins: (json['wins'] as num).toInt(),
     );
 
 Map<String, dynamic> _$DeckWithCountToJson(DeckWithCount instance) =>
     <String, dynamic>{
       'deck': instance.deck,
       'count': instance.count,
+      'wins': instance.wins,
     };

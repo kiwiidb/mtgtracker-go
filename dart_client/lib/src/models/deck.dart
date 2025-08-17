@@ -25,10 +25,12 @@ class Deck {
 class DeckWithCount {
   final Deck deck;
   final int count;
+  final int wins;
 
   const DeckWithCount({
     required this.deck,
     required this.count,
+    required this.wins,
   });
 
   factory DeckWithCount.fromJson(Map<String, dynamic> json) =>
