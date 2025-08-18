@@ -1,0 +1,33 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build and push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: mtgtracker
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tags: ${{ steps.meta.outputs.tags }}
+          dockerfile: Dockerfile
+          buildArgs: |
+            VERSION=${{ github.sha }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
