@@ -212,13 +212,8 @@ func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 	playerID := r.PathValue("playerId")
-	playerIDInt, err := strconv.Atoi(playerID)
-	if err != nil {
-		http.Error(w, "Invalid player ID", http.StatusBadRequest)
-		return
-	}
-	// Call the repository to get the player
-	player, err := s.Repository.GetPlayerByID(uint(playerIDInt))
+	// Call the repository to get the player by Firebase ID
+	player, err := s.Repository.GetPlayerByFirebaseID(playerID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -435,12 +430,7 @@ func (s *Service) DeleteFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	targetPlayerIDStr := r.PathValue("playerId")
-	targetPlayerID, err := strconv.Atoi(targetPlayerIDStr)
-	if err != nil {
-		http.Error(w, "Invalid player ID", http.StatusBadRequest)
-		return
-	}
+	targetPlayerID := r.PathValue("playerId")
 
 	// Get the current user's player record
 	currentPlayer, err := s.Repository.GetPlayerByFirebaseID(userID)
@@ -449,7 +439,7 @@ func (s *Service) DeleteFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.Repository.DeleteFollow(currentPlayer.ID, uint(targetPlayerID))
+	err = s.Repository.DeleteFollow(currentPlayer.FirebaseID, targetPlayerID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -476,7 +466,7 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	follows, err := s.Repository.GetFollows(currentPlayer.ID)
+	follows, err := s.Repository.GetFollows(currentPlayer.FirebaseID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -494,14 +484,9 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
-	playerIDStr := r.PathValue("playerId")
-	playerID, err := strconv.Atoi(playerIDStr)
-	if err != nil {
-		http.Error(w, "Invalid player ID", http.StatusBadRequest)
-		return
-	}
+	playerID := r.PathValue("playerId")
 
-	follows, err := s.Repository.GetFollows(uint(playerID))
+	follows, err := s.Repository.GetFollows(playerID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -15,7 +15,7 @@ type Repository struct {
 func (r *Repository) GetPendingGames(firebaseID string) ([]Game, error) {
 	var games []Game
 	err := r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
-		Joins("JOIN players ON rankings.player_id = players.id").
+		Joins("JOIN players ON rankings.player_id = players.firebase_id").
 		Where("rankings.status = ? AND players.firebase_id = ?", StatusPending, firebaseID).
 		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("Player")
@@ -33,7 +33,7 @@ func (r *Repository) GetPendingGames(firebaseID string) ([]Game, error) {
 func (r *Repository) GetActiveGames(firebaseID string) ([]Game, error) {
 	var games []Game
 	err := r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
-		Joins("JOIN players ON rankings.player_id = players.id").
+		Joins("JOIN players ON rankings.player_id = players.firebase_id").
 		Where("players.firebase_id = ? AND games.finished = ?", firebaseID, false).
 		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("Player")
@@ -77,7 +77,7 @@ func (r *Repository) AcceptRanking(rankingID uint) (*Ranking, error) {
 				_, err := r.CreateFollow(ranking.PlayerID, otherPlayerID)
 				if err != nil {
 					// Log error but don't fail the ranking acceptance
-					log.Printf("Error creating follow between players %d and %d: %v", ranking.PlayerID, otherPlayerID, err)
+					log.Printf("Error creating follow between players %s and %s: %v", ranking.PlayerID, otherPlayerID, err)
 				}
 			}
 		}
@@ -117,7 +117,7 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	// We need to find games where this player has rankings
 	var games []Game
 	err = r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
-		Where("rankings.player_id = ?", player.ID).
+		Where("rankings.player_id = ?", player.FirebaseID).
 		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("Player")
 		}).
@@ -151,47 +151,6 @@ func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	return players, nil
 }
 
-func (r *Repository) GetPlayerByID(id uint) (*Player, error) {
-	var player Player
-	err := r.DB.First(&player, id).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("player not found")
-		}
-		return nil, err
-	}
-
-	// Get games through rankings
-	var rankings []Ranking
-	err = r.DB.Preload("Player").Where("player_id = ?", id).Find(&rankings).Error
-	if err != nil {
-		return nil, err
-	}
-
-	// Get unique game IDs
-	gameIDs := make(map[uint]bool)
-	for _, ranking := range rankings {
-		gameIDs[ranking.GameID] = true
-	}
-
-	// Convert map keys to slice
-	gameIDSlice := make([]uint, 0, len(gameIDs))
-	for gameID := range gameIDs {
-		gameIDSlice = append(gameIDSlice, gameID)
-	}
-
-	// Get games with all their rankings and related data
-	var games []Game
-	if len(gameIDSlice) > 0 {
-		err = r.DB.Preload("Rankings.Player").Preload("GameEvents").Where("id IN ?", gameIDSlice).Order("date desc").Find(&games).Error
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	player.Games = games
-	return &player, nil
-}
 
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
@@ -258,7 +217,7 @@ func NewRepository(db *gorm.DB) *Repository {
 
 	// Add unique constraint for symmetrical follows
 	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_follow_pair 
-		ON follows (LEAST(player1_id, player2_id), GREATEST(player1_id, player2_id))`)
+		ON follows (player1_id, player2_id)`)
 
 	return &Repository{
 		DB: db,
@@ -275,7 +234,7 @@ func (r *Repository) InsertGame(duration *int, comments, image string, date *tim
 	// Ensure each ranking has valid player and deck (optional but safe)
 	for i, rank := range rankings {
 		var player Player
-		if err := r.DB.First(&player, rank.PlayerID).Error; err != nil {
+		if err := r.DB.Where("firebase_id = ?", rank.PlayerID).First(&player).Error; err != nil {
 			return nil, errors.New("invalid player ID")
 		}
 		rank.Player = player
@@ -327,7 +286,7 @@ func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
 	return &game, nil
 }
 
-func (r *Repository) CreateFollow(player1ID, player2ID uint) (*Follow, error) {
+func (r *Repository) CreateFollow(player1ID, player2ID string) (*Follow, error) {
 	if player1ID == player2ID {
 		return nil, errors.New("cannot follow yourself")
 	}
@@ -354,7 +313,7 @@ func (r *Repository) CreateFollow(player1ID, player2ID uint) (*Follow, error) {
 	return &follow, nil
 }
 
-func (r *Repository) DeleteFollow(player1ID, player2ID uint) error {
+func (r *Repository) DeleteFollow(player1ID, player2ID string) error {
 	if player1ID == player2ID {
 		return errors.New("invalid follow relationship")
 	}
@@ -376,7 +335,7 @@ func (r *Repository) DeleteFollow(player1ID, player2ID uint) error {
 	return nil
 }
 
-func (r *Repository) GetFollows(playerID uint) ([]Player, error) {
+func (r *Repository) GetFollows(playerID string) ([]Player, error) {
 	var follows []Follow
 
 	// Get all follows where the player is either player1 or player2
@@ -399,7 +358,7 @@ func (r *Repository) GetFollows(playerID uint) ([]Player, error) {
 	return followedPlayers, nil
 }
 
-func (r *Repository) IsFollowing(player1ID, player2ID uint) (bool, error) {
+func (r *Repository) IsFollowing(player1ID, player2ID string) (bool, error) {
 	if player1ID == player2ID {
 		return false, nil
 	}
@@ -418,14 +377,14 @@ func (r *Repository) IsFollowing(player1ID, player2ID uint) (bool, error) {
 	return count > 0, nil
 }
 
-func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]uint, error) {
+func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]string, error) {
 	var rankings []Ranking
 	err := r.DB.Where("game_id = ? AND status = ?", gameID, StatusAccepted).Find(&rankings).Error
 	if err != nil {
 		return nil, err
 	}
 
-	playerIDs := make([]uint, 0, len(rankings))
+	playerIDs := make([]string, 0, len(rankings))
 	for _, ranking := range rankings {
 		playerIDs = append(playerIDs, ranking.PlayerID)
 	}

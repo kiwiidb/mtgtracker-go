@@ -74,7 +74,7 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 				Image:        rank.Deck.Image,
 			},
 			Player: Player{
-				ID:   rank.Player.ID,
+				ID:   rank.Player.FirebaseID,
 				Name: rank.Player.Name,
 			},
 		}
@@ -84,7 +84,7 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 
 func convertPlayerToDto(player *repository.Player) Player {
 	result := Player{
-		ID:   player.ID,
+		ID:   player.FirebaseID,
 		Name: player.Name,
 	}
 
@@ -92,7 +92,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 	totalGames := len(player.Games)
 	wins := 0
 	deckMap := make(map[string]DeckWithCount)
-	coPlayerMap := make(map[uint]PlayerWithCount)
+	coPlayerMap := make(map[string]PlayerWithCount)
 	games := make([]Game, len(player.Games))
 
 	for i, game := range player.Games {
@@ -107,7 +107,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 		// Find this player's ranking in the game
 		for _, ranking := range game.Rankings {
-			if ranking.PlayerID == player.ID {
+			if ranking.PlayerID == player.FirebaseID {
 				deckKey := ranking.Deck.Commander
 				if _, exists := deckMap[deckKey]; !exists {
 					deckMap[deckKey] = DeckWithCount{Deck: Deck{
@@ -137,14 +137,14 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 		// Collect co-players
 		for _, ranking := range game.Rankings {
-			if ranking.PlayerID != player.ID {
+			if ranking.PlayerID != player.FirebaseID {
 				if coPlayer, exists := coPlayerMap[ranking.PlayerID]; exists {
 					coPlayer.Count++
 					coPlayerMap[ranking.PlayerID] = coPlayer
 				} else {
 					coPlayerMap[ranking.PlayerID] = PlayerWithCount{
 						Player: Player{
-							ID:   ranking.Player.ID,
+							ID:   ranking.Player.FirebaseID,
 							Name: ranking.Player.Name,
 						},
 						Count: 1,

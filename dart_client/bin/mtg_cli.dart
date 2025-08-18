@@ -51,7 +51,7 @@ void printUsage(ArgParser argParser) {
   print('  game                     Manage games');
   print('    create <comments>      Create a new game');
   print(
-      '    mock-game <players>    Create a mock Commander game (2-4 players)');
+      '    mock-game <player1> <player2> [player3] [player4]    Create a mock Commander game');
   print('    list                   List all games');
   print('    active                 List active games');
   print('    get <id>               Get game by ID');
@@ -165,11 +165,7 @@ Future<void> handlePlayerCommand(
         print('Error: Player ID required.');
         exit(1);
       }
-      final playerId = int.tryParse(args[1]);
-      if (playerId == null) {
-        print('Error: Invalid player ID "${args[1]}".');
-        exit(1);
-      }
+      final playerId = args[1];
       final player = await client.getPlayer(playerId);
       print(jsonEncode(player.toJson()));
       break;
@@ -210,25 +206,26 @@ Future<void> handleGameCommand(
       break;
 
     case 'mock-game':
-      if (args.length < 2) {
-        print('Error: Number of players required for mock game.');
-        print('Usage: game mock-game <players>');
-        print('Players must be between 2 and 4.');
+      if (args.length < 3) {
+        print('Error: At least 2 player IDs required for mock game.');
+        print('Usage: game mock-game <player1> <player2> [player3] [player4]');
         exit(1);
       }
 
-      final playerCount = int.tryParse(args[1]);
-      if (playerCount == null || playerCount < 2 || playerCount > 4) {
-        print('Error: Invalid player count "${args[1]}".');
-        print('Players must be between 2 and 4.');
+      // Extract player IDs from arguments (skip the 'mock-game' command)
+      final playerIds = args.sublist(1);
+      
+      if (playerIds.length < 2 || playerIds.length > 4) {
+        print('Error: Must provide between 2 and 4 player IDs.');
+        print('Usage: game mock-game <player1> <player2> [player3] [player4]');
         exit(1);
       }
 
       // Generate randomized mock rankings
-      final mockRankings = MockGameGenerator.generateMockRankings(playerCount);
+      final mockRankings = MockGameGenerator.generateMockRankings(playerIds);
 
       final mockGame = await client.createGame(CreateGameRequest(
-        comments: 'Mock Commander Game - $playerCount players',
+        comments: 'Mock Commander Game - ${playerIds.length} players: ${playerIds.join(", ")}',
         finished: false,
         rankings: mockRankings,
       ));

@@ -49,22 +49,22 @@ class MockGameGenerator {
   ];
 
   /// Generates a list of mock rankings with randomized commanders
-  /// [playerCount] must be between 2 and 4
-  static List<Ranking> generateMockRankings(int playerCount) {
-    if (playerCount < 2 || playerCount > 4) {
-      throw ArgumentError('Player count must be between 2 and 4');
+  /// [playerIds] must contain between 2 and 4 player IDs
+  static List<Ranking> generateMockRankings(List<String> playerIds) {
+    if (playerIds.length < 2 || playerIds.length > 4) {
+      throw ArgumentError('Player IDs list must contain between 2 and 4 players');
     }
 
     // Shuffle commanders and take the required number
     final shuffledCommanders = List<MockCommander>.from(_commanders)..shuffle(_random);
-    final selectedCommanders = shuffledCommanders.take(playerCount).toList();
+    final selectedCommanders = shuffledCommanders.take(playerIds.length).toList();
 
     final rankings = <Ranking>[];
-    for (int i = 0; i < playerCount; i++) {
+    for (int i = 0; i < playerIds.length; i++) {
       final commander = selectedCommanders[i];
       rankings.add(Ranking(
         id: 0,
-        playerId: i + 1,
+        playerId: playerIds[i],
         position: i + 1,
         lifeTotal: 40,
         deck: Deck(

@@ -6,7 +6,7 @@ part 'player.g.dart';
 
 @JsonSerializable()
 class Player {
-  final int id;
+  final String id;
   final String name;
   @JsonKey(name: 'winrate_all_time')
   final double winrateAllTime;

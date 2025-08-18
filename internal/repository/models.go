@@ -21,11 +21,13 @@ type Deck struct {
 }
 
 type Player struct {
-	gorm.Model
-	FirebaseID string `gorm:"unique;not null" json:"firebase_id"`
+	FirebaseID string `gorm:"primaryKey" json:"firebase_id"`
 	Name       string `gorm:"unique;not null" json:"name"`
 	Email      string `gorm:"unique;not null" json:"email"`
 	Image      string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	Games      []Game `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
 }
 type Game struct {
@@ -50,7 +52,7 @@ const (
 type Ranking struct {
 	gorm.Model
 	GameID         uint          `json:"game_id"`
-	PlayerID       uint          `json:"player_id"`
+	PlayerID       string        `json:"player_id"`
 	Position       int           `json:"position"`
 	CouldHaveWon   bool          `json:"could_have_won"`
 	EarlySolRing   bool          `json:"early_sol_ring"`
@@ -58,7 +60,7 @@ type Ranking struct {
 	Status         RankingStatus `json:"status"`
 	PlayerName     string        `gorm:"-"`
 
-	Player Player `json:"player"`
+	Player Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player"`
 	Deck   Deck   `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
 }
 
@@ -69,7 +71,7 @@ type DeckWin struct {
 }
 
 type PlayerWin struct {
-	PlayerID uint
+	PlayerID string
 	Player   Player
 	Wins     int
 	DeckWins []DeckWin
@@ -91,9 +93,9 @@ type GameEvent struct {
 
 type Follow struct {
 	gorm.Model
-	Player1ID uint `gorm:"not null" json:"player1_id"`
-	Player2ID uint `gorm:"not null" json:"player2_id"`
+	Player1ID string `gorm:"not null" json:"player1_id"`
+	Player2ID string `gorm:"not null" json:"player2_id"`
 
-	Player1 Player `gorm:"foreignKey:Player1ID;references:ID" json:"player1"`
-	Player2 Player `gorm:"foreignKey:Player2ID;references:ID" json:"player2"`
+	Player1 Player `gorm:"foreignKey:Player1ID;references:FirebaseID" json:"player1"`
+	Player2 Player `gorm:"foreignKey:Player2ID;references:FirebaseID" json:"player2"`
 }

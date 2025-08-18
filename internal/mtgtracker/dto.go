@@ -44,7 +44,7 @@ type DeckWithCount struct {
 	Wins  int  `json:"wins"`
 }
 type Player struct {
-	ID                   uint              `json:"id"`
+	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
 	WinrateAllTime       float64           `json:"winrate_all_time"`
 	NumberofGamesAllTime int               `json:"number_of_games_all_time"`
@@ -80,7 +80,7 @@ type GameEvent struct {
 
 type Ranking struct {
 	ID        uint          `json:"id"`
-	PlayerID  uint          `json:"player_id"`
+	PlayerID  string        `json:"player_id"`
 	Position  int           `json:"position"`
 	LifeTotal *uint         `json:"life_total,omitempty"`
 	Deck      Deck          `json:"deck"`

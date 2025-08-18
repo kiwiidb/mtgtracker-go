@@ -75,7 +75,7 @@ class MTGTrackerClient {
     return _handleListResponse(response, Player.fromJson);
   }
 
-  Future<Player> getPlayer(int playerId) async {
+  Future<Player> getPlayer(String playerId) async {
     final response = await _httpClient.get(
       Uri.parse('$baseUrl/player/v1/players/$playerId'),
       headers: _headers,
