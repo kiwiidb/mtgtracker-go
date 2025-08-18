@@ -35,12 +35,16 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 	var sourceCommander, targetCommander string
 
 	if event.SourceRanking != nil {
-		sourcePlayer = event.SourceRanking.Player.Name
+		if event.SourceRanking.Player != nil {
+			sourcePlayer = event.SourceRanking.Player.Name
+		}
 		sourceCommander = event.SourceRanking.Deck.Commander
 	}
 
 	if event.TargetRanking != nil {
-		targetPlayer = event.TargetRanking.Player.Name
+		if event.TargetRanking.Player != nil {
+			targetPlayer = event.TargetRanking.Player.Name
+		}
 		targetCommander = event.TargetRanking.Deck.Commander
 	}
 
@@ -73,10 +77,15 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 				SecondaryImg: rank.Deck.SecondaryImage,
 				Image:        rank.Deck.Image,
 			},
-			Player: Player{
-				ID:   rank.Player.FirebaseID,
-				Name: rank.Player.Name,
-			},
+			Player: func() *Player {
+				if rank.Player != nil {
+					return &Player{
+						ID:   rank.Player.FirebaseID,
+						Name: rank.Player.Name,
+					}
+				}
+				return nil
+			}(),
 		}
 	}
 	return result
@@ -107,7 +116,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 		// Find this player's ranking in the game
 		for _, ranking := range game.Rankings {
-			if ranking.PlayerID == player.FirebaseID {
+			if ranking.PlayerID != nil && *ranking.PlayerID == player.FirebaseID {
 				deckKey := ranking.Deck.Commander
 				if _, exists := deckMap[deckKey]; !exists {
 					deckMap[deckKey] = DeckWithCount{Deck: Deck{
@@ -137,15 +146,22 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 		// Collect co-players
 		for _, ranking := range game.Rankings {
-			if ranking.PlayerID != player.FirebaseID {
-				if coPlayer, exists := coPlayerMap[ranking.PlayerID]; exists {
+			if ranking.PlayerID != nil && *ranking.PlayerID != player.FirebaseID {
+				if coPlayer, exists := coPlayerMap[*ranking.PlayerID]; exists {
 					coPlayer.Count++
-					coPlayerMap[ranking.PlayerID] = coPlayer
+					coPlayerMap[*ranking.PlayerID] = coPlayer
 				} else {
-					coPlayerMap[ranking.PlayerID] = PlayerWithCount{
+					coPlayerMap[*ranking.PlayerID] = PlayerWithCount{
 						Player: Player{
-							ID:   ranking.Player.FirebaseID,
-							Name: ranking.Player.Name,
+							ID:   func() string { 
+								if ranking.Player != nil { return ranking.Player.FirebaseID } 
+								if ranking.PlayerID != nil { return *ranking.PlayerID }
+								return ""
+							}(),
+							Name: func() string { 
+								if ranking.Player != nil { return ranking.Player.Name } 
+								return "" 
+							}(),
 						},
 						Count: 1,
 					}

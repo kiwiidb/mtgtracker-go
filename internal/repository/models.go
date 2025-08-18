@@ -52,7 +52,7 @@ const (
 type Ranking struct {
 	gorm.Model
 	GameID         uint          `json:"game_id"`
-	PlayerID       string        `json:"player_id"`
+	PlayerID       *string       `json:"player_id,omitempty"`
 	Position       int           `json:"position"`
 	CouldHaveWon   bool          `json:"could_have_won"`
 	EarlySolRing   bool          `json:"early_sol_ring"`
@@ -60,7 +60,7 @@ type Ranking struct {
 	Status         RankingStatus `json:"status"`
 	PlayerName     string        `gorm:"-"`
 
-	Player Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player"`
+	Player *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
 	Deck   Deck   `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
 }
 

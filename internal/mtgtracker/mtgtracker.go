@@ -227,6 +227,7 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body
+	userId := middleware.GetUserID(r)
 	var request CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -241,12 +242,18 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
 
-		rankings = append(rankings, repository.Ranking{
+		toAdd := repository.Ranking{
 			PlayerID: rank.PlayerID,
 			Position: rank.Position,
 			Status:   repository.StatusPending,
 			Deck:     convertDeck(rank.Deck),
-		})
+		}
+
+		// we always accept our own ranking duh
+		if rank.PlayerID != nil && userId == *rank.PlayerID {
+			toAdd.Status = repository.StatusAccepted
+		}
+		rankings = append(rankings, toAdd)
 	}
 	game, err := s.Repository.InsertGame(request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {

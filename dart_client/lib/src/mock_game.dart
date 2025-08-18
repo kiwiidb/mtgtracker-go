@@ -50,6 +50,7 @@ class MockGameGenerator {
 
   /// Generates a list of mock rankings with randomized commanders
   /// [playerIds] must contain between 2 and 4 player IDs
+  /// Use "guest" as a player ID to create a ranking with null playerId
   static List<Ranking> generateMockRankings(List<String> playerIds) {
     if (playerIds.length < 2 || playerIds.length > 4) {
       throw ArgumentError('Player IDs list must contain between 2 and 4 players');
@@ -62,9 +63,11 @@ class MockGameGenerator {
     final rankings = <Ranking>[];
     for (int i = 0; i < playerIds.length; i++) {
       final commander = selectedCommanders[i];
+      final playerId = playerIds[i];
+      
       rankings.add(Ranking(
         id: 0,
-        playerId: playerIds[i],
+        playerId: playerId == 'guest' ? null : playerId,
         position: i + 1,
         lifeTotal: 40,
         deck: Deck(

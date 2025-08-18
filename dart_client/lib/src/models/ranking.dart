@@ -8,7 +8,7 @@ part 'ranking.g.dart';
 class Ranking {
   final int id;
   @JsonKey(name: 'player_id')
-  final String playerId;
+  final String? playerId;
   int position;
   @JsonKey(name: 'life_total')
   final int? lifeTotal;
@@ -18,7 +18,7 @@ class Ranking {
 
   Ranking({
     required this.id,
-    required this.playerId,
+    this.playerId,
     required this.position,
     this.lifeTotal,
     required this.deck,

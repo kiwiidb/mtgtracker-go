@@ -51,7 +51,7 @@ void printUsage(ArgParser argParser) {
   print('  game                     Manage games');
   print('    create <comments>      Create a new game');
   print(
-      '    mock-game <player1> <player2> [player3] [player4]    Create a mock Commander game');
+      '    mock-game <player1> <player2> [player3] [player4]    Create a mock Commander game (use "guest" for anonymous players)');
   print('    list                   List all games');
   print('    active                 List active games');
   print('    get <id>               Get game by ID');

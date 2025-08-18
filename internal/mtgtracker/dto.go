@@ -80,11 +80,11 @@ type GameEvent struct {
 
 type Ranking struct {
 	ID        uint          `json:"id"`
-	PlayerID  string        `json:"player_id"`
+	PlayerID  *string       `json:"player_id,omitempty"`
 	Position  int           `json:"position"`
 	LifeTotal *uint         `json:"life_total,omitempty"`
 	Deck      Deck          `json:"deck"`
-	Player    Player        `json:"player,omitempty"` // Optional, can be omitted if not needed
+	Player    *Player       `json:"player,omitempty"` // Optional, can be omitted if not needed
 	Status    RankingStatus `json:"status,omitempty"` // Optional, can be omitted if not needed
 }
 

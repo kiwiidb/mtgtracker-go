@@ -72,12 +72,14 @@ func (r *Repository) AcceptRanking(rankingID uint) (*Ranking, error) {
 		// Don't fail the ranking acceptance if follow creation fails
 	} else {
 		// Create follows between the current player and all other accepted players
-		for _, otherPlayerID := range acceptedPlayerIDs {
-			if otherPlayerID != ranking.PlayerID {
-				_, err := r.CreateFollow(ranking.PlayerID, otherPlayerID)
-				if err != nil {
-					// Log error but don't fail the ranking acceptance
-					log.Printf("Error creating follow between players %s and %s: %v", ranking.PlayerID, otherPlayerID, err)
+		if ranking.PlayerID != nil {
+			for _, otherPlayerID := range acceptedPlayerIDs {
+				if otherPlayerID != *ranking.PlayerID {
+					_, err := r.CreateFollow(*ranking.PlayerID, otherPlayerID)
+					if err != nil {
+						// Log error but don't fail the ranking acceptance
+						log.Printf("Error creating follow between players %s and %s: %v", *ranking.PlayerID, otherPlayerID, err)
+					}
 				}
 			}
 		}
@@ -233,11 +235,15 @@ func (r *Repository) InsertGame(duration *int, comments, image string, date *tim
 
 	// Ensure each ranking has valid player and deck (optional but safe)
 	for i, rank := range rankings {
-		var player Player
-		if err := r.DB.Where("firebase_id = ?", rank.PlayerID).First(&player).Error; err != nil {
-			return nil, errors.New("invalid player ID")
+		if rank.PlayerID != nil {
+			var player Player
+			if err := r.DB.Where("firebase_id = ?", *rank.PlayerID).First(&player).Error; err != nil {
+				return nil, errors.New("invalid player ID")
+			}
+			rank.Player = &player
+		} else {
+			rank.Player = nil
 		}
-		rank.Player = player
 		rankings[i] = rank
 
 	}
@@ -386,7 +392,9 @@ func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]string, error) {
 
 	playerIDs := make([]string, 0, len(rankings))
 	for _, ranking := range rankings {
-		playerIDs = append(playerIDs, ranking.PlayerID)
+		if ranking.PlayerID != nil {
+			playerIDs = append(playerIDs, *ranking.PlayerID)
+		}
 	}
 
 	return playerIDs, nil
