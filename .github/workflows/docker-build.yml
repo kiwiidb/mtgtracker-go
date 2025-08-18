@@ -26,8 +26,3 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          tags: ${{ steps.meta.outputs.tags }}
-          dockerfile: Dockerfile
-          buildArgs: |
-            VERSION=${{ github.sha }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
