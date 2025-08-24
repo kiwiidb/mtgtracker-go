@@ -23,6 +23,7 @@ func main() {
 	ctx := context.Background()
 	var authClient *auth.Client
 	if os.Getenv("FIREBASE_CONFIG") != "" {
+		log.Println("initializing firebase")
 		app, err := firebase.NewApp(ctx, nil)
 		if err != nil {
 			log.Fatal("failed to initialize Firebase app", err)
@@ -38,7 +39,8 @@ func main() {
 	// a local postgres dsn mtgtracker, the dsn is:
 	// export POSTGRES_DSN="host=localhost user=postgres password=postgres dbname=mtgtracker port=5432 sslmode=disable"
 	// docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=mtgtracker -p 5432:5432 postgres
-	// docker ex
+	// docker exec -it postgres psql -U postgres -d mtgtracker
+	log.Println("initializing database")
 	db, err := gorm.Open(postgres.Open(os.Getenv("POSTGRES_DSN")), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect to database", err)
@@ -48,6 +50,7 @@ func main() {
 	repo := repository.NewRepository(db)
 
 	// // Initialize the S3 storage
+	log.Println("initializing storage")
 	storage := storage.InitStorage()
 
 	// // Initialize the service
