@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"firebase.google.com/go/v4/auth"
 )
@@ -110,5 +111,63 @@ func CorsMw(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+	size       int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	size, err := rw.ResponseWriter.Write(b)
+	rw.size += size
+	return size, err
+}
+
+func ApacheLogMw(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		rw := &responseWriter{
+			ResponseWriter: w,
+			statusCode:     200,
+			size:           0,
+		}
+
+		next.ServeHTTP(rw, r)
+
+		clientIP := r.RemoteAddr
+		if forwardedFor := r.Header.Get("X-Forwarded-For"); forwardedFor != "" {
+			clientIP = strings.Split(forwardedFor, ",")[0]
+		} else if realIP := r.Header.Get("X-Real-IP"); realIP != "" {
+			clientIP = realIP
+		}
+
+		userID := "-"
+		if uid := GetUserID(r); uid != "" {
+			userID = uid
+		}
+
+		timestamp := start.Format("02/Jan/2006:15:04:05 -0700")
+		duration := time.Since(start)
+
+		log.Printf("%s - %s [%s] \"%s %s %s\" %d %d %v",
+			clientIP,
+			userID,
+			timestamp,
+			r.Method,
+			r.URL.RequestURI(),
+			r.Proto,
+			rw.statusCode,
+			rw.size,
+			duration,
+		)
 	})
 }

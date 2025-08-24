@@ -59,8 +59,9 @@ func main() {
 	mux := http.NewServeMux()
 
 	service.RegisterRoutes(mux)
-	// add cors middleware on all routes
-	handler := middleware.CorsMw(mux)
+	// add middleware chain
+	handler := middleware.ApacheLogMw(mux)
+	handler = middleware.CorsMw(handler)
 	handler = middleware.JsonMw(handler)
 	if authClient != nil {
 		// Use Firebase Auth middleware if authClient is available
