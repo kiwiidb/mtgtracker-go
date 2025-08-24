@@ -25,9 +25,6 @@ WORKDIR /app
 # Copy the built Go binary from the builder stage
 COPY --from=builder /app/server .
 
-# Copy static files
-COPY --from=builder /app/static ./static
-
 # Expose the application port
 EXPOSE 8080
 
