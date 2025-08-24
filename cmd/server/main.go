@@ -71,9 +71,6 @@ func main() {
 		handler = middleware.MockFirebaseAuthMw(handler)
 	}
 
-	//serve static files
-	mux.Handle("/", http.FileServer(http.Dir("static")))
-
 	// Start the server
 	log.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", handler))
