@@ -10,14 +10,18 @@ type SignupPlayerRequest struct {
 
 // duration int, comments, image string, rankings []Ranking
 type CreateGameRequest struct {
-	Duration *int       `json:"duration"`
-	Date     *time.Time `json:"date"`
-	Comments string     `json:"comments"`
-	Image    string     `json:"image"`
-	Finished bool       `json:"finished"`
-	Rankings []Ranking  `json:"rankings"`
+	Duration *int                   `json:"duration"`
+	Date     *time.Time             `json:"date"`
+	Comments string                 `json:"comments"`
+	Image    string                 `json:"image"`
+	Finished bool                   `json:"finished"`
+	Rankings []CreateRankingRequest `json:"rankings"`
 }
 
+type CreateRankingRequest struct {
+	PlayerID *string `json:"player_id,omitempty"`
+	Deck     Deck    `json:"deck"`
+}
 type UpdateGameRequest struct {
 	GameID   uint      `json:"game_id"`
 	Finished *bool     `json:"finished"`

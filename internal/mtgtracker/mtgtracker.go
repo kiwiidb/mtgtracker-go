@@ -244,7 +244,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 		toAdd := repository.Ranking{
 			PlayerID: rank.PlayerID,
-			Position: rank.Position,
+			Position: 0,
 			Status:   repository.StatusPending,
 			Deck:     convertDeck(rank.Deck),
 		}
