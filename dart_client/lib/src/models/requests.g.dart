@@ -17,6 +17,20 @@ Map<String, dynamic> _$SignupPlayerRequestToJson(
       'name': instance.name,
     };
 
+CreateRankingRequest _$CreateRankingRequestFromJson(
+        Map<String, dynamic> json) =>
+    CreateRankingRequest(
+      playerId: json['player_id'] as String?,
+      deck: Deck.fromJson(json['deck'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$CreateRankingRequestToJson(
+        CreateRankingRequest instance) =>
+    <String, dynamic>{
+      'player_id': instance.playerId,
+      'deck': instance.deck,
+    };
+
 CreateGameRequest _$CreateGameRequestFromJson(Map<String, dynamic> json) =>
     CreateGameRequest(
       duration: (json['duration'] as num?)?.toInt(),
@@ -25,7 +39,7 @@ CreateGameRequest _$CreateGameRequestFromJson(Map<String, dynamic> json) =>
       comments: json['comments'] as String,
       finished: json['finished'] as bool,
       rankings: (json['rankings'] as List<dynamic>)
-          .map((e) => Ranking.fromJson(e as Map<String, dynamic>))
+          .map((e) => CreateRankingRequest.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

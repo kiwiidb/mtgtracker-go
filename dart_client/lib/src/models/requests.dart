@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'ranking.dart';
+import 'deck.dart';
 
 part 'requests.g.dart';
 
@@ -17,12 +18,28 @@ class SignupPlayerRequest {
 }
 
 @JsonSerializable()
+class CreateRankingRequest {
+  @JsonKey(name: 'player_id')
+  final String? playerId;
+  final Deck deck;
+
+  const CreateRankingRequest({
+    this.playerId,
+    required this.deck,
+  });
+
+  factory CreateRankingRequest.fromJson(Map<String, dynamic> json) =>
+      _$CreateRankingRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$CreateRankingRequestToJson(this);
+}
+
+@JsonSerializable()
 class CreateGameRequest {
   final int? duration;
   final DateTime? date;
   final String comments;
   final bool finished;
-  final List<Ranking> rankings;
+  final List<CreateRankingRequest> rankings;
 
   const CreateGameRequest({
     this.duration,
