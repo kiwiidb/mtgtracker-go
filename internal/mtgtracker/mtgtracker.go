@@ -6,6 +6,7 @@ import (
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/repository"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -52,20 +53,28 @@ func (s *Service) GetPendingGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse pagination parameters
+	params := parsePaginationParams(r.URL.Query())
+
 	// Call the repository to get the games with pending rankings
-	games, err := s.Repository.GetPendingGames(userID)
+	games, pagination, err := s.Repository.GetPendingGamesPaginated(userID, params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Convert games to DTOs
-	result := make([]Game, 0, len(games))
+	gamesDtos := make([]Game, 0, len(games))
 	for _, game := range games {
-		result = append(result, convertGameToDto(&game))
+		gamesDtos = append(gamesDtos, convertGameToDto(&game))
 	}
 
-	err = json.NewEncoder(w).Encode(result)
+	response := PaginatedResponse[Game]{
+		Data:       gamesDtos,
+		Pagination: convertPaginationResult(pagination),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -78,20 +87,28 @@ func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse pagination parameters
+	params := parsePaginationParams(r.URL.Query())
+
 	// Call the repository to get the games that are not finished
-	games, err := s.Repository.GetActiveGames(userID)
+	games, pagination, err := s.Repository.GetActiveGamesPaginated(userID, params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Convert games to DTOs
-	result := make([]Game, 0, len(games))
+	gameDtos := make([]Game, 0, len(games))
 	for _, game := range games {
-		result = append(result, convertGameToDto(&game))
+		gameDtos = append(gameDtos, convertGameToDto(&game))
 	}
 
-	err = json.NewEncoder(w).Encode(result)
+	response := PaginatedResponse[Game]{
+		Data:       gameDtos,
+		Pagination: convertPaginationResult(pagination),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -190,21 +207,29 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to get the players
-	// use the search query parameters if needed
+	// Parse query parameters
 	search := r.URL.Query().Get("search")
-	players, err := s.Repository.GetPlayers(search)
+	params := parsePaginationParams(r.URL.Query())
+
+	// Call the repository to get the players
+	players, pagination, err := s.Repository.GetPlayersPaginated(search, params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Player, 0, len(players))
+	playerDtos := make([]Player, 0, len(players))
 	for _, player := range players {
 		// Convert the player to a DTO
-		result = append(result, convertPlayerToDto(&player))
+		playerDtos = append(playerDtos, convertPlayerToDto(&player))
 	}
-	err = json.NewEncoder(w).Encode(result)
+
+	response := PaginatedResponse[Player]{
+		Data:       playerDtos,
+		Pagination: convertPaginationResult(pagination),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -356,19 +381,28 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
+	// Parse pagination parameters
+	params := parsePaginationParams(r.URL.Query())
+
 	// Call the repository to get the games
-	games, err := s.Repository.GetGames()
+	games, pagination, err := s.Repository.GetGamesPaginated(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Game, 0, len(games))
+	gameDtos := make([]Game, 0, len(games))
 	for _, game := range games {
 		// Convert the game to a DTO
-		result = append(result, convertGameToDto(&game))
+		gameDtos = append(gameDtos, convertGameToDto(&game))
 	}
-	err = json.NewEncoder(w).Encode(result)
+
+	response := PaginatedResponse[Game]{
+		Data:       gameDtos,
+		Pagination: convertPaginationResult(pagination),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -473,18 +507,26 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	follows, err := s.Repository.GetFollows(currentPlayer.FirebaseID)
+	// Parse pagination parameters
+	params := parsePaginationParams(r.URL.Query())
+
+	follows, pagination, err := s.Repository.GetFollowsPaginated(currentPlayer.FirebaseID, params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Player, 0, len(follows))
+	playerDtos := make([]Player, 0, len(follows))
 	for _, player := range follows {
-		result = append(result, convertPlayerToDto(&player))
+		playerDtos = append(playerDtos, convertPlayerToDto(&player))
 	}
 
-	err = json.NewEncoder(w).Encode(result)
+	response := PaginatedResponse[Player]{
+		Data:       playerDtos,
+		Pagination: convertPaginationResult(pagination),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -493,19 +535,59 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
 	playerID := r.PathValue("playerId")
 
-	follows, err := s.Repository.GetFollows(playerID)
+	// Parse pagination parameters
+	params := parsePaginationParams(r.URL.Query())
+
+	follows, pagination, err := s.Repository.GetFollowsPaginated(playerID, params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Player, 0, len(follows))
+	playerDtos := make([]Player, 0, len(follows))
 	for _, player := range follows {
-		result = append(result, convertPlayerToDto(&player))
+		playerDtos = append(playerDtos, convertPlayerToDto(&player))
 	}
 
-	err = json.NewEncoder(w).Encode(result)
+	response := PaginatedResponse[Player]{
+		Data:       playerDtos,
+		Pagination: convertPaginationResult(pagination),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
+	}
+}
+
+func parsePaginationParams(values url.Values) repository.PaginationParams {
+	page := 1
+	if p := values.Get("page"); p != "" {
+		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
+			page = parsed
+		}
+	}
+
+	pageSize := 20
+	if ps := values.Get("page_size"); ps != "" {
+		if parsed, err := strconv.Atoi(ps); err == nil && parsed > 0 && parsed <= 100 {
+			pageSize = parsed
+		}
+	}
+
+	return repository.PaginationParams{
+		Page:     page,
+		PageSize: pageSize,
+	}
+}
+
+func convertPaginationResult(repoResult repository.PaginationResult) PaginationInfo {
+	return PaginationInfo{
+		Page:       repoResult.Page,
+		PageSize:   repoResult.PageSize,
+		TotalItems: repoResult.TotalItems,
+		TotalPages: repoResult.TotalPages,
+		HasNext:    repoResult.HasNext,
+		HasPrev:    repoResult.HasPrev,
 	}
 }

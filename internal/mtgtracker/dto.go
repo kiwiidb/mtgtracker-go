@@ -102,3 +102,17 @@ type Deck struct {
 	SecondaryImg string `json:"secondary_image"`
 	Image        string `json:"image"`
 }
+
+type PaginationInfo struct {
+	Page       int  `json:"page"`
+	PageSize   int  `json:"page_size"`
+	TotalItems int  `json:"total_items"`
+	TotalPages int  `json:"total_pages"`
+	HasNext    bool `json:"has_next"`
+	HasPrev    bool `json:"has_prev"`
+}
+
+type PaginatedResponse[T any] struct {
+	Data       []T            `json:"data"`
+	Pagination PaginationInfo `json:"pagination"`
+}

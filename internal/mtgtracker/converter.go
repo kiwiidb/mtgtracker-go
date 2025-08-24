@@ -153,14 +153,20 @@ func convertPlayerToDto(player *repository.Player) Player {
 				} else {
 					coPlayerMap[*ranking.PlayerID] = PlayerWithCount{
 						Player: Player{
-							ID:   func() string { 
-								if ranking.Player != nil { return ranking.Player.FirebaseID } 
-								if ranking.PlayerID != nil { return *ranking.PlayerID }
+							ID: func() string {
+								if ranking.Player != nil {
+									return ranking.Player.FirebaseID
+								}
+								if ranking.PlayerID != nil {
+									return *ranking.PlayerID
+								}
 								return ""
 							}(),
-							Name: func() string { 
-								if ranking.Player != nil { return ranking.Player.Name } 
-								return "" 
+							Name: func() string {
+								if ranking.Player != nil {
+									return ranking.Player.Name
+								}
+								return ""
 							}(),
 						},
 						Count: 1,

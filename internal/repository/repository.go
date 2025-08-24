@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"log"
+	"math"
 	"time"
 
 	"gorm.io/gorm"
@@ -10,6 +11,20 @@ import (
 
 type Repository struct {
 	DB *gorm.DB
+}
+
+type PaginationParams struct {
+	Page     int
+	PageSize int
+}
+
+type PaginationResult struct {
+	Page       int
+	PageSize   int
+	TotalItems int
+	TotalPages int
+	HasNext    bool
+	HasPrev    bool
 }
 
 func (r *Repository) GetPendingGames(firebaseID string) ([]Game, error) {
@@ -152,7 +167,6 @@ func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	}
 	return players, nil
 }
-
 
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
@@ -398,4 +412,198 @@ func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]string, error) {
 	}
 
 	return playerIDs, nil
+}
+
+func (r *Repository) GetPendingGamesPaginated(firebaseID string, params PaginationParams) ([]Game, PaginationResult, error) {
+	var games []Game
+	var totalItems int64
+
+	baseQuery := r.DB.Model(&Game{}).
+		Joins("JOIN rankings ON games.id = rankings.game_id").
+		Joins("JOIN players ON rankings.player_id = players.firebase_id").
+		Where("rankings.status = ? AND players.firebase_id = ?", StatusPending, firebaseID).
+		Distinct()
+
+	if err := baseQuery.Count(&totalItems).Error; err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	offset := (params.Page - 1) * params.PageSize
+	err := baseQuery.
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents").
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&games).Error
+
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := PaginationResult{
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalItems: int(totalItems),
+		TotalPages: int(math.Ceil(float64(totalItems) / float64(params.PageSize))),
+		HasNext:    params.Page < int(math.Ceil(float64(totalItems)/float64(params.PageSize))),
+		HasPrev:    params.Page > 1,
+	}
+
+	return games, pagination, nil
+}
+
+func (r *Repository) GetActiveGamesPaginated(firebaseID string, params PaginationParams) ([]Game, PaginationResult, error) {
+	var games []Game
+	var totalItems int64
+
+	baseQuery := r.DB.Model(&Game{}).
+		Joins("JOIN rankings ON games.id = rankings.game_id").
+		Joins("JOIN players ON rankings.player_id = players.firebase_id").
+		Where("players.firebase_id = ? AND games.finished = ?", firebaseID, false).
+		Distinct()
+
+	if err := baseQuery.Count(&totalItems).Error; err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	offset := (params.Page - 1) * params.PageSize
+	err := baseQuery.
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents").
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&games).Error
+
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := PaginationResult{
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalItems: int(totalItems),
+		TotalPages: int(math.Ceil(float64(totalItems) / float64(params.PageSize))),
+		HasNext:    params.Page < int(math.Ceil(float64(totalItems)/float64(params.PageSize))),
+		HasPrev:    params.Page > 1,
+	}
+
+	return games, pagination, nil
+}
+
+func (r *Repository) GetPlayersPaginated(search string, params PaginationParams) ([]Player, PaginationResult, error) {
+	var players []Player
+	var totalItems int64
+
+	baseQuery := r.DB.Model(&Player{})
+	if search != "" {
+		baseQuery = baseQuery.Where("name LIKE ?", "%"+search+"%")
+	}
+
+	if err := baseQuery.Count(&totalItems).Error; err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	offset := (params.Page - 1) * params.PageSize
+	err := baseQuery.
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&players).Error
+
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := PaginationResult{
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalItems: int(totalItems),
+		TotalPages: int(math.Ceil(float64(totalItems) / float64(params.PageSize))),
+		HasNext:    params.Page < int(math.Ceil(float64(totalItems)/float64(params.PageSize))),
+		HasPrev:    params.Page > 1,
+	}
+
+	return players, pagination, nil
+}
+
+func (r *Repository) GetGamesPaginated(params PaginationParams) ([]Game, PaginationResult, error) {
+	var games []Game
+	var totalItems int64
+
+	baseQuery := r.DB.Model(&Game{})
+
+	if err := baseQuery.Count(&totalItems).Error; err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	offset := (params.Page - 1) * params.PageSize
+	err := baseQuery.
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents").
+		Order("Date desc").
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&games).Error
+
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := PaginationResult{
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalItems: int(totalItems),
+		TotalPages: int(math.Ceil(float64(totalItems) / float64(params.PageSize))),
+		HasNext:    params.Page < int(math.Ceil(float64(totalItems)/float64(params.PageSize))),
+		HasPrev:    params.Page > 1,
+	}
+
+	return games, pagination, nil
+}
+
+func (r *Repository) GetFollowsPaginated(playerID string, params PaginationParams) ([]Player, PaginationResult, error) {
+	var totalItems int64
+
+	baseQuery := r.DB.Model(&Follow{}).Where("player1_id = ? OR player2_id = ?", playerID, playerID)
+
+	if err := baseQuery.Count(&totalItems).Error; err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	var follows []Follow
+	offset := (params.Page - 1) * params.PageSize
+	err := r.DB.Preload("Player1").Preload("Player2").
+		Where("player1_id = ? OR player2_id = ?", playerID, playerID).
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&follows).Error
+
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	var followedPlayers []Player
+	for _, follow := range follows {
+		if follow.Player1ID == playerID {
+			followedPlayers = append(followedPlayers, follow.Player2)
+		} else {
+			followedPlayers = append(followedPlayers, follow.Player1)
+		}
+	}
+
+	pagination := PaginationResult{
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalItems: int(totalItems),
+		TotalPages: int(math.Ceil(float64(totalItems) / float64(params.PageSize))),
+		HasNext:    params.Page < int(math.Ceil(float64(totalItems)/float64(params.PageSize))),
+		HasPrev:    params.Page > 1,
+	}
+
+	return followedPlayers, pagination, nil
 }
