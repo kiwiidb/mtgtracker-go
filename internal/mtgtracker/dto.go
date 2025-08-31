@@ -23,9 +23,14 @@ type CreateRankingRequest struct {
 	Deck     Deck    `json:"deck"`
 }
 type UpdateGameRequest struct {
-	GameID   uint      `json:"game_id"`
-	Finished *bool     `json:"finished"`
-	Rankings []Ranking `json:"rankings"`
+	GameID   uint            `json:"game_id"`
+	Finished *bool           `json:"finished"`
+	Rankings []UpdateRanking `json:"rankings"`
+}
+
+type UpdateRanking struct {
+	PlayerID *string `json:"player_id"`
+	Position int     `json:"position"`
 }
 
 type GameEventRequest struct {

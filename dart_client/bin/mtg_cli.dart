@@ -9,6 +9,14 @@ import '../lib/src/mock_game.dart';
 
 const String version = '1.0.0';
 
+/// Converts a Ranking to an UpdateRanking for game updates
+UpdateRanking rankingToUpdateRanking(Ranking ranking) {
+  return UpdateRanking(
+    playerId: ranking.playerId,
+    position: ranking.position,
+  );
+}
+
 ArgParser buildParser() {
   return ArgParser()
     ..addFlag(
@@ -27,7 +35,7 @@ ArgParser buildParser() {
       'server',
       abbr: 's',
       help: 'MTG Tracker server URL',
-      defaultsTo: 'http://localhost:8080',
+      defaultsTo: 'https://api-staging.plowshare.social/api',
     )
     ..addOption(
       'token',
@@ -214,7 +222,7 @@ Future<void> handleGameCommand(
 
       // Extract player IDs from arguments (skip the 'mock-game' command)
       final playerIds = args.sublist(1);
-      
+
       if (playerIds.length < 2 || playerIds.length > 4) {
         print('Error: Must provide between 2 and 4 player IDs.');
         print('Usage: game mock-game <player1> <player2> [player3] [player4]');
@@ -225,7 +233,8 @@ Future<void> handleGameCommand(
       final mockRankings = MockGameGenerator.generateMockRankings(playerIds);
 
       final mockGame = await client.createGame(CreateGameRequest(
-        comments: 'Mock Commander Game - ${playerIds.length} players: ${playerIds.join(", ")}',
+        comments:
+            'Mock Commander Game - ${playerIds.length} players: ${playerIds.join(", ")}',
         finished: false,
         rankings: mockRankings,
       ));
@@ -287,14 +296,7 @@ Future<void> handleGameCommand(
           request = UpdateGameRequest(
             gameId: gameId,
             finished: true,
-            rankings: currentGame.rankings,
-          );
-          break;
-        case 'reopen':
-          request = UpdateGameRequest(
-            gameId: gameId,
-            finished: false,
-            rankings: currentGame.rankings,
+            rankings: currentGame.rankings.map(rankingToUpdateRanking).toList(),
           );
           break;
         default:

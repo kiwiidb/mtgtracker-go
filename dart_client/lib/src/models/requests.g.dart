@@ -52,12 +52,24 @@ Map<String, dynamic> _$CreateGameRequestToJson(CreateGameRequest instance) =>
       'rankings': instance.rankings,
     };
 
+UpdateRanking _$UpdateRankingFromJson(Map<String, dynamic> json) =>
+    UpdateRanking(
+      playerId: json['player_id'] as String?,
+      position: (json['position'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$UpdateRankingToJson(UpdateRanking instance) =>
+    <String, dynamic>{
+      'player_id': instance.playerId,
+      'position': instance.position,
+    };
+
 UpdateGameRequest _$UpdateGameRequestFromJson(Map<String, dynamic> json) =>
     UpdateGameRequest(
       gameId: (json['game_id'] as num).toInt(),
       finished: json['finished'] as bool?,
       rankings: (json['rankings'] as List<dynamic>)
-          .map((e) => Ranking.fromJson(e as Map<String, dynamic>))
+          .map((e) => UpdateRanking.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

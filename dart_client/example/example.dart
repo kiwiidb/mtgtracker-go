@@ -3,7 +3,7 @@ import 'package:mtgtracker_client/mtgtracker_client.dart';
 void main() async {
   // Initialize the client with your API host and auth token
   final client = MTGTrackerClient(
-    baseUrl: 'https://your-mtg-tracker-api.com',
+    baseUrl: 'https://api-staging.plowshare.social/api',
     authToken: 'your-firebase-auth-token',
   );
 
