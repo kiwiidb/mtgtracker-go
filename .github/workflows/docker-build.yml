@@ -26,3 +26,25 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Filter tags
+        run: echo "FILTERED_TAGS=$(echo '${{ steps.build.outputs.tags }}' | sed 's/,latest//')" >> $GITHUB_ENV
+      - name: Checkout deployment repo
+        uses: actions/checkout@v2
+        with:
+          repository: kiwiidb/mtgtracker-deployment
+          path: infrastructure
+          token: ${{ secrets.GITHUB_TOKEN }}
+      # staging environment is tracking main
+      - name: Update staging environment
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: fjogeleit/yaml-update-action@v0.7.0
+        with:
+          valueFile: 'staging/values.yaml'
+          propertyPath: '${{ env.IMAGENAME }}.image.tag'
+          value: ${{ env.FILTERED_TAGS }}
+          repository: kiwiidb/mtgtracker-deployment
+          branch: main
+          createPR: false
+          message: 'CD: deploy staging ${{ env.IMAGENAME }} version ${{ env.FILTERED_TAGS }}'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          workDir: infrastructure
