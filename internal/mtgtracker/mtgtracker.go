@@ -2,6 +2,7 @@ package mtgtracker
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/repository"
@@ -396,19 +397,10 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	newRankings := []repository.Ranking{}
-	for _, rank := range request.Rankings {
-		// the only thing that can change is the position
-		for _, oldRank := range rankings {
-			if oldRank.PlayerID == rank.PlayerID {
-				oldRank.Position = rank.Position
-				newRankings = append(newRankings, oldRank)
-				break
-			}
-		}
-	}
-	if len(newRankings) != len(rankings) {
-		http.Error(w, "Invalid rankings", http.StatusBadRequest)
+	// Validate and reorder rankings
+	newRankings, err := validateAndReorderRankings(request.Rankings, rankings)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -508,4 +500,37 @@ func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
+}
+
+// validateAndReorderRankings validates that the request rankings match existing rankings
+// and returns them with sequential positions (1, 2, 3, etc.) based on request order
+func validateAndReorderRankings(requestRankings []UpdateRanking, existingRankings []repository.Ranking) ([]repository.Ranking, error) {
+	// Validate that request rankings match existing rankings count
+	if len(requestRankings) != len(existingRankings) {
+		return nil, errors.New("rankings count must match existing rankings")
+	}
+
+	// Create map of existing rankings by PlayerID string value for quick lookup
+	existingMap := make(map[string]repository.Ranking)
+	for _, ranking := range existingRankings {
+		if ranking.PlayerID != nil {
+			existingMap[*ranking.PlayerID] = ranking
+		}
+	}
+
+	// Validate all request rankings have valid PlayerIDs and set sequential positions
+	newRankings := make([]repository.Ranking, len(requestRankings))
+	for i, reqRanking := range requestRankings {
+		if reqRanking.PlayerID == nil {
+			return nil, errors.New("player ID cannot be nil")
+		}
+		existing, exists := existingMap[*reqRanking.PlayerID]
+		if !exists {
+			return nil, errors.New("invalid player ID in rankings")
+		}
+		existing.Position = i + 1 // Set position to 1, 2, 3, etc.
+		newRankings[i] = existing
+	}
+
+	return newRankings, nil
 }
