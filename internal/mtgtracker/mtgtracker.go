@@ -26,11 +26,18 @@ func NewService(repo *repository.Repository, storage Storage) *Service {
 	}
 }
 
+const (
+	profileImagePrefix = "profile-images/"
+	eventImagePrefix   = "event-images/"
+)
+
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /player/v1/signup", s.SignupPlayer)
 	mux.HandleFunc("GET /player/v1/players", s.GetPlayers)
 	mux.HandleFunc("GET /player/v1/players/{playerId}", s.GetPlayer)
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
+	mux.HandleFunc("POST /player/v1/profile-image/upload-url", s.GetProfileImageUploadURL)
+	mux.HandleFunc("PUT /player/v1/profile-image", s.UpdateProfileImage)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
@@ -296,7 +303,7 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Event image name is required for image events", http.StatusBadRequest)
 			return
 		}
-		uploadURL, err := s.Storage.GeneratePresignedUploadURL(*req.EventImageName, getImgContentType(*req.EventImageName))
+		uploadURL, err := s.Storage.GeneratePresignedUploadURL(eventImagePrefix+*req.EventImageName, getImgContentType(*req.EventImageName))
 		if err != nil {
 			http.Error(w, "Error generating upload URL", http.StatusInternalServerError)
 			return
@@ -533,4 +540,73 @@ func validateAndReorderRankings(requestRankings []UpdateRanking, existingRanking
 	}
 
 	return newRankings, nil
+}
+
+func (s *Service) GetProfileImageUploadURL(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var request struct {
+		FileName string `json:"file_name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if request.FileName == "" {
+		http.Error(w, "file_name is required", http.StatusBadRequest)
+		return
+	}
+
+	uploadURL, err := s.Storage.GeneratePresignedUploadURL(profileImagePrefix+request.FileName, getImgContentType(request.FileName))
+	if err != nil {
+		http.Error(w, "Error generating upload URL", http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		UploadURL string `json:"upload_url"`
+		ImageURL  string `json:"image_url"`
+	}{
+		UploadURL: uploadURL,
+		ImageURL:  strings.Split(uploadURL, "?")[0],
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) UpdateProfileImage(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var request struct {
+		ImageURL string `json:"image_url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if request.ImageURL == "" {
+		http.Error(w, "image_url is required", http.StatusBadRequest)
+		return
+	}
+
+	err := s.Repository.UpdatePlayerProfileImage(userID, request.ImageURL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

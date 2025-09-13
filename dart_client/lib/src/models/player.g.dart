@@ -9,6 +9,7 @@ part of 'player.dart';
 Player _$PlayerFromJson(Map<String, dynamic> json) => Player(
       id: json['id'] as String,
       name: json['name'] as String,
+      profileImageUrl: json['profile_image_url'] as String?,
       winrateAllTime: (json['winrate_all_time'] as num).toDouble(),
       numberOfGamesAllTime: (json['number_of_games_all_time'] as num).toInt(),
       decksAllTime: (json['decks_all_time'] as List<dynamic>?)
@@ -28,6 +29,7 @@ Player _$PlayerFromJson(Map<String, dynamic> json) => Player(
 Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
+      'profile_image_url': instance.profileImageUrl,
       'winrate_all_time': instance.winrateAllTime,
       'number_of_games_all_time': instance.numberOfGamesAllTime,
       'decks_all_time': instance.decksAllTime,

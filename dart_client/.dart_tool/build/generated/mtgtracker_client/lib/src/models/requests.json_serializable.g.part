@@ -97,3 +97,41 @@ Map<String, dynamic> _$GameEventRequestToJson(GameEventRequest instance) =>
       'source_ranking_id': instance.sourceRankingId,
       'target_ranking_id': instance.targetRankingId,
     };
+
+ProfileImageUploadUrlRequest _$ProfileImageUploadUrlRequestFromJson(
+        Map<String, dynamic> json) =>
+    ProfileImageUploadUrlRequest(
+      fileName: json['file_name'] as String,
+    );
+
+Map<String, dynamic> _$ProfileImageUploadUrlRequestToJson(
+        ProfileImageUploadUrlRequest instance) =>
+    <String, dynamic>{
+      'file_name': instance.fileName,
+    };
+
+ProfileImageUploadUrlResponse _$ProfileImageUploadUrlResponseFromJson(
+        Map<String, dynamic> json) =>
+    ProfileImageUploadUrlResponse(
+      uploadUrl: json['upload_url'] as String,
+      imageUrl: json['image_url'] as String,
+    );
+
+Map<String, dynamic> _$ProfileImageUploadUrlResponseToJson(
+        ProfileImageUploadUrlResponse instance) =>
+    <String, dynamic>{
+      'upload_url': instance.uploadUrl,
+      'image_url': instance.imageUrl,
+    };
+
+UpdateProfileImageRequest _$UpdateProfileImageRequestFromJson(
+        Map<String, dynamic> json) =>
+    UpdateProfileImageRequest(
+      imageUrl: json['image_url'] as String,
+    );
+
+Map<String, dynamic> _$UpdateProfileImageRequestToJson(
+        UpdateProfileImageRequest instance) =>
+    <String, dynamic>{
+      'image_url': instance.imageUrl,
+    };

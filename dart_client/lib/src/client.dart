@@ -91,6 +91,33 @@ class MTGTrackerClient {
     return _handleResponse(response, Player.fromJson);
   }
 
+  /// Get a signed URL for uploading a profile image to S3
+  Future<ProfileImageUploadUrlResponse> getProfileImageUploadUrl(
+      ProfileImageUploadUrlRequest request) async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/player/v1/profile-image/upload-url'),
+      headers: _headers,
+      body: jsonEncode(request.toJson()),
+    );
+    return _handleResponse(response, ProfileImageUploadUrlResponse.fromJson);
+  }
+
+  /// Update the player's profile image URL after uploading to S3
+  Future<void> updateProfileImage(UpdateProfileImageRequest request) async {
+    final response = await _httpClient.put(
+      Uri.parse('$baseUrl/player/v1/profile-image'),
+      headers: _headers,
+      body: jsonEncode(request.toJson()),
+    );
+    
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   // Game endpoints
   Future<Game> createGame(CreateGameRequest request) async {
     final response = await _httpClient.post(

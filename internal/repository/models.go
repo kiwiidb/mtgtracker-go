@@ -28,7 +28,7 @@ type Player struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Games      []Game `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
+	Games      []Game         `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
 }
 type Game struct {
 	gorm.Model
@@ -61,7 +61,7 @@ type Ranking struct {
 	PlayerName     string        `gorm:"-"`
 
 	Player *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
-	Deck   Deck   `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
+	Deck   Deck    `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
 }
 
 type DeckWin struct {

@@ -117,3 +117,48 @@ class GameEventRequest {
       _$GameEventRequestFromJson(json);
   Map<String, dynamic> toJson() => _$GameEventRequestToJson(this);
 }
+
+@JsonSerializable()
+class ProfileImageUploadUrlRequest {
+  @JsonKey(name: 'file_name')
+  final String fileName;
+
+  const ProfileImageUploadUrlRequest({
+    required this.fileName,
+  });
+
+  factory ProfileImageUploadUrlRequest.fromJson(Map<String, dynamic> json) =>
+      _$ProfileImageUploadUrlRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$ProfileImageUploadUrlRequestToJson(this);
+}
+
+@JsonSerializable()
+class ProfileImageUploadUrlResponse {
+  @JsonKey(name: 'upload_url')
+  final String uploadUrl;
+  @JsonKey(name: 'image_url')
+  final String imageUrl;
+
+  const ProfileImageUploadUrlResponse({
+    required this.uploadUrl,
+    required this.imageUrl,
+  });
+
+  factory ProfileImageUploadUrlResponse.fromJson(Map<String, dynamic> json) =>
+      _$ProfileImageUploadUrlResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ProfileImageUploadUrlResponseToJson(this);
+}
+
+@JsonSerializable()
+class UpdateProfileImageRequest {
+  @JsonKey(name: 'image_url')
+  final String imageUrl;
+
+  const UpdateProfileImageRequest({
+    required this.imageUrl,
+  });
+
+  factory UpdateProfileImageRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateProfileImageRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$UpdateProfileImageRequestToJson(this);
+}

@@ -153,7 +153,6 @@ func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	return players, nil
 }
 
-
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
 	return r.DB.Transaction(func(tx *gorm.DB) error {
@@ -398,4 +397,15 @@ func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]string, error) {
 	}
 
 	return playerIDs, nil
+}
+
+func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error {
+	result := r.DB.Model(&Player{}).Where("firebase_id = ?", firebaseID).Update("image", imageURL)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("player not found")
+	}
+	return nil
 }

@@ -8,6 +8,8 @@ part 'player.g.dart';
 class Player {
   final String id;
   final String name;
+  @JsonKey(name: 'profile_image_url')
+  final String? profileImageUrl;
   @JsonKey(name: 'winrate_all_time')
   final double winrateAllTime;
   @JsonKey(name: 'number_of_games_all_time')
@@ -23,6 +25,7 @@ class Player {
   const Player({
     required this.id,
     required this.name,
+    this.profileImageUrl,
     required this.winrateAllTime,
     required this.numberOfGamesAllTime,
     required this.decksAllTime,

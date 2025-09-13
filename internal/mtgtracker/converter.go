@@ -80,8 +80,9 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 			Player: func() *Player {
 				if rank.Player != nil {
 					return &Player{
-						ID:   rank.Player.FirebaseID,
-						Name: rank.Player.Name,
+						ID:              rank.Player.FirebaseID,
+						Name:            rank.Player.Name,
+						ProfileImageURL: rank.Player.Image,
 					}
 				}
 				return nil
@@ -93,8 +94,9 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 
 func convertPlayerToDto(player *repository.Player) Player {
 	result := Player{
-		ID:   player.FirebaseID,
-		Name: player.Name,
+		ID:              player.FirebaseID,
+		Name:            player.Name,
+		ProfileImageURL: player.Image,
 	}
 
 	// Calculate winrate and game statistics
@@ -153,14 +155,26 @@ func convertPlayerToDto(player *repository.Player) Player {
 				} else {
 					coPlayerMap[*ranking.PlayerID] = PlayerWithCount{
 						Player: Player{
-							ID:   func() string { 
-								if ranking.Player != nil { return ranking.Player.FirebaseID } 
-								if ranking.PlayerID != nil { return *ranking.PlayerID }
+							ID: func() string {
+								if ranking.Player != nil {
+									return ranking.Player.FirebaseID
+								}
+								if ranking.PlayerID != nil {
+									return *ranking.PlayerID
+								}
 								return ""
 							}(),
-							Name: func() string { 
-								if ranking.Player != nil { return ranking.Player.Name } 
-								return "" 
+							Name: func() string {
+								if ranking.Player != nil {
+									return ranking.Player.Name
+								}
+								return ""
+							}(),
+							ProfileImageURL: func() string {
+								if ranking.Player != nil {
+									return ranking.Player.Image
+								}
+								return ""
 							}(),
 						},
 						Count: 1,

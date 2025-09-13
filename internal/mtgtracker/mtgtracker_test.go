@@ -10,11 +10,11 @@ func TestValidateAndReorderRankings(t *testing.T) {
 	strPtr := func(s string) *string { return &s }
 
 	tests := []struct {
-		name             string
-		requestRankings  []UpdateRanking
-		existingRankings []repository.Ranking
-		expectError      bool
-		errorMessage     string
+		name              string
+		requestRankings   []UpdateRanking
+		existingRankings  []repository.Ranking
+		expectError       bool
+		errorMessage      string
 		expectedPositions []int
 	}{
 		{
@@ -29,7 +29,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{PlayerID: strPtr("player2"), Position: 0},
 				{PlayerID: strPtr("player3"), Position: 0},
 			},
-			expectError: false,
+			expectError:       false,
 			expectedPositions: []int{1, 2, 3}, // Sequential based on request order
 		},
 		{
@@ -41,7 +41,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{PlayerID: strPtr("player1"), Position: 0},
 				{PlayerID: strPtr("player2"), Position: 0},
 			},
-			expectError: true,
+			expectError:  true,
 			errorMessage: "rankings count must match existing rankings",
 		},
 		{
@@ -55,7 +55,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{PlayerID: strPtr("player1"), Position: 0},
 				{PlayerID: strPtr("player2"), Position: 0},
 			},
-			expectError: true,
+			expectError:  true,
 			errorMessage: "rankings count must match existing rankings",
 		},
 		{
@@ -68,14 +68,14 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{PlayerID: strPtr("player1"), Position: 0},
 				{PlayerID: strPtr("player2"), Position: 0},
 			},
-			expectError: true,
+			expectError:  true,
 			errorMessage: "invalid player ID in rankings",
 		},
 		{
-			name: "empty rankings",
-			requestRankings: []UpdateRanking{},
-			existingRankings: []repository.Ranking{},
-			expectError: false,
+			name:              "empty rankings",
+			requestRankings:   []UpdateRanking{},
+			existingRankings:  []repository.Ranking{},
+			expectError:       false,
 			expectedPositions: []int{},
 		},
 		{
@@ -86,7 +86,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 			existingRankings: []repository.Ranking{
 				{PlayerID: strPtr("player1"), Position: 0},
 			},
-			expectError: false,
+			expectError:       false,
 			expectedPositions: []int{1},
 		},
 	}
