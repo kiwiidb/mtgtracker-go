@@ -517,23 +517,17 @@ func validateAndReorderRankings(requestRankings []UpdateRanking, existingRanking
 		return nil, errors.New("rankings count must match existing rankings")
 	}
 
-	// Create map of existing rankings by PlayerID string value for quick lookup
-	existingMap := make(map[string]repository.Ranking)
+	// Create map of existing rankings by RankingID string value for quick lookup
+	existingMap := make(map[uint]repository.Ranking)
 	for _, ranking := range existingRankings {
-		if ranking.PlayerID != nil {
-			existingMap[*ranking.PlayerID] = ranking
-		}
+		existingMap[ranking.ID] = ranking
 	}
 
-	// Validate all request rankings have valid PlayerIDs and set sequential positions
 	newRankings := make([]repository.Ranking, len(requestRankings))
 	for i, reqRanking := range requestRankings {
-		if reqRanking.PlayerID == nil {
-			return nil, errors.New("player ID cannot be nil")
-		}
-		existing, exists := existingMap[*reqRanking.PlayerID]
+		existing, exists := existingMap[reqRanking.RankingID]
 		if !exists {
-			return nil, errors.New("invalid player ID in rankings")
+			return nil, errors.New("invalid ranking ID in rankings")
 		}
 		existing.Position = i + 1 // Set position to 1, 2, 3, etc.
 		newRankings[i] = existing

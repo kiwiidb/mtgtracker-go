@@ -29,8 +29,8 @@ type UpdateGameRequest struct {
 }
 
 type UpdateRanking struct {
-	PlayerID *string `json:"player_id"`
-	Position int     `json:"position"`
+	RankingID uint `json:"ranking_id"`
+	Position  int  `json:"position"`
 }
 
 type GameEventRequest struct {

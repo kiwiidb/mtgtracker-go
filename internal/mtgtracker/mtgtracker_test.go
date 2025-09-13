@@ -3,6 +3,8 @@ package mtgtracker
 import (
 	"mtgtracker/internal/repository"
 	"testing"
+
+	"gorm.io/gorm"
 )
 
 func TestValidateAndReorderRankings(t *testing.T) {
@@ -20,14 +22,14 @@ func TestValidateAndReorderRankings(t *testing.T) {
 		{
 			name: "valid reordering",
 			requestRankings: []UpdateRanking{
-				{PlayerID: strPtr("player2"), Position: 0}, // Position ignored
-				{PlayerID: strPtr("player1"), Position: 0}, // Position ignored
-				{PlayerID: strPtr("player3"), Position: 0}, // Position ignored
+				{RankingID: 2, Position: 0}, // Position ignored
+				{RankingID: 1, Position: 0}, // Position ignored
+				{RankingID: 3, Position: 0}, // Position ignored
 			},
 			existingRankings: []repository.Ranking{
-				{PlayerID: strPtr("player1"), Position: 0},
-				{PlayerID: strPtr("player2"), Position: 0},
-				{PlayerID: strPtr("player3"), Position: 0},
+				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
+				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
+				{Model: gorm.Model{ID: 3}, PlayerID: strPtr("player3"), Position: 0},
 			},
 			expectError:       false,
 			expectedPositions: []int{1, 2, 3}, // Sequential based on request order
@@ -35,11 +37,11 @@ func TestValidateAndReorderRankings(t *testing.T) {
 		{
 			name: "mismatched count - too few in request",
 			requestRankings: []UpdateRanking{
-				{PlayerID: strPtr("player1"), Position: 0},
+				{RankingID: 1, Position: 0},
 			},
 			existingRankings: []repository.Ranking{
-				{PlayerID: strPtr("player1"), Position: 0},
-				{PlayerID: strPtr("player2"), Position: 0},
+				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
+				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 			},
 			expectError:  true,
 			errorMessage: "rankings count must match existing rankings",
@@ -47,29 +49,29 @@ func TestValidateAndReorderRankings(t *testing.T) {
 		{
 			name: "mismatched count - too many in request",
 			requestRankings: []UpdateRanking{
-				{PlayerID: strPtr("player1"), Position: 0},
-				{PlayerID: strPtr("player2"), Position: 0},
-				{PlayerID: strPtr("player3"), Position: 0},
+				{RankingID: 1, Position: 0},
+				{RankingID: 2, Position: 0},
+				{RankingID: 3, Position: 0},
 			},
 			existingRankings: []repository.Ranking{
-				{PlayerID: strPtr("player1"), Position: 0},
-				{PlayerID: strPtr("player2"), Position: 0},
+				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
+				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 			},
 			expectError:  true,
 			errorMessage: "rankings count must match existing rankings",
 		},
 		{
-			name: "invalid player ID in request",
+			name: "invalid ranking ID in request",
 			requestRankings: []UpdateRanking{
-				{PlayerID: strPtr("player1"), Position: 0},
-				{PlayerID: strPtr("invalid_player"), Position: 0},
+				{RankingID: 1, Position: 0},
+				{RankingID: 999, Position: 0}, // Invalid ranking ID
 			},
 			existingRankings: []repository.Ranking{
-				{PlayerID: strPtr("player1"), Position: 0},
-				{PlayerID: strPtr("player2"), Position: 0},
+				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
+				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 			},
 			expectError:  true,
-			errorMessage: "invalid player ID in rankings",
+			errorMessage: "invalid ranking ID in rankings",
 		},
 		{
 			name:              "empty rankings",
@@ -81,10 +83,10 @@ func TestValidateAndReorderRankings(t *testing.T) {
 		{
 			name: "single ranking",
 			requestRankings: []UpdateRanking{
-				{PlayerID: strPtr("player1"), Position: 0},
+				{RankingID: 1, Position: 0},
 			},
 			existingRankings: []repository.Ranking{
-				{PlayerID: strPtr("player1"), Position: 0},
+				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
 			},
 			expectError:       false,
 			expectedPositions: []int{1},
@@ -122,15 +124,11 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				}
 			}
 
-			// Verify the result maintains the request order for PlayerIDs
+			// Verify the result maintains the request order for RankingIDs
 			if !tt.expectError && len(tt.requestRankings) > 0 {
 				for i, reqRanking := range tt.requestRankings {
-					if reqRanking.PlayerID == nil || result[i].PlayerID == nil {
-						t.Errorf("nil PlayerID found at index %d", i)
-						continue
-					}
-					if *result[i].PlayerID != *reqRanking.PlayerID {
-						t.Errorf("expected PlayerID %s at index %d, got %s", *reqRanking.PlayerID, i, *result[i].PlayerID)
+					if result[i].ID != reqRanking.RankingID {
+						t.Errorf("expected RankingID %d at index %d, got %d", reqRanking.RankingID, i, result[i].ID)
 					}
 				}
 			}
