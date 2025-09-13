@@ -35,7 +35,7 @@ ArgParser buildParser() {
       'server',
       abbr: 's',
       help: 'MTG Tracker server URL',
-      defaultsTo: 'https://api-staging.plowshare.social/api',
+      defaultsTo: 'https://staging.plowshare.social/api',
     )
     ..addOption(
       'token',
@@ -55,6 +55,7 @@ void printUsage(ArgParser argParser) {
   print('    list [search]          List all players (with optional search)');
   print('    get <id>               Get player by ID');
   print('    me                     Get current player info');
+  print('    getProfileImageUrl <filename>  Get signed upload URL for profile image');
   print('');
   print('  game                     Manage games');
   print('    create <comments>      Create a new game');
@@ -145,7 +146,7 @@ Future<void> handlePlayerCommand(
     MTGTrackerClient client, List<String> args) async {
   if (args.isEmpty) {
     print('Error: No player subcommand specified.');
-    print('Available subcommands: signup, list, get, me');
+    print('Available subcommands: signup, list, get, me, getProfileImageUrl');
     exit(1);
   }
 
@@ -183,9 +184,22 @@ Future<void> handlePlayerCommand(
       print(jsonEncode(player.toJson()));
       break;
 
+    case 'getProfileImageUrl':
+      if (args.length < 2) {
+        print('Error: Filename required for upload URL.');
+        print('Usage: player getProfileImageUrl <filename>');
+        exit(1);
+      }
+      final filename = args[1];
+      final response = await client.getProfileImageUploadUrl(
+        ProfileImageUploadUrlRequest(fileName: filename),
+      );
+      print(jsonEncode(response.toJson()));
+      break;
+
     default:
       print('Error: Unknown player subcommand "${args[0]}".');
-      print('Available subcommands: signup, list, get, me');
+      print('Available subcommands: signup, list, get, me, getProfileImageUrl');
       exit(1);
   }
 }
