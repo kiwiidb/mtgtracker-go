@@ -37,7 +37,7 @@ jobs:
       # staging environment is tracking main
       - name: Update staging environment
         if: ${{ github.ref == 'refs/heads/main' }}
-        uses: fjogeleit/yaml-update-action@v0.7.0
+        uses: fjogeleit/yaml-update-action@v0.16.1
         with:
           valueFile: 'staging/values.yaml'
           propertyPath: '${{ env.IMAGENAME }}.image.tag'
