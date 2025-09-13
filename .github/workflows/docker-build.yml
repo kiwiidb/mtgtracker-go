@@ -46,5 +46,5 @@ jobs:
           branch: main
           createPR: false
           message: 'CD: deploy staging ${{ env.IMAGENAME }} version ${{ env.FILTERED_TAGS }}'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           workDir: infrastructure
