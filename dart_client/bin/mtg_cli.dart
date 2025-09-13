@@ -12,7 +12,7 @@ const String version = '1.0.0';
 /// Converts a Ranking to an UpdateRanking for game updates
 UpdateRanking rankingToUpdateRanking(Ranking ranking) {
   return UpdateRanking(
-    playerId: ranking.playerId,
+    rankingId: ranking.id,
     position: ranking.position,
   );
 }

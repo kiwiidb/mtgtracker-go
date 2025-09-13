@@ -55,12 +55,12 @@ class CreateGameRequest {
 
 @JsonSerializable()
 class UpdateRanking {
-  @JsonKey(name: 'player_id')
-  final String? playerId;
+  @JsonKey(name: 'ranking_id')
+  final int rankingId;
   final int position;
 
   const UpdateRanking({
-    this.playerId,
+    required this.rankingId,
     required this.position,
   });
 

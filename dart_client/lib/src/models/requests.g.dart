@@ -54,13 +54,13 @@ Map<String, dynamic> _$CreateGameRequestToJson(CreateGameRequest instance) =>
 
 UpdateRanking _$UpdateRankingFromJson(Map<String, dynamic> json) =>
     UpdateRanking(
-      playerId: json['player_id'] as String?,
+      rankingId: (json['ranking_id'] as num).toInt(),
       position: (json['position'] as num).toInt(),
     );
 
 Map<String, dynamic> _$UpdateRankingToJson(UpdateRanking instance) =>
     <String, dynamic>{
-      'player_id': instance.playerId,
+      'ranking_id': instance.rankingId,
       'position': instance.position,
     };
 
