@@ -37,7 +37,6 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /player/v1/players/{playerId}", s.GetPlayer)
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
 	mux.HandleFunc("POST /player/v1/profile-image/upload-url", s.GetProfileImageUploadURL)
-	mux.HandleFunc("PUT /player/v1/profile-image", s.UpdateProfileImage)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
@@ -562,6 +561,12 @@ func (s *Service) GetProfileImageUploadURL(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	imgUrl := strings.Split(uploadURL, "?")[0]
+	err = s.Repository.UpdatePlayerProfileImage(userID, imgUrl)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	response := struct {
 		UploadURL string `json:"upload_url"`
 		ImageURL  string `json:"image_url"`
@@ -574,33 +579,4 @@ func (s *Service) GetProfileImageUploadURL(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
-}
-
-func (s *Service) UpdateProfileImage(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	var request struct {
-		ImageURL string `json:"image_url"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if request.ImageURL == "" {
-		http.Error(w, "image_url is required", http.StatusBadRequest)
-		return
-	}
-
-	err := s.Repository.UpdatePlayerProfileImage(userID, request.ImageURL)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
 }
