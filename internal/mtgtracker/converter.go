@@ -209,6 +209,40 @@ func convertPlayerToDto(player *repository.Player) Player {
 	return result
 }
 
+func convertNotificationToDto(notification *repository.Notification) Notification {
+	result := Notification{
+		ID:               notification.ID,
+		Title:            notification.Title,
+		Body:             notification.Body,
+		Type:             notification.Type,
+		Actions:          convertActionsToDto(notification.Actions),
+		Read:             notification.Read,
+		CreatedAt:        notification.CreatedAt,
+		GameID:           notification.GameID,
+		ReferredPlayerID: notification.ReferredPlayerID,
+	}
+
+	if notification.Game != nil {
+		game := convertGameToDto(notification.Game)
+		result.Game = &game
+	}
+
+	if notification.ReferredPlayer != nil {
+		player := convertPlayerToDto(notification.ReferredPlayer)
+		result.ReferredPlayer = &player
+	}
+
+	return result
+}
+
+func convertActionsToDto(actions []repository.NotificationAction) []NotificationAction {
+	result := make([]NotificationAction, len(actions))
+	for i, action := range actions {
+		result[i] = NotificationAction(action)
+	}
+	return result
+}
+
 func getImgContentType(s string) string {
 	switch filepath.Ext(s) {
 	case ".jpg", ".jpeg":

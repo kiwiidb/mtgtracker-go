@@ -90,3 +90,26 @@ type Follow struct {
 	Player1 Player `gorm:"foreignKey:Player1ID;references:FirebaseID" json:"player1"`
 	Player2 Player `gorm:"foreignKey:Player2ID;references:FirebaseID" json:"player2"`
 }
+
+type NotificationAction string
+
+const (
+	ActionDeleteRanking NotificationAction = "delete_ranking"
+	ActionViewGame      NotificationAction = "view_game"
+)
+
+type Notification struct {
+	gorm.Model
+	UserID           string               `gorm:"not null" json:"user_id"`
+	Title            string               `gorm:"not null" json:"title"`
+	Body             string               `gorm:"not null" json:"body"`
+	Type             string               `gorm:"not null" json:"type"`
+	Actions          []NotificationAction `gorm:"serializer:json" json:"actions"`
+	Read             bool                 `gorm:"default:false" json:"read"`
+	GameID           *uint                `json:"game_id,omitempty"`
+	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
+
+	Player         Player  `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
+	Game           *Game   `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
+	ReferredPlayer *Player `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
+}

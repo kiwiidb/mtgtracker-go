@@ -46,6 +46,8 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
 	mux.HandleFunc("GET /follow/v1/follows", s.GetMyFollows)
 	mux.HandleFunc("GET /follow/v1/follows/{playerId}", s.GetPlayerFollows)
+	mux.HandleFunc("GET /notification/v1/notifications", s.GetNotifications)
+	mux.HandleFunc("PUT /notification/v1/notifications/{notificationId}/read", s.MarkNotificationAsRead)
 }
 
 func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
@@ -507,4 +509,55 @@ func (s *Service) GetProfileImageUploadURL(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
+}
+
+func (s *Service) GetNotifications(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	notifications, err := s.Repository.GetNotifications(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := make([]Notification, 0, len(notifications))
+	for _, notification := range notifications {
+		result = append(result, convertNotificationToDto(&notification))
+	}
+
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) MarkNotificationAsRead(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	notificationIDStr := r.PathValue("notificationId")
+	notificationID, err := strconv.Atoi(notificationIDStr)
+	if err != nil {
+		http.Error(w, "Invalid notification ID", http.StatusBadRequest)
+		return
+	}
+
+	err = s.Repository.MarkNotificationAsRead(uint(notificationID), userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "access denied") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

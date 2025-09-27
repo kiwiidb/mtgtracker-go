@@ -103,3 +103,24 @@ type Deck struct {
 	SecondaryImg string `json:"secondary_image"`
 	Image        string `json:"image"`
 }
+
+type Notification struct {
+	ID               uint                 `json:"id"`
+	Title            string               `json:"title"`
+	Body             string               `json:"body"`
+	Type             string               `json:"type"`
+	Actions          []NotificationAction `json:"actions"`
+	Read             bool                 `json:"read"`
+	CreatedAt        time.Time            `json:"created_at"`
+	GameID           *uint                `json:"game_id,omitempty"`
+	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
+	Game             *Game                `json:"game,omitempty"`
+	ReferredPlayer   *Player              `json:"referred_player,omitempty"`
+}
+
+type NotificationAction string
+
+const (
+	ActionDeleteRanking NotificationAction = "delete_ranking"
+	ActionViewGame      NotificationAction = "view_game"
+)

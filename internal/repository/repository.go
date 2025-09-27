@@ -133,7 +133,7 @@ func (r *Repository) GetGames() ([]Game, error) {
 }
 
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{})
+	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Notification{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -311,6 +311,33 @@ func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error
 	}
 	if result.RowsAffected == 0 {
 		return errors.New("player not found")
+	}
+	return nil
+}
+
+func (r *Repository) GetNotifications(userID string) ([]Notification, error) {
+	var notifications []Notification
+	err := r.DB.Where("user_id = ?", userID).
+		Preload("Player").
+		Preload("Game").
+		Preload("ReferredPlayer").
+		Order("created_at DESC").
+		Find(&notifications).Error
+	if err != nil {
+		return nil, err
+	}
+	return notifications, nil
+}
+
+func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) error {
+	result := r.DB.Model(&Notification{}).
+		Where("id = ? AND user_id = ?", notificationID, userID).
+		Update("read", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("notification not found or access denied")
 	}
 	return nil
 }
