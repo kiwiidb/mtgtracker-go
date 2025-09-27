@@ -217,6 +217,21 @@ func convertPlayerToDto(player *repository.Player) Player {
 	return result
 }
 
+// convertPlayerToDtoSimple converts a player for notification context without game statistics
+func convertPlayerToDtoSimple(player *repository.Player) Player {
+	return Player{
+		ID:                   player.FirebaseID,
+		Name:                 player.Name,
+		ProfileImageURL:      player.Image,
+		WinrateAllTime:       0,
+		NumberofGamesAllTime: 0,
+		DecksAllTime:         []DeckWithCount{},
+		CoPlayersAllTime:     []PlayerWithCount{},
+		Games:                []Game{},
+		CurrentGame:          nil,
+	}
+}
+
 func convertNotificationToDto(notification *repository.Notification) Notification {
 	result := Notification{
 		ID:               notification.ID,
@@ -236,7 +251,7 @@ func convertNotificationToDto(notification *repository.Notification) Notificatio
 	}
 
 	if notification.ReferredPlayer != nil {
-		player := convertPlayerToDto(notification.ReferredPlayer)
+		player := convertPlayerToDtoSimple(notification.ReferredPlayer)
 		result.ReferredPlayer = &player
 	}
 

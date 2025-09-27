@@ -12,8 +12,8 @@ MtgNotification _$MtgNotificationFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       body: json['body'] as String,
       type: json['type'] as String,
-      actions: (json['actions'] as List<dynamic>)
-          .map((e) => $enumDecode(_$NotificationActionEnumMap, e))
+      actions: (json['actions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$NotificationActionEnumMap, e))
           .toList(),
       read: json['read'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -33,8 +33,9 @@ Map<String, dynamic> _$MtgNotificationToJson(MtgNotification instance) =>
       'title': instance.title,
       'body': instance.body,
       'type': instance.type,
-      'actions':
-          instance.actions.map((e) => _$NotificationActionEnumMap[e]!).toList(),
+      'actions': instance.actions
+          ?.map((e) => _$NotificationActionEnumMap[e]!)
+          .toList(),
       'read': instance.read,
       'created_at': instance.createdAt.toIso8601String(),
       'game_id': instance.gameId,

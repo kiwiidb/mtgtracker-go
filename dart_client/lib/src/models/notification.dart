@@ -17,7 +17,7 @@ class MtgNotification {
   final String title;
   final String body;
   final String type;
-  final List<NotificationAction> actions;
+  final List<NotificationAction>? actions;
   final bool read;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
@@ -34,7 +34,7 @@ class MtgNotification {
     required this.title,
     required this.body,
     required this.type,
-    required this.actions,
+    this.actions,
     required this.read,
     required this.createdAt,
     this.gameId,

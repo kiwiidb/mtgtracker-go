@@ -326,7 +326,9 @@ func (r *Repository) GetNotifications(userID string) ([]Notification, error) {
 	var notifications []Notification
 	err := r.DB.Where("user_id = ?", userID).
 		Preload("Player").
-		Preload("Game").
+		Preload("Game.Rankings").
+		Preload("Game.GameEvents").
+		Preload("Game.Creator").
 		Preload("ReferredPlayer").
 		Order("created_at DESC").
 		Find(&notifications).Error
