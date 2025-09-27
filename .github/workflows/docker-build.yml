@@ -19,15 +19,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Generate tag
+        id: generate-tag
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          SHORT_SHA=${GITHUB_SHA:0:7}
+          TAG="${BRANCH_NAME}-${SHORT_SHA}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "FILTERED_TAGS=${TAG}" >> $GITHUB_ENV
+          echo "IMAGENAME=mtgtracker" >> $GITHUB_ENV
+
       - name: Build and push Docker image
+        id: build
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
           image: mtgtracker
+          tags: ${{ steps.generate-tag.outputs.tag }}
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Filter tags
-        run: echo "FILTERED_TAGS=$(echo '${{ steps.build.outputs.tags }}' | sed 's/,latest//')" >> $GITHUB_ENV
       - name: Checkout deployment repo
         uses: actions/checkout@v2
         with:
