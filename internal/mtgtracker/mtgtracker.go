@@ -169,8 +169,13 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
-	// todo: add creator id to game
-	// userId := middleware.GetUserID(r)
+	// Get the user ID from the context
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var request CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -192,7 +197,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		}
 		rankings = append(rankings, toAdd)
 	}
-	game, err := s.Repository.InsertGame(request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
+	game, err := s.Repository.InsertGame(userID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

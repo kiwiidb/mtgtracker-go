@@ -8,6 +8,7 @@ import (
 func convertGameToDto(game *repository.Game) Game {
 	result := Game{
 		ID:         game.ID,
+		CreatorID:  game.CreatorID,
 		Duration:   game.Duration,
 		Date:       game.Date,
 		Comments:   game.Comments,
@@ -15,6 +16,13 @@ func convertGameToDto(game *repository.Game) Game {
 		Rankings:   convertRankingsToDto(game.Rankings),
 		GameEvents: make([]GameEvent, len(game.GameEvents)),
 	}
+
+	// Include creator information if available
+	if game.Creator.FirebaseID != "" {
+		creator := convertPlayerToDto(&game.Creator)
+		result.Creator = &creator
+	}
+
 	for i, event := range game.GameEvents {
 		result.GameEvents[i] = convertGameEvent(&event, "")
 	}

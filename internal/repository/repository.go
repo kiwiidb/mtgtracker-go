@@ -152,7 +152,7 @@ func (r *Repository) InsertPlayer(name string, email string, userId string) (*Pl
 	return &player, result.Error
 }
 
-func (r *Repository) InsertGame(duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
+func (r *Repository) InsertGame(creatorID string, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 
 	// Ensure each ranking has valid player and deck (optional but safe)
 	for i, rank := range rankings {
@@ -170,15 +170,22 @@ func (r *Repository) InsertGame(duration *int, comments, image string, date *tim
 	}
 
 	game := Game{
-		Duration: duration,
-		Date:     date,
-		Comments: comments,
-		Image:    image,
-		Rankings: rankings,
+		CreatorID: creatorID,
+		Duration:  duration,
+		Date:      date,
+		Comments:  comments,
+		Image:     image,
+		Rankings:  rankings,
 	}
 
 	if err := r.DB.Create(&game).Error; err != nil {
 		return nil, err
+	}
+
+	// Create notifications for all players in the game
+	if err := r.createGameCreatedNotifications(&game); err != nil {
+		log.Printf("Failed to create game notifications: %v", err)
+		// Don't fail the game creation if notifications fail
 	}
 
 	return &game, nil
@@ -338,6 +345,30 @@ func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) 
 	}
 	if result.RowsAffected == 0 {
 		return errors.New("notification not found or access denied")
+	}
+	return nil
+}
+
+func (r *Repository) createGameCreatedNotifications(game *Game) error {
+	// Create notifications for all players in the game
+	for _, ranking := range game.Rankings {
+		if ranking.PlayerID != nil {
+			notification := Notification{
+				UserID:           *ranking.PlayerID,
+				ReferredPlayerID: &game.CreatorID,
+				Title:            "New game created",
+				Body:             "You have been added to a new MTG game",
+				Type:             "game_created",
+				Actions:          []NotificationAction{ActionViewGame},
+				Read:             false,
+				GameID:           &game.ID,
+			}
+
+			if err := r.DB.Create(&notification).Error; err != nil {
+				log.Printf("Failed to create notification for player %s: %v", *ranking.PlayerID, err)
+				// Continue creating notifications for other players even if one fails
+			}
+		}
 	}
 	return nil
 }

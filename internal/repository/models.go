@@ -32,6 +32,7 @@ type Player struct {
 }
 type Game struct {
 	gorm.Model
+	CreatorID  string `gorm:"not null" json:"creator_id"`
 	Duration   *int
 	Date       *time.Time
 	Comments   string
@@ -39,6 +40,8 @@ type Game struct {
 	Rankings   []Ranking
 	Finished   bool
 	GameEvents []GameEvent // Add relation: a game has many game events
+
+	Creator Player `gorm:"foreignKey:CreatorID;references:FirebaseID" json:"creator,omitempty"`
 }
 
 type Ranking struct {

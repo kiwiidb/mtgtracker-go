@@ -66,12 +66,14 @@ type Player struct {
 
 type Game struct {
 	ID         uint        `json:"id"`
+	CreatorID  string      `json:"creator_id"`
 	Duration   *int        `json:"duration,omitempty"`
 	Date       *time.Time  `json:"date,omitempty"`
 	Comments   string      `json:"comments,omitempty"`
 	Rankings   []Ranking   `json:"rankings,omitempty"`
 	Finished   bool        `json:"finished"`
 	GameEvents []GameEvent `json:"game_events,omitempty"`
+	Creator    *Player     `json:"creator,omitempty"`
 }
 
 type GameEvent struct {
