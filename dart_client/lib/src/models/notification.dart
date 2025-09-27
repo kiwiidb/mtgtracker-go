@@ -12,7 +12,7 @@ enum NotificationAction {
 }
 
 @JsonSerializable()
-class Notification {
+class MtgNotification {
   final int id;
   final String title;
   final String body;
@@ -29,7 +29,7 @@ class Notification {
   @JsonKey(name: 'referred_player')
   final Player? referredPlayer;
 
-  const Notification({
+  const MtgNotification({
     required this.id,
     required this.title,
     required this.body,
@@ -43,7 +43,7 @@ class Notification {
     this.referredPlayer,
   });
 
-  factory Notification.fromJson(Map<String, dynamic> json) =>
-      _$NotificationFromJson(json);
-  Map<String, dynamic> toJson() => _$NotificationToJson(this);
+  factory MtgNotification.fromJson(Map<String, dynamic> json) =>
+      _$MtgNotificationFromJson(json);
+  Map<String, dynamic> toJson() => _$MtgNotificationToJson(this);
 }

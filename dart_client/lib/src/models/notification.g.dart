@@ -6,7 +6,8 @@ part of 'notification.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
+MtgNotification _$MtgNotificationFromJson(Map<String, dynamic> json) =>
+    MtgNotification(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
       body: json['body'] as String,
@@ -26,7 +27,7 @@ Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
           : Player.fromJson(json['referred_player'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$NotificationToJson(Notification instance) =>
+Map<String, dynamic> _$MtgNotificationToJson(MtgNotification instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
