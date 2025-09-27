@@ -118,6 +118,15 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 	if err != nil {
 		return nil, err
 	}
+
+	// Create finished game notifications if game was just finished
+	if finished != nil && *finished {
+		if err := r.CreateFinishedGameNotifications(res); err != nil {
+			log.Printf("Failed to create finished game notifications: %v", err)
+			// Don't fail the game update if notifications fail
+		}
+	}
+
 	return res, nil
 }
 
@@ -363,7 +372,7 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
 				ReferredPlayerID: game.CreatorID,
-				Title:            fmt.Sprintf("%s started a game with you", creator.Name),
+				Title:            fmt.Sprintf("%s started a game", creator.Name),
 				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
 				Type:             "game_created",
 				Actions:          []NotificationAction{ActionViewGame},
@@ -373,6 +382,67 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 
 			if err := r.DB.Create(&notification).Error; err != nil {
 				log.Printf("Failed to create notification for player %s: %v", *ranking.PlayerID, err)
+				// Continue creating notifications for other players even if one fails
+			}
+		}
+	}
+	return nil
+}
+
+func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
+	// Get all player names for the body
+	playerNames := make([]string, 0, len(game.Rankings))
+	for _, ranking := range game.Rankings {
+		if ranking.Player != nil {
+			playerNames = append(playerNames, ranking.Player.Name)
+		}
+	}
+
+	// Create notifications for all players
+	for _, ranking := range game.Rankings {
+		if ranking.PlayerID != nil {
+			// Build list of other players (excluding current player)
+			otherPlayers := make([]string, 0, len(playerNames)-1)
+			for _, name := range playerNames {
+				if ranking.Player != nil && name != ranking.Player.Name {
+					otherPlayers = append(otherPlayers, name)
+				}
+			}
+
+			var title, notificationType string
+			if ranking.Position == 1 {
+				title = "🎉 You won the game!"
+				notificationType = "game_finished_won"
+			} else {
+				title = "Game finished"
+				notificationType = "game_finished"
+			}
+
+			body := "Played with: "
+			if len(otherPlayers) > 0 {
+				body += otherPlayers[0]
+				for i := 1; i < len(otherPlayers); i++ {
+					if i == len(otherPlayers)-1 {
+						body += " and " + otherPlayers[i]
+					} else {
+						body += ", " + otherPlayers[i]
+					}
+				}
+			}
+
+			notification := Notification{
+				UserID:           *ranking.PlayerID,
+				ReferredPlayerID: game.CreatorID,
+				Title:            title,
+				Body:             body,
+				Type:             notificationType,
+				Actions:          []NotificationAction{ActionViewGame},
+				Read:             false,
+				GameID:           &game.ID,
+			}
+
+			if err := r.DB.Create(&notification).Error; err != nil {
+				log.Printf("Failed to create finished game notification for player %s: %v", *ranking.PlayerID, err)
 				// Continue creating notifications for other players even if one fails
 			}
 		}
