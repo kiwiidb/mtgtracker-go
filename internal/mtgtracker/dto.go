@@ -66,7 +66,7 @@ type Player struct {
 
 type Game struct {
 	ID         uint        `json:"id"`
-	CreatorID  string      `json:"creator_id"`
+	CreatorID  *string     `json:"creator_id,omitempty"`
 	Duration   *int        `json:"duration,omitempty"`
 	Date       *time.Time  `json:"date,omitempty"`
 	Comments   string      `json:"comments,omitempty"`

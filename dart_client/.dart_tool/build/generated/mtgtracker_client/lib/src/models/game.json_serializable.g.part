@@ -4,7 +4,7 @@
 
 Game _$GameFromJson(Map<String, dynamic> json) => Game(
       id: (json['id'] as num).toInt(),
-      creatorId: json['creator_id'] as String,
+      creatorId: json['creator_id'] as String?,
       duration: (json['duration'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),

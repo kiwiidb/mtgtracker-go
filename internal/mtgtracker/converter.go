@@ -18,8 +18,8 @@ func convertGameToDto(game *repository.Game) Game {
 	}
 
 	// Include creator information if available
-	if game.Creator.FirebaseID != "" {
-		creator := convertPlayerToDto(&game.Creator)
+	if game.Creator != nil && game.Creator.FirebaseID != "" {
+		creator := convertPlayerToDto(game.Creator)
 		result.Creator = &creator
 	}
 

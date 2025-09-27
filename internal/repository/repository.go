@@ -170,7 +170,7 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 	}
 
 	game := Game{
-		CreatorID: creatorID,
+		CreatorID: &creatorID,
 		Duration:  duration,
 		Date:      date,
 		Comments:  comments,
@@ -355,7 +355,7 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 		if ranking.PlayerID != nil {
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
-				ReferredPlayerID: &game.CreatorID,
+				ReferredPlayerID: game.CreatorID,
 				Title:            "New game created",
 				Body:             "You have been added to a new MTG game",
 				Type:             "game_created",

@@ -9,7 +9,7 @@ part 'game.g.dart';
 class Game {
   final int id;
   @JsonKey(name: 'creator_id')
-  final String creatorId;
+  final String? creatorId;
   final int? duration;
   final DateTime? date;
   final String? comments;
@@ -21,7 +21,7 @@ class Game {
 
   const Game({
     required this.id,
-    required this.creatorId,
+    this.creatorId,
     this.duration,
     this.date,
     required this.comments,
