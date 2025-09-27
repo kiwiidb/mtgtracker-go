@@ -89,22 +89,13 @@ type GameEvent struct {
 }
 
 type Ranking struct {
-	ID        uint          `json:"id"`
-	PlayerID  *string       `json:"player_id,omitempty"`
-	Position  int           `json:"position"`
-	LifeTotal *uint         `json:"life_total,omitempty"`
-	Deck      Deck          `json:"deck"`
-	Player    *Player       `json:"player,omitempty"` // Optional, can be omitted if not needed
-	Status    RankingStatus `json:"status,omitempty"` // Optional, can be omitted if not needed
+	ID        uint    `json:"id"`
+	PlayerID  *string `json:"player_id,omitempty"`
+	Position  int     `json:"position"`
+	LifeTotal *uint   `json:"life_total,omitempty"`
+	Deck      Deck    `json:"deck"`
+	Player    *Player `json:"player,omitempty"` // Optional, can be omitted if not needed
 }
-
-type RankingStatus string
-
-const (
-	StatusPending  RankingStatus = "pending"
-	StatusAccepted RankingStatus = "accepted"
-	StatusDeclined RankingStatus = "declined"
-)
 
 type Deck struct {
 	Commander    string `json:"commander"`

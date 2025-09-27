@@ -17,11 +17,11 @@ class MTGTrackerClient {
     final headers = <String, String>{
       'Content-Type': 'application/json',
     };
-    
+
     if (authToken != null) {
       headers['Authorization'] = 'Bearer $authToken';
     }
-    
+
     return headers;
   }
 
@@ -46,7 +46,9 @@ class MTGTrackerClient {
   ) async {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> jsonList = jsonDecode(response.body);
-      return jsonList.map((json) => fromJson(json as Map<String, dynamic>)).toList();
+      return jsonList
+          .map((json) => fromJson(json as Map<String, dynamic>))
+          .toList();
     } else {
       throw MTGTrackerException(
         statusCode: response.statusCode,
@@ -67,10 +69,9 @@ class MTGTrackerClient {
 
   Future<List<Player>> getPlayers({String? search}) async {
     final uri = Uri.parse('$baseUrl/player/v1/players');
-    final finalUri = search != null 
-        ? uri.replace(queryParameters: {'search': search})
-        : uri;
-    
+    final finalUri =
+        search != null ? uri.replace(queryParameters: {'search': search}) : uri;
+
     final response = await _httpClient.get(finalUri, headers: _headers);
     return _handleListResponse(response, Player.fromJson);
   }
@@ -109,7 +110,7 @@ class MTGTrackerClient {
       headers: _headers,
       body: jsonEncode(request.toJson()),
     );
-    
+
     if (response.statusCode != 204) {
       throw MTGTrackerException(
         statusCode: response.statusCode,
@@ -158,7 +159,7 @@ class MTGTrackerClient {
       Uri.parse('$baseUrl/game/v1/games/$gameId'),
       headers: _headers,
     );
-    
+
     if (response.statusCode != 204) {
       throw MTGTrackerException(
         statusCode: response.statusCode,
@@ -176,49 +177,12 @@ class MTGTrackerClient {
     return _handleResponse(response, GameEvent.fromJson);
   }
 
-  // Ranking endpoints
-  Future<List<Game>> getPendingGames() async {
-    final response = await _httpClient.get(
-      Uri.parse('$baseUrl/ranking/v1/games/pending'),
-      headers: _headers,
-    );
-    return _handleListResponse(response, Game.fromJson);
-  }
-
   Future<List<Game>> getActiveGames() async {
     final response = await _httpClient.get(
       Uri.parse('$baseUrl/game/v1/games/active'),
       headers: _headers,
     );
     return _handleListResponse(response, Game.fromJson);
-  }
-
-  Future<void> acceptRanking(int rankingId) async {
-    final response = await _httpClient.put(
-      Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId/accept'),
-      headers: _headers,
-    );
-    
-    if (response.statusCode != 204) {
-      throw MTGTrackerException(
-        statusCode: response.statusCode,
-        message: response.body,
-      );
-    }
-  }
-
-  Future<void> declineRanking(int rankingId) async {
-    final response = await _httpClient.put(
-      Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId/decline'),
-      headers: _headers,
-    );
-    
-    if (response.statusCode != 204) {
-      throw MTGTrackerException(
-        statusCode: response.statusCode,
-        message: response.body,
-      );
-    }
   }
 
   void dispose() {

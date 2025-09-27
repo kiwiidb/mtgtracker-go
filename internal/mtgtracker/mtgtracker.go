@@ -43,40 +43,11 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
-	mux.HandleFunc("GET /ranking/v1/games/pending", s.GetPendingGames)
-	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/accept", s.AcceptRanking)
-	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}/decline", s.DeclineRanking)
 	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
 	mux.HandleFunc("GET /follow/v1/follows", s.GetMyFollows)
 	mux.HandleFunc("GET /follow/v1/follows/{playerId}", s.GetPlayerFollows)
 }
 
-func (s *Service) GetPendingGames(w http.ResponseWriter, r *http.Request) {
-	// Get the user ID from the context
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Call the repository to get the games with pending rankings
-	games, err := s.Repository.GetPendingGames(userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Convert games to DTOs
-	result := make([]Game, 0, len(games))
-	for _, game := range games {
-		result = append(result, convertGameToDto(&game))
-	}
-
-	err = json.NewEncoder(w).Encode(result)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
 func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the context
 	userID := middleware.GetUserID(r)
@@ -104,43 +75,6 @@ func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
-func (s *Service) AcceptRanking(w http.ResponseWriter, r *http.Request) {
-	rankingID := r.PathValue("rankingId")
-	rankingIDInt, err := strconv.Atoi(rankingID)
-	if err != nil {
-		http.Error(w, "Invalid ranking ID", http.StatusBadRequest)
-		return
-	}
-
-	// Call the repository to accept the ranking
-	_, err = s.Repository.AcceptRanking(uint(rankingIDInt))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func (s *Service) DeclineRanking(w http.ResponseWriter, r *http.Request) {
-	rankingID := r.PathValue("rankingId")
-	rankingIDInt, err := strconv.Atoi(rankingID)
-	if err != nil {
-		http.Error(w, "Invalid ranking ID", http.StatusBadRequest)
-		return
-	}
-
-	// Call the repository to decline the ranking
-	err = s.Repository.DeclineRanking(uint(rankingIDInt))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the context
 	userID := middleware.GetUserID(r)
@@ -233,8 +167,8 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
-	// Parse the request body
-	userId := middleware.GetUserID(r)
+	// todo: add creator id to game
+	// userId := middleware.GetUserID(r)
 	var request CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -252,13 +186,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		toAdd := repository.Ranking{
 			PlayerID: rank.PlayerID,
 			Position: 0,
-			Status:   repository.StatusPending,
 			Deck:     convertDeck(rank.Deck),
-		}
-
-		// we always accept our own ranking duh
-		if rank.PlayerID != nil && userId == *rank.PlayerID {
-			toAdd.Status = repository.StatusAccepted
 		}
 		rankings = append(rankings, toAdd)
 	}

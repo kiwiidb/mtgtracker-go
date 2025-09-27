@@ -12,23 +12,6 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (r *Repository) GetPendingGames(firebaseID string) ([]Game, error) {
-	var games []Game
-	err := r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
-		Joins("JOIN players ON rankings.player_id = players.firebase_id").
-		Where("rankings.status = ? AND players.firebase_id = ?", StatusPending, firebaseID).
-		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Player")
-		}).
-		Preload("GameEvents").
-		Distinct().
-		Find(&games).Error
-	if err != nil {
-		return nil, err
-	}
-	return games, nil
-}
-
 // get games of user id with finished = false
 func (r *Repository) GetActiveGames(firebaseID string) ([]Game, error) {
 	var games []Game
@@ -45,67 +28,6 @@ func (r *Repository) GetActiveGames(firebaseID string) ([]Game, error) {
 		return nil, err
 	}
 	return games, nil
-}
-
-// todo: check if ranking is for this user
-func (r *Repository) AcceptRanking(rankingID uint) (*Ranking, error) {
-	var ranking Ranking
-	err := r.DB.First(&ranking, rankingID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("ranking not found")
-		}
-		return nil, err
-	}
-
-	// Update the ranking status
-	ranking.Status = StatusAccepted
-	err = r.DB.Save(&ranking).Error
-	if err != nil {
-		return nil, err
-	}
-
-	// Get all other accepted players in the same game
-	acceptedPlayerIDs, err := r.GetAcceptedPlayersInGame(ranking.GameID)
-	if err != nil {
-		log.Printf("Error getting accepted players for game %d: %v", ranking.GameID, err)
-		// Don't fail the ranking acceptance if follow creation fails
-	} else {
-		// Create follows between the current player and all other accepted players
-		if ranking.PlayerID != nil {
-			for _, otherPlayerID := range acceptedPlayerIDs {
-				if otherPlayerID != *ranking.PlayerID {
-					_, err := r.CreateFollow(*ranking.PlayerID, otherPlayerID)
-					if err != nil {
-						// Log error but don't fail the ranking acceptance
-						log.Printf("Error creating follow between players %s and %s: %v", *ranking.PlayerID, otherPlayerID, err)
-					}
-				}
-			}
-		}
-	}
-
-	return &ranking, nil
-}
-
-// todo: check if ranking is for this user
-func (r *Repository) DeclineRanking(rankingID uint) error {
-	var ranking Ranking
-	err := r.DB.First(&ranking, rankingID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("ranking not found")
-		}
-		return err
-	}
-
-	// Update the ranking status
-	ranking.Status = StatusDeclined
-	err = r.DB.Save(&ranking).Error
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
@@ -380,23 +302,6 @@ func (r *Repository) IsFollowing(player1ID, player2ID string) (bool, error) {
 	}
 
 	return count > 0, nil
-}
-
-func (r *Repository) GetAcceptedPlayersInGame(gameID uint) ([]string, error) {
-	var rankings []Ranking
-	err := r.DB.Where("game_id = ? AND status = ?", gameID, StatusAccepted).Find(&rankings).Error
-	if err != nil {
-		return nil, err
-	}
-
-	playerIDs := make([]string, 0, len(rankings))
-	for _, ranking := range rankings {
-		if ranking.PlayerID != nil {
-			playerIDs = append(playerIDs, *ranking.PlayerID)
-		}
-	}
-
-	return playerIDs, nil
 }
 
 func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error {

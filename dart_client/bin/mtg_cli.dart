@@ -55,7 +55,8 @@ void printUsage(ArgParser argParser) {
   print('    list [search]          List all players (with optional search)');
   print('    get <id>               Get player by ID');
   print('    me                     Get current player info');
-  print('    getProfileImageUrl <filename>  Get signed upload URL for profile image');
+  print(
+      '    getProfileImageUrl <filename>  Get signed upload URL for profile image');
   print('');
   print('  game                     Manage games');
   print('    create <comments>      Create a new game');
@@ -119,9 +120,6 @@ Future<void> main(List<String> arguments) async {
           break;
         case 'game':
           await handleGameCommand(client, args);
-          break;
-        case 'ranking':
-          await handleRankingCommand(client, args);
           break;
         default:
           print('Error: Unknown command "$command".\n');
@@ -375,57 +373,6 @@ Future<void> handleGameCommand(
       print('Error: Unknown game subcommand "${args[0]}".');
       print(
           'Available subcommands: create, mock-game, list, active, get, update, delete, event');
-      exit(1);
-  }
-}
-
-Future<void> handleRankingCommand(
-    MTGTrackerClient client, List<String> args) async {
-  if (args.isEmpty) {
-    print('Error: No ranking subcommand specified.');
-    print('Available subcommands: pending, accept, decline');
-    exit(1);
-  }
-
-  switch (args[0]) {
-    case 'pending':
-      final games = await client.getPendingGames();
-      print(jsonEncode(games.map((g) => g.toJson()).toList()));
-      break;
-
-    case 'accept':
-      if (args.length < 2) {
-        print('Error: Ranking ID required.');
-        exit(1);
-      }
-      final rankingId = int.tryParse(args[1]);
-      if (rankingId == null) {
-        print('Error: Invalid ranking ID "${args[1]}".');
-        exit(1);
-      }
-      await client.acceptRanking(rankingId);
-      print(jsonEncode(
-          {'success': true, 'message': 'Ranking $rankingId accepted'}));
-      break;
-
-    case 'decline':
-      if (args.length < 2) {
-        print('Error: Ranking ID required.');
-        exit(1);
-      }
-      final rankingId = int.tryParse(args[1]);
-      if (rankingId == null) {
-        print('Error: Invalid ranking ID "${args[1]}".');
-        exit(1);
-      }
-      await client.declineRanking(rankingId);
-      print(jsonEncode(
-          {'success': true, 'message': 'Ranking $rankingId declined'}));
-      break;
-
-    default:
-      print('Error: Unknown ranking subcommand "${args[0]}".');
-      print('Available subcommands: pending, accept, decline');
       exit(1);
   }
 }

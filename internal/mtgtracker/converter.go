@@ -70,7 +70,6 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 			ID:       rank.ID,
 			PlayerID: rank.PlayerID,
 			Position: rank.Position,
-			Status:   RankingStatus(rank.Status),
 			Deck: Deck{
 				Commander:    rank.Deck.Commander,
 				Crop:         rank.Deck.Crop,
