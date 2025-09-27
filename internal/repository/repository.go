@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -358,8 +359,8 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
 				ReferredPlayerID: game.CreatorID,
-				Title:            "New game created",
-				Body:             "You have been added to a new MTG game",
+				Title:            fmt.Sprintf("%s started a game", game.Creator.Name),
+				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
 				Type:             "game_created",
 				Actions:          []NotificationAction{ActionViewGame},
 				Read:             false,
