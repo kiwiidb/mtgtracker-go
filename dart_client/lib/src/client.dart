@@ -185,6 +185,29 @@ class MTGTrackerClient {
     return _handleListResponse(response, Game.fromJson);
   }
 
+  // Notification endpoints
+  Future<List<Notification>> getNotifications() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/notification/v1/notifications'),
+      headers: _headers,
+    );
+    return _handleListResponse(response, Notification.fromJson);
+  }
+
+  Future<void> markNotificationAsRead(int notificationId) async {
+    final response = await _httpClient.put(
+      Uri.parse('$baseUrl/notification/v1/notifications/$notificationId/read'),
+      headers: _headers,
+    );
+
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   void dispose() {
     _httpClient.close();
   }
