@@ -363,7 +363,7 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
 				ReferredPlayerID: game.CreatorID,
-				Title:            fmt.Sprintf("%s started a game", creator.Name),
+				Title:            fmt.Sprintf("%s started a game with you", creator.Name),
 				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
 				Type:             "game_created",
 				Actions:          []NotificationAction{ActionViewGame},
