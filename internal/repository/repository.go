@@ -354,12 +354,16 @@ func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) 
 
 func (r *Repository) createGameCreatedNotifications(game *Game) error {
 	// Create notifications for all players in the game
+	creator, err := r.GetPlayerByFirebaseID(*game.CreatorID)
+	if err != nil {
+		return err
+	}
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
 				ReferredPlayerID: game.CreatorID,
-				Title:            fmt.Sprintf("%s started a game", game.Creator.Name),
+				Title:            fmt.Sprintf("%s started a game", creator.Name),
 				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
 				Type:             "game_created",
 				Actions:          []NotificationAction{ActionViewGame},
