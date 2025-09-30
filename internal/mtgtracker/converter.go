@@ -203,6 +203,10 @@ func convertPlayerToDto(player *repository.Player) Player {
 	for _, deck := range deckMap {
 		decks = append(decks, deck)
 	}
+	// sort decks by count descending
+	sort.Slice(decks, func(i, j int) bool {
+		return decks[i].Count > decks[j].Count
+	})
 
 	coPlayers := make([]PlayerWithCount, 0, len(coPlayerMap))
 	for _, coPlayer := range coPlayerMap {
