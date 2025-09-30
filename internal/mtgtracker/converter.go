@@ -3,6 +3,7 @@ package mtgtracker
 import (
 	"mtgtracker/internal/repository"
 	"path/filepath"
+	"sort"
 )
 
 func convertGameToDto(game *repository.Game) Game {
@@ -207,6 +208,10 @@ func convertPlayerToDto(player *repository.Player) Player {
 	for _, coPlayer := range coPlayerMap {
 		coPlayers = append(coPlayers, coPlayer)
 	}
+	//sort coPlayers by count descending
+	sort.Slice(coPlayers, func(i, j int) bool {
+		return coPlayers[i].Count > coPlayers[j].Count
+	})
 
 	result.WinrateAllTime = winrate
 	result.NumberofGamesAllTime = totalGames
