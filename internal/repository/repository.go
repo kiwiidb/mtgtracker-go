@@ -418,7 +418,7 @@ func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
 				notificationType = "game_finished"
 			}
 
-			body := "Played with: "
+			body := "Opponents "
 			if len(otherPlayers) > 0 {
 				body += otherPlayers[0]
 				for i := 1; i < len(otherPlayers); i++ {
