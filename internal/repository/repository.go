@@ -374,6 +374,12 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 }
 
 func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
+	// Delete all game_created notifications for this game
+	if err := r.DB.Where("game_id = ? AND type = ?", game.ID, "game_created").Delete(&Notification{}).Error; err != nil {
+		log.Printf("Failed to delete game_created notifications for game %d: %v", game.ID, err)
+		// Don't fail the entire operation if deletion fails
+	}
+
 	// Get all player names for the body
 	playerNames := make([]string, 0, len(game.Rankings))
 	for _, ranking := range game.Rankings {
