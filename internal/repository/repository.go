@@ -357,7 +357,7 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 				Title:            fmt.Sprintf("%s started a game", creator.Name),
 				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
 				Type:             "game_created",
-				Actions:          []NotificationAction{ActionViewGame},
+				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking, ActionAddImageGameEvent},
 				Read:             false,
 				GameID:           &game.ID,
 			}

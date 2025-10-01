@@ -97,8 +97,9 @@ type Follow struct {
 type NotificationAction string
 
 const (
-	ActionDeleteRanking NotificationAction = "delete_ranking"
-	ActionViewGame      NotificationAction = "view_game"
+	ActionDeleteRanking     NotificationAction = "delete_ranking"
+	ActionViewGame          NotificationAction = "view_game"
+	ActionAddImageGameEvent NotificationAction = "add_image_game_event"
 )
 
 type Notification struct {
