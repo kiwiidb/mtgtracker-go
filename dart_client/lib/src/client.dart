@@ -183,6 +183,21 @@ class MTGTrackerClient {
     }
   }
 
+  // Ranking endpoints
+  Future<void> deleteRanking(int rankingId) async {
+    final response = await _httpClient.delete(
+      Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId'),
+      headers: _headers,
+    );
+
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   void dispose() {
     _httpClient.close();
   }

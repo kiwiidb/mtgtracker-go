@@ -11,7 +11,7 @@ MtgNotification _$MtgNotificationFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
       body: json['body'] as String,
-      type: json['type'] as String,
+      type: $enumDecode(_$NotificationTypeEnumMap, json['type']),
       actions: (json['actions'] as List<dynamic>?)
           ?.map((e) => $enumDecode(_$NotificationActionEnumMap, e))
           .toList(),
@@ -32,7 +32,7 @@ Map<String, dynamic> _$MtgNotificationToJson(MtgNotification instance) =>
       'id': instance.id,
       'title': instance.title,
       'body': instance.body,
-      'type': instance.type,
+      'type': _$NotificationTypeEnumMap[instance.type]!,
       'actions': instance.actions
           ?.map((e) => _$NotificationActionEnumMap[e]!)
           .toList(),
@@ -43,6 +43,12 @@ Map<String, dynamic> _$MtgNotificationToJson(MtgNotification instance) =>
       'game': instance.game,
       'referred_player': instance.referredPlayer,
     };
+
+const _$NotificationTypeEnumMap = {
+  NotificationType.gameCreated: 'game_created',
+  NotificationType.gameFinished: 'game_finished',
+  NotificationType.gameFinishedWon: 'game_finished_won',
+};
 
 const _$NotificationActionEnumMap = {
   NotificationAction.deleteRanking: 'delete_ranking',

@@ -11,12 +11,21 @@ enum NotificationAction {
   viewGame,
 }
 
+enum NotificationType {
+  @JsonValue('game_created')
+  gameCreated,
+  @JsonValue('game_finished')
+  gameFinished,
+  @JsonValue('game_finished_won')
+  gameFinishedWon,
+}
+
 @JsonSerializable()
 class MtgNotification {
   final int id;
   final String title;
   final String body;
-  final String type;
+  final NotificationType type;
   final List<NotificationAction>? actions;
   final bool read;
   @JsonKey(name: 'created_at')
