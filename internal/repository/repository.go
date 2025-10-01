@@ -315,9 +315,16 @@ func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error
 	return nil
 }
 
-func (r *Repository) GetNotifications(userID string) ([]Notification, error) {
+func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notification, error) {
 	var notifications []Notification
-	err := r.DB.Where("user_id = ?", userID).
+	query := r.DB.Where("user_id = ?", userID)
+
+	// Apply read filter if provided
+	if readFilter != nil {
+		query = query.Where("read = ?", *readFilter)
+	}
+
+	err := query.
 		Preload("Player").
 		Preload("Game.Rankings").
 		Preload("Game.GameEvents").

@@ -497,7 +497,21 @@ func (s *Service) GetNotifications(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	notifications, err := s.Repository.GetNotifications(userID)
+	// Get the read filter from query params (optional)
+	readParam := r.URL.Query().Get("read")
+	var readFilter *bool
+	if readParam != "" {
+		switch readParam {
+		case "true":
+			trueVal := true
+			readFilter = &trueVal
+		case "false":
+			falseVal := false
+			readFilter = &falseVal
+		}
+	}
+
+	notifications, err := s.Repository.GetNotifications(userID, readFilter)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

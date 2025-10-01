@@ -161,9 +161,14 @@ class MTGTrackerClient {
   }
 
   // Notification endpoints
-  Future<List<MtgNotification>> getNotifications() async {
+  Future<List<MtgNotification>> getNotifications({bool? read}) async {
+    final uri = Uri.parse('$baseUrl/notification/v1/notifications');
+    final finalUri = read != null
+        ? uri.replace(queryParameters: {'read': read.toString()})
+        : uri;
+
     final response = await _httpClient.get(
-      Uri.parse('$baseUrl/notification/v1/notifications'),
+      finalUri,
       headers: _headers,
     );
     return _handleListResponse(response, MtgNotification.fromJson);
