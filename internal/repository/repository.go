@@ -445,6 +445,11 @@ func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
 		return err
 	}
 
+	// Check if ranking is already deleted (player_id is nil)
+	if ranking.PlayerID == nil {
+		return errors.New("ranking already deleted")
+	}
+
 	// Get the game to verify the user is authorized (must be creator or the player in the ranking)
 	var game Game
 	if err := r.DB.First(&game, ranking.GameID).Error; err != nil {
@@ -458,18 +463,6 @@ func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
 		return errors.New("unauthorized to delete this ranking")
 	}
 
-	// Use a transaction to delete ranking and related game events
-	return r.DB.Transaction(func(tx *gorm.DB) error {
-		// Delete game events that reference this ranking (as source or target)
-		if err := tx.Where("source_ranking_id = ? OR target_ranking_id = ?", rankingID, rankingID).Delete(&GameEvent{}).Error; err != nil {
-			return err
-		}
-
-		// Delete the ranking itself
-		if err := tx.Delete(&ranking).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
+	// Set player_id to nil instead of deleting the ranking
+	return r.DB.Model(&ranking).Update("player_id", nil).Error
 }
