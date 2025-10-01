@@ -112,8 +112,10 @@ type Notification struct {
 	Read             bool                 `gorm:"default:false" json:"read"`
 	GameID           *uint                `json:"game_id,omitempty"`
 	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
+	PlayerRankingID  *uint                `json:"player_ranking_id,omitempty"`
 
-	Player         Player  `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
-	Game           *Game   `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
-	ReferredPlayer *Player `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
+	Player         Player   `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
+	Game           *Game    `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
+	ReferredPlayer *Player  `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
+	PlayerRanking  *Ranking `gorm:"foreignKey:PlayerRankingID;references:ID" json:"player_ranking,omitempty"`
 }

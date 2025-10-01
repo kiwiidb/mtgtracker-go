@@ -9,6 +9,8 @@ enum NotificationAction {
   deleteRanking,
   @JsonValue('view_game')
   viewGame,
+  @JsonValue('add_image_game_event')
+  addImageGameEvent,
 }
 
 enum NotificationType {
@@ -34,6 +36,8 @@ class MtgNotification {
   final int? gameId;
   @JsonKey(name: 'referred_player_id')
   final String? referredPlayerId;
+  @JsonKey(name: 'player_ranking_id')
+  final int? playerRankingId;
   final Game? game;
   @JsonKey(name: 'referred_player')
   final Player? referredPlayer;
@@ -48,6 +52,7 @@ class MtgNotification {
     required this.createdAt,
     this.gameId,
     this.referredPlayerId,
+    this.playerRankingId,
     this.game,
     this.referredPlayer,
   });

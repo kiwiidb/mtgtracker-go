@@ -322,6 +322,7 @@ func (r *Repository) GetNotifications(userID string) ([]Notification, error) {
 		Preload("Game.GameEvents").
 		Preload("Game.Creator").
 		Preload("ReferredPlayer").
+		Preload("PlayerRanking").
 		Order("created_at DESC").
 		Find(&notifications).Error
 	if err != nil {
@@ -360,6 +361,7 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking, ActionAddImageGameEvent},
 				Read:             false,
 				GameID:           &game.ID,
+				PlayerRankingID:  &ranking.ID,
 			}
 
 			if err := r.DB.Create(&notification).Error; err != nil {
@@ -421,6 +423,7 @@ func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
 				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking},
 				Read:             false,
 				GameID:           &game.ID,
+				PlayerRankingID:  &ranking.ID,
 			}
 
 			if err := r.DB.Create(&notification).Error; err != nil {

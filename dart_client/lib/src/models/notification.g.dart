@@ -19,6 +19,7 @@ MtgNotification _$MtgNotificationFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['created_at'] as String),
       gameId: (json['game_id'] as num?)?.toInt(),
       referredPlayerId: json['referred_player_id'] as String?,
+      playerRankingId: (json['player_ranking_id'] as num?)?.toInt(),
       game: json['game'] == null
           ? null
           : Game.fromJson(json['game'] as Map<String, dynamic>),
@@ -40,6 +41,7 @@ Map<String, dynamic> _$MtgNotificationToJson(MtgNotification instance) =>
       'created_at': instance.createdAt.toIso8601String(),
       'game_id': instance.gameId,
       'referred_player_id': instance.referredPlayerId,
+      'player_ranking_id': instance.playerRankingId,
       'game': instance.game,
       'referred_player': instance.referredPlayer,
     };
@@ -53,4 +55,5 @@ const _$NotificationTypeEnumMap = {
 const _$NotificationActionEnumMap = {
   NotificationAction.deleteRanking: 'delete_ranking',
   NotificationAction.viewGame: 'view_game',
+  NotificationAction.addImageGameEvent: 'add_image_game_event',
 };

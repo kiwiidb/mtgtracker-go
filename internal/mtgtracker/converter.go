@@ -252,6 +252,7 @@ func convertNotificationToDto(notification *repository.Notification) Notificatio
 		CreatedAt:        notification.CreatedAt,
 		GameID:           notification.GameID,
 		ReferredPlayerID: notification.ReferredPlayerID,
+		PlayerRankingID:  notification.PlayerRankingID,
 	}
 
 	if notification.Game != nil {

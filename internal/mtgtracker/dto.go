@@ -116,6 +116,7 @@ type Notification struct {
 	CreatedAt        time.Time            `json:"created_at"`
 	GameID           *uint                `json:"game_id,omitempty"`
 	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
+	PlayerRankingID  *uint                `json:"player_ranking_id,omitempty"`
 	Game             *Game                `json:"game,omitempty"`
 	ReferredPlayer   *Player              `json:"referred_player,omitempty"`
 }
