@@ -30,6 +30,7 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 		}).
 		Preload("GameEvents").
 		Distinct().
+		Order("games.created_at desc").
 		Find(&games).Error
 	if err != nil {
 		return nil, err
