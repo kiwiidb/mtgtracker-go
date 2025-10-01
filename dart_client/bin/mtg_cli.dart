@@ -258,11 +258,6 @@ Future<void> handleGameCommand(
       print(jsonEncode(games.map((g) => g.toJson()).toList()));
       break;
 
-    case 'active':
-      final games = await client.getActiveGames();
-      print(jsonEncode(games.map((g) => g.toJson()).toList()));
-      break;
-
     case 'get':
       if (args.length < 2) {
         print('Error: Game ID required.');

@@ -13,24 +13,6 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-// get games of user id with finished = false
-func (r *Repository) GetActiveGames(firebaseID string) ([]Game, error) {
-	var games []Game
-	err := r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
-		Joins("JOIN players ON rankings.player_id = players.firebase_id").
-		Where("players.firebase_id = ? AND games.finished = ?", firebaseID, false).
-		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Player")
-		}).
-		Preload("GameEvents").
-		Distinct().
-		Find(&games).Error
-	if err != nil {
-		return nil, err
-	}
-	return games, nil
-}
-
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	var player Player
 	err := r.DB.Where("firebase_id = ?", userID).First(&player).Error
@@ -448,4 +430,43 @@ func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
 		}
 	}
 	return nil
+}
+
+func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
+	// First, get the ranking to verify it exists and get the game info
+	var ranking Ranking
+	if err := r.DB.First(&ranking, rankingID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("ranking not found")
+		}
+		return err
+	}
+
+	// Get the game to verify the user is authorized (must be creator or the player in the ranking)
+	var game Game
+	if err := r.DB.First(&game, ranking.GameID).Error; err != nil {
+		return err
+	}
+
+	// Check authorization: user must be either the game creator or the player in the ranking
+	isCreator := game.CreatorID != nil && *game.CreatorID == userID
+	isRankingPlayer := ranking.PlayerID != nil && *ranking.PlayerID == userID
+	if !isCreator && !isRankingPlayer {
+		return errors.New("unauthorized to delete this ranking")
+	}
+
+	// Use a transaction to delete ranking and related game events
+	return r.DB.Transaction(func(tx *gorm.DB) error {
+		// Delete game events that reference this ranking (as source or target)
+		if err := tx.Where("source_ranking_id = ? OR target_ranking_id = ?", rankingID, rankingID).Delete(&GameEvent{}).Error; err != nil {
+			return err
+		}
+
+		// Delete the ranking itself
+		if err := tx.Delete(&ranking).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

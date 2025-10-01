@@ -42,6 +42,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
+	mux.HandleFunc("DELETE /ranking/v1/rankings/{rankingId}", s.DeleteRanking)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
 	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
 	mux.HandleFunc("GET /follow/v1/follows", s.GetMyFollows)
@@ -50,33 +51,6 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /notification/v1/notifications/{notificationId}/read", s.MarkNotificationAsRead)
 }
 
-func (s *Service) GetActiveGames(w http.ResponseWriter, r *http.Request) {
-	// Get the user ID from the context
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Call the repository to get the games that are not finished
-	games, err := s.Repository.GetActiveGames(userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Convert games to DTOs
-	result := make([]Game, 0, len(games))
-	for _, game := range games {
-		result = append(result, convertGameToDto(&game))
-	}
-
-	err = json.NewEncoder(w).Encode(result)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-
-}
 func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the context
 	userID := middleware.GetUserID(r)
@@ -557,6 +531,34 @@ func (s *Service) MarkNotificationAsRead(w http.ResponseWriter, r *http.Request)
 	err = s.Repository.MarkNotificationAsRead(uint(notificationID), userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "access denied") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Service) DeleteRanking(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	rankingIDStr := r.PathValue("rankingId")
+	rankingID, err := strconv.Atoi(rankingIDStr)
+	if err != nil {
+		http.Error(w, "Invalid ranking ID", http.StatusBadRequest)
+		return
+	}
+
+	// Call the repository to delete the ranking
+	err = s.Repository.DeleteRanking(uint(rankingID), userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "unauthorized") {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}

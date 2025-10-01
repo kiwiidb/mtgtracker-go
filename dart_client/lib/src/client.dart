@@ -160,14 +160,6 @@ class MTGTrackerClient {
     return _handleResponse(response, GameEvent.fromJson);
   }
 
-  Future<List<Game>> getActiveGames() async {
-    final response = await _httpClient.get(
-      Uri.parse('$baseUrl/game/v1/games/active'),
-      headers: _headers,
-    );
-    return _handleListResponse(response, Game.fromJson);
-  }
-
   // Notification endpoints
   Future<List<MtgNotification>> getNotifications() async {
     final response = await _httpClient.get(
