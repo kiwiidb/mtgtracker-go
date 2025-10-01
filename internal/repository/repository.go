@@ -418,7 +418,7 @@ func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
 				Title:            title,
 				Body:             body,
 				Type:             notificationType,
-				Actions:          []NotificationAction{ActionViewGame},
+				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking},
 				Read:             false,
 				GameID:           &game.ID,
 			}
