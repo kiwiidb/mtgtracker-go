@@ -326,7 +326,7 @@ func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notifi
 
 	err := query.
 		Preload("Player").
-		Preload("Game.Rankings").
+		Preload("Game.Rankings.Player").
 		Preload("Game.GameEvents").
 		Preload("Game.Creator").
 		Preload("ReferredPlayer").
