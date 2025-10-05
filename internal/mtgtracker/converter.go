@@ -47,14 +47,24 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 		if event.SourceRanking.Player != nil {
 			sourcePlayer = event.SourceRanking.Player.Name
 		}
-		sourceCommander = event.SourceRanking.Deck.Commander
+		// Get commander from either referenced deck or embedded deck
+		if event.SourceRanking.Deck != nil {
+			sourceCommander = event.SourceRanking.Deck.Commander
+		} else {
+			sourceCommander = event.SourceRanking.DeckEmbedded.Commander
+		}
 	}
 
 	if event.TargetRanking != nil {
 		if event.TargetRanking.Player != nil {
 			targetPlayer = event.TargetRanking.Player.Name
 		}
-		targetCommander = event.TargetRanking.Deck.Commander
+		// Get commander from either referenced deck or embedded deck
+		if event.TargetRanking.Deck != nil {
+			targetCommander = event.TargetRanking.Deck.Commander
+		} else {
+			targetCommander = event.TargetRanking.DeckEmbedded.Commander
+		}
 	}
 
 	return GameEvent{
@@ -75,16 +85,31 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 	result := make([]Ranking, len(rankings))
 	for i, rank := range rankings {
-		result[i] = Ranking{
-			ID:       rank.ID,
-			PlayerID: rank.PlayerID,
-			Position: rank.Position,
-			Deck: Deck{
+		// Determine which deck to use: referenced deck or embedded deck
+		var deckData Deck
+		if rank.Deck != nil {
+			// Use referenced deck from player's deck collection
+			deckData = Deck{
 				Commander:    rank.Deck.Commander,
 				Crop:         rank.Deck.Crop,
 				SecondaryImg: rank.Deck.SecondaryImage,
 				Image:        rank.Deck.Image,
-			},
+			}
+		} else {
+			// Use embedded deck data
+			deckData = Deck{
+				Commander:    rank.DeckEmbedded.Commander,
+				Crop:         rank.DeckEmbedded.Crop,
+				SecondaryImg: rank.DeckEmbedded.SecondaryImage,
+				Image:        rank.DeckEmbedded.Image,
+			}
+		}
+
+		result[i] = Ranking{
+			ID:       rank.ID,
+			PlayerID: rank.PlayerID,
+			Position: rank.Position,
+			Deck:     deckData,
 			Player: func() *Player {
 				if rank.Player != nil {
 					return &Player{
@@ -102,9 +127,10 @@ func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
 
 func convertPlayerToDto(player *repository.Player) Player {
 	result := Player{
-		ID:              player.FirebaseID,
-		Name:            player.Name,
-		ProfileImageURL: player.Image,
+		ID:               player.FirebaseID,
+		Name:             player.Name,
+		ProfileImageURL:  player.Image,
+		MoxfieldUsername: player.MoxfieldUsername,
 	}
 
 	// Calculate winrate and game statistics
@@ -232,6 +258,7 @@ func convertPlayerToDtoSimple(player *repository.Player) Player {
 		ID:                   player.FirebaseID,
 		Name:                 player.Name,
 		ProfileImageURL:      player.Image,
+		MoxfieldUsername:     player.MoxfieldUsername,
 		WinrateAllTime:       0,
 		NumberofGamesAllTime: 0,
 		DecksAllTime:         []DeckWithCount{},

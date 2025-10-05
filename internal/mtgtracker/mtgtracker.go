@@ -36,6 +36,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /player/v1/players", s.GetPlayers)
 	mux.HandleFunc("GET /player/v1/players/{playerId}", s.GetPlayer)
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
+	mux.HandleFunc("PUT /player/v1/me", s.UpdateMyPlayer)
 	mux.HandleFunc("POST /player/v1/profile-image/upload-url", s.GetProfileImageUploadURL)
 	mux.HandleFunc("POST /deck/v1/decks", s.CreateDeck)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
@@ -164,12 +165,17 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 	// Call the repository to insert the game
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
-
 		toAdd := repository.Ranking{
 			PlayerID: rank.PlayerID,
 			Position: 0,
-			Deck:     convertDeck(rank.Deck),
+			DeckID:   rank.DeckID, // Optional deck reference
 		}
+
+		// If inline deck is provided (and no deck_id), use embedded deck
+		if rank.Deck != nil && rank.DeckID == nil {
+			toAdd.DeckEmbedded = convertDeck(*rank.Deck)
+		}
+
 		rankings = append(rankings, toAdd)
 	}
 	game, err := s.Repository.InsertGame(userID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
@@ -614,6 +620,47 @@ func (s *Service) CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	// Convert to DTO (you may need to create a converter function)
 	result := convertDeckToDto(deck)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) UpdateMyPlayer(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var request UpdatePlayerRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Build updates map
+	updates := make(map[string]interface{})
+	if request.MoxfieldUsername != nil {
+		updates["moxfield_username"] = *request.MoxfieldUsername
+	}
+
+	if len(updates) == 0 {
+		http.Error(w, "No fields to update", http.StatusBadRequest)
+		return
+	}
+
+	player, err := s.Repository.UpdatePlayer(userID, updates)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := convertPlayerToDto(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)

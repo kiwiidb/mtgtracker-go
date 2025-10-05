@@ -30,15 +30,16 @@ type Deck struct {
 }
 
 type Player struct {
-	FirebaseID string `gorm:"primaryKey" json:"firebase_id"`
-	Name       string `gorm:"unique;not null" json:"name"`
-	Email      string `gorm:"unique;not null" json:"email"`
-	Image      string
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Games      []Game         `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
-	Decks      []Deck         `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"decks,omitempty"`
+	FirebaseID       string `gorm:"primaryKey" json:"firebase_id"`
+	Name             string `gorm:"unique;not null" json:"name"`
+	Email            string `gorm:"unique;not null" json:"email"`
+	Image            string
+	MoxfieldUsername string         `json:"moxfield_username"`
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	DeletedAt        gorm.DeletedAt `gorm:"index"`
+	Games            []Game         `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
+	Decks            []Deck         `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"decks,omitempty"`
 }
 type Game struct {
 	gorm.Model
@@ -58,14 +59,16 @@ type Ranking struct {
 	gorm.Model
 	GameID         uint    `json:"game_id"`
 	PlayerID       *string `json:"player_id,omitempty"`
+	DeckID         *uint   `json:"deck_id,omitempty"` // Reference to player's deck (optional)
 	Position       int     `json:"position"`
 	CouldHaveWon   bool    `json:"could_have_won"`
 	EarlySolRing   bool    `json:"early_sol_ring"`
 	StartingPlayer bool    `json:"starting_player"`
 	PlayerName     string  `gorm:"-"`
 
-	Player *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
-	Deck   Deck    `gorm:"embedded" json:"deck"` // Use embedded struct for Deck
+	Player       *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
+	Deck         *Deck   `gorm:"foreignKey:DeckID;references:ID" json:"deck,omitempty"` // Reference to Deck model
+	DeckEmbedded Deck    `gorm:"embedded;embeddedPrefix:deck_" json:"deck_embedded"`    // Embedded deck info for games without deck reference
 }
 
 type DeckWin struct {

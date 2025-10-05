@@ -20,7 +20,8 @@ type CreateGameRequest struct {
 
 type CreateRankingRequest struct {
 	PlayerID *string `json:"player_id,omitempty"`
-	Deck     Deck    `json:"deck"`
+	DeckID   *uint   `json:"deck_id,omitempty"` // Optional: reference to existing deck
+	Deck     *Deck   `json:"deck,omitempty"`    // Optional: inline deck info (used if deck_id not provided)
 }
 type UpdateGameRequest struct {
 	GameID   uint            `json:"game_id"`
@@ -56,12 +57,17 @@ type Player struct {
 	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
 	ProfileImageURL      string            `json:"profile_image_url,omitempty"`
+	MoxfieldUsername     string            `json:"moxfield_username,omitempty"`
 	WinrateAllTime       float64           `json:"winrate_all_time"`
 	NumberofGamesAllTime int               `json:"number_of_games_all_time"`
 	DecksAllTime         []DeckWithCount   `json:"decks_all_time"`
 	CoPlayersAllTime     []PlayerWithCount `json:"co_players_all_time"`
 	Games                []Game            `json:"games"`
 	CurrentGame          *Game             `json:"current_game,omitempty"`
+}
+
+type UpdatePlayerRequest struct {
+	MoxfieldUsername *string `json:"moxfield_username,omitempty"`
 }
 
 type Game struct {

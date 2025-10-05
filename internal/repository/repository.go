@@ -26,7 +26,7 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	err = r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
 		Where("rankings.player_id = ?", player.FirebaseID).
 		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Player")
+			return db.Preload("Player").Preload("Deck")
 		}).
 		Preload("GameEvents").
 		Distinct().
@@ -116,7 +116,7 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-		return db.Preload("Player")
+		return db.Preload("Player").Preload("Deck")
 	}).Preload("GameEvents").Order("Date desc").Find(&games).Error
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func (r *Repository) InsertPlayer(name string, email string, userId string) (*Pl
 
 func (r *Repository) InsertGame(creatorID string, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 
-	// Ensure each ranking has valid player and deck (optional but safe)
+	// Ensure each ranking has valid player and deck
 	for i, rank := range rankings {
 		if rank.PlayerID != nil {
 			var player Player
@@ -158,8 +158,21 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 		} else {
 			rank.Player = nil
 		}
-		rankings[i] = rank
 
+		// If DeckID is provided, validate and load the deck
+		if rank.DeckID != nil {
+			var deck Deck
+			if err := r.DB.First(&deck, *rank.DeckID).Error; err != nil {
+				return nil, errors.New("invalid deck ID")
+			}
+			// Verify deck belongs to the player
+			if rank.PlayerID != nil && deck.PlayerID != nil && *deck.PlayerID != *rank.PlayerID {
+				return nil, errors.New("deck does not belong to player")
+			}
+			rank.Deck = &deck
+		}
+
+		rankings[i] = rank
 	}
 
 	game := Game{
@@ -204,8 +217,11 @@ func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
 	var game Game
 	err := r.DB.
 		Preload("Rankings.Player").
+		Preload("Rankings.Deck").
 		Preload("GameEvents.SourceRanking.Player").
+		Preload("GameEvents.SourceRanking.Deck").
 		Preload("GameEvents.TargetRanking.Player").
+		Preload("GameEvents.TargetRanking.Deck").
 		First(&game, gameID).Error
 	if err != nil {
 		return nil, err
@@ -315,6 +331,23 @@ func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error
 	return nil
 }
 
+func (r *Repository) UpdatePlayer(firebaseID string, updates map[string]interface{}) (*Player, error) {
+	result := r.DB.Model(&Player{}).Where("firebase_id = ?", firebaseID).Updates(updates)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("player not found")
+	}
+
+	// Fetch and return the updated player
+	var player Player
+	if err := r.DB.Where("firebase_id = ?", firebaseID).First(&player).Error; err != nil {
+		return nil, err
+	}
+	return &player, nil
+}
+
 func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notification, error) {
 	var notifications []Notification
 	query := r.DB.Where("user_id = ?", userID)
@@ -367,11 +400,19 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 	}
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
+			// Get commander name from either referenced deck or embedded deck
+			commanderName := ""
+			if ranking.Deck != nil {
+				commanderName = ranking.Deck.Commander
+			} else {
+				commanderName = ranking.DeckEmbedded.Commander
+			}
+
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
 				ReferredPlayerID: game.CreatorID,
 				Title:            fmt.Sprintf("%s started a game", creator.Name),
-				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
+				Body:             fmt.Sprintf("You're playing %s", commanderName),
 				Type:             "game_created",
 				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking, ActionAddImageGameEvent},
 				Read:             false,
