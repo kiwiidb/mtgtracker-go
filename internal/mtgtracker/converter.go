@@ -276,6 +276,15 @@ func convertActionsToDto(actions []repository.NotificationAction) []Notification
 	return result
 }
 
+func convertDeckToDto(deck *repository.Deck) Deck {
+	return Deck{
+		Commander:    deck.Commander,
+		Crop:         deck.Crop,
+		SecondaryImg: deck.SecondaryImage,
+		Image:        deck.Image,
+	}
+}
+
 func getImgContentType(s string) string {
 	switch filepath.Ext(s) {
 	case ".jpg", ".jpeg":

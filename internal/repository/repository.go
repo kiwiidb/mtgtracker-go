@@ -126,13 +126,13 @@ func (r *Repository) GetGames() ([]Game, error) {
 }
 
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Notification{})
+	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Notification{}, &Deck{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Add unique constraint for symmetrical follows
-	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_follow_pair 
+	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_follow_pair
 		ON follows (player1_id, player2_id)`)
 
 	return &Repository{
@@ -486,4 +486,28 @@ func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
 
 	// Set player_id to nil instead of deleting the ranking
 	return r.DB.Model(&ranking).Update("player_id", nil).Error
+}
+
+func (r *Repository) CreateDeck(playerID, moxfieldID, commander, image, secondaryImage, crop string, themes []string, bracket uint) (*Deck, error) {
+	deck := Deck{
+		PlayerID:       &playerID,
+		MoxfieldID:     moxfieldID,
+		Themes:         themes,
+		Bracket:        bracket,
+		Commander:      commander,
+		Image:          image,
+		SecondaryImage: secondaryImage,
+		Crop:           crop,
+	}
+
+	if err := r.DB.Create(&deck).Error; err != nil {
+		return nil, err
+	}
+
+	// Load the player relationship
+	if err := r.DB.Preload("Player").First(&deck, deck.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return &deck, nil
 }

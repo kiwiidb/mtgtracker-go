@@ -14,10 +14,19 @@ const (
 )
 
 type Deck struct {
-	Commander      string `json:"commander"`
-	Image          string `json:"image"`
-	SecondaryImage string `json:"secondary_image"`
-	Crop           string `json:"crop"`
+	gorm.Model
+	MoxfieldID     string   `json:"moxfield_id"`
+	Themes         []string `gorm:"serializer:json" json:"themes"`
+	Bracket        uint     `json:"bracket"`
+	Commander      string   `json:"commander"`
+	Image          string   `json:"image"`
+	SecondaryImage string   `json:"secondary_image"`
+	Crop           string   `json:"crop"`
+	PlayerID       *string  `json:"player_id,omitempty"`
+	GameCount      int      `gorm:"default:0" json:"game_count"`
+	WinCount       int      `gorm:"default:0" json:"win_count"`
+
+	Player *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
 }
 
 type Player struct {
@@ -29,6 +38,7 @@ type Player struct {
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	Games      []Game         `gorm:"-" json:"-"` // Not a GORM relationship, populated manually
+	Decks      []Deck         `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"decks,omitempty"`
 }
 type Game struct {
 	gorm.Model

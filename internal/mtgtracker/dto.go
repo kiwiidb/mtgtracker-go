@@ -106,6 +106,16 @@ type Deck struct {
 	Image        string `json:"image"`
 }
 
+type CreateDeckRequest struct {
+	MoxfieldID     string   `json:"moxfield_id"`
+	Themes         []string `json:"themes"`
+	Bracket        uint     `json:"bracket"`
+	Commander      string   `json:"commander"`
+	Image          string   `json:"image"`
+	SecondaryImage string   `json:"secondary_image"`
+	Crop           string   `json:"crop"`
+}
+
 type Notification struct {
 	ID               uint                 `json:"id"`
 	Title            string               `json:"title"`
