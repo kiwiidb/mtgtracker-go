@@ -3,6 +3,7 @@ package mtgtracker
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/repository"
@@ -163,6 +164,24 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "At least two rankings are required", http.StatusBadRequest)
 		return
 	}
+
+	// Validate rankings have either deck_id or inline deck
+	for i, rank := range request.Rankings {
+		if rank.DeckID == nil && rank.Deck == nil {
+			http.Error(w, "Each ranking must have either deck_id or deck provided", http.StatusBadRequest)
+			return
+		}
+		if rank.DeckID != nil && rank.Deck != nil {
+			http.Error(w, "Each ranking must have either deck_id OR deck, not both", http.StatusBadRequest)
+			return
+		}
+		// If inline deck is provided, validate required fields
+		if rank.Deck != nil && rank.Deck.Commander == "" {
+			http.Error(w, fmt.Sprintf("Ranking %d: deck.commander is required", i), http.StatusBadRequest)
+			return
+		}
+	}
+
 	// Call the repository to insert the game
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
