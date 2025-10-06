@@ -39,6 +39,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
 	mux.HandleFunc("PUT /player/v1/me", s.UpdateMyPlayer)
 	mux.HandleFunc("POST /player/v1/profile-image/upload-url", s.GetProfileImageUploadURL)
+	mux.HandleFunc("GET /player/v1/players/{playerId}/decks", s.GetPlayerDecks)
 	mux.HandleFunc("POST /deck/v1/decks", s.CreateDeck)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
@@ -666,6 +667,31 @@ func (s *Service) CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	// Convert to DTO (you may need to create a converter function)
 	result := convertDeckToDto(deck)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetPlayerDecks(w http.ResponseWriter, r *http.Request) {
+	playerID := r.PathValue("playerId")
+	if playerID == "" {
+		http.Error(w, "Player ID is required", http.StatusBadRequest)
+		return
+	}
+
+	decks, err := s.Repository.GetPlayerDecks(playerID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to DTO
+	result := make([]Deck, 0, len(decks))
+	for _, deck := range decks {
+		result = append(result, convertDeckToDto(&deck))
+	}
+
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)

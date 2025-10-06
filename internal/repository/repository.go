@@ -623,3 +623,14 @@ func (r *Repository) CreateDeck(playerID, moxfieldID, commander, image, secondar
 
 	return &deck, nil
 }
+
+func (r *Repository) GetPlayerDecks(playerID string) ([]Deck, error) {
+	var decks []Deck
+	err := r.DB.Where("player_id = ?", playerID).
+		Order("game_count DESC, win_count DESC").
+		Find(&decks).Error
+	if err != nil {
+		return nil, err
+	}
+	return decks, nil
+}

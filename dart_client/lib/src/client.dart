@@ -92,6 +92,14 @@ class MTGTrackerClient {
     return _handleResponse(response, Player.fromJson);
   }
 
+  Future<List<Deck>> getPlayerDecks(String playerId) async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/player/v1/players/$playerId/decks'),
+      headers: _headers,
+    );
+    return _handleListResponse(response, Deck.fromJson);
+  }
+
   /// Get a signed URL for uploading a profile image to S3
   Future<ProfileImageUploadUrlResponse> getProfileImageUploadUrl(
       ProfileImageUploadUrlRequest request) async {
