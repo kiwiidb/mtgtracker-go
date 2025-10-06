@@ -34,6 +34,7 @@ func convertGameToDto(game *repository.Game) Game {
 func convertDeck(deck Deck) repository.Deck {
 	return repository.Deck{
 		Commander:      deck.Commander,
+		Colors:         deck.Colors,
 		Image:          deck.Image,
 		SecondaryImage: deck.SecondaryImg,
 		Crop:           deck.Crop,
@@ -112,6 +113,7 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 			// Use referenced deck from player's deck collection
 			deckData = Deck{
 				Commander:    rank.Deck.Commander,
+				Colors:       rank.Deck.Colors,
 				Crop:         rank.Deck.Crop,
 				SecondaryImg: rank.Deck.SecondaryImage,
 				Image:        rank.Deck.Image,
@@ -120,6 +122,7 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 			// Use embedded deck data
 			deckData = Deck{
 				Commander:    rank.DeckEmbedded.Commander,
+				Colors:       rank.DeckEmbedded.Colors,
 				Crop:         rank.DeckEmbedded.Crop,
 				SecondaryImg: rank.DeckEmbedded.SecondaryImage,
 				Image:        rank.DeckEmbedded.Image,
@@ -231,6 +234,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 		decks = append(decks, DeckWithCount{
 			Deck: Deck{
 				Commander:    deck.Commander,
+				Colors:       deck.Colors,
 				Crop:         deck.Crop,
 				SecondaryImg: deck.SecondaryImage,
 				Image:        deck.Image,
@@ -316,6 +320,7 @@ func convertActionsToDto(actions []repository.NotificationAction) []Notification
 func convertDeckToDto(deck *repository.Deck) Deck {
 	return Deck{
 		Commander:    deck.Commander,
+		Colors:       deck.Colors,
 		Crop:         deck.Crop,
 		SecondaryImg: deck.SecondaryImage,
 		Image:        deck.Image,

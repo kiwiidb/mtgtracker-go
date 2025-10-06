@@ -107,10 +107,11 @@ type Ranking struct {
 }
 
 type Deck struct {
-	Commander    string `json:"commander"`
-	Crop         string `json:"crop"`
-	SecondaryImg string `json:"secondary_image"`
-	Image        string `json:"image"`
+	Commander    string   `json:"commander"`
+	Crop         string   `json:"crop"`
+	SecondaryImg string   `json:"secondary_image"`
+	Image        string   `json:"image"`
+	Colors       []string `json:"colors,omitempty"` // Scryfall color codes: W, U, B, R, G, C
 }
 
 type CreateDeckRequest struct {
@@ -118,6 +119,7 @@ type CreateDeckRequest struct {
 	Themes         []string `json:"themes"`
 	Bracket        uint     `json:"bracket"`
 	Commander      string   `json:"commander"`
+	Colors         []string `json:"colors"`
 	Image          string   `json:"image"`
 	SecondaryImage string   `json:"secondary_image"`
 	Crop           string   `json:"crop"`

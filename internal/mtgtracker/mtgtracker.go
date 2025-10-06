@@ -656,6 +656,7 @@ func (s *Service) CreateDeck(w http.ResponseWriter, r *http.Request) {
 		request.SecondaryImage,
 		request.Crop,
 		request.Themes,
+		request.Colors,
 		request.Bracket,
 	)
 	if err != nil {
