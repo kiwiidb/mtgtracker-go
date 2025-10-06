@@ -232,6 +232,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 	for _, deck := range player.Decks {
 		decks = append(decks, DeckWithCount{
 			Deck: Deck{
+				ID:           &deck.ID,
 				Commander:    deck.Commander,
 				Colors:       deck.Colors,
 				Crop:         deck.Crop,
@@ -357,6 +358,7 @@ func convertActionsToDto(actions []repository.NotificationAction) []Notification
 
 func convertDeckToDto(deck *repository.Deck) Deck {
 	return Deck{
+		ID:           &deck.ID,
 		Commander:    deck.Commander,
 		Colors:       deck.Colors,
 		Crop:         deck.Crop,

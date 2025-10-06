@@ -108,6 +108,7 @@ type Ranking struct {
 }
 
 type Deck struct {
+	ID           *uint    `json:"id,omitempty"`
 	Commander    string   `json:"commander"`
 	Crop         string   `json:"crop"`
 	SecondaryImg string   `json:"secondary_image"`
