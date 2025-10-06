@@ -1,0 +1,411 @@
+{
+  "pageNumber": 1,
+  "pageSize": 25,
+  "totalResults": 6,
+  "totalPages": 1,
+  "data": [
+    {
+      "matchTypes": [],
+      "matchedCards": [],
+      "id": "nRex2A",
+      "name": "borbo",
+      "hasPrimer": false,
+      "format": "commander",
+      "areCommentsEnabled": true,
+      "visibility": "public",
+      "publicUrl": "https://moxfield.com/decks/ZEvoScpaQk2a9JpLmBpr6g",
+      "publicId": "ZEvoScpaQk2a9JpLmBpr6g",
+      "likeCount": 0,
+      "viewCount": 16,
+      "commentCount": 0,
+      "sfwCommentCount": 0,
+      "bookmarkCount": 0,
+      "isLegal": true,
+      "authorsCanEdit": false,
+      "isShared": false,
+      "mainCardId": "kpxzJ",
+      "mainCardIdIsCardFace": false,
+      "mainCardIdIsBackFace": false,
+      "createdByUser": {
+        "userName": "kiwiidb",
+        "displayName": "kiwiidb",
+        "badges": []
+      },
+      "authors": [
+        {
+          "userName": "kiwiidb",
+          "displayName": "kiwiidb",
+          "badges": []
+        }
+      ],
+      "createdAtUtc": "2025-07-21T17:53:31.547Z",
+      "lastUpdatedAtUtc": "2025-10-05T10:30:21.397Z",
+      "mainboardCount": 100,
+      "sideboardCount": 0,
+      "maybeboardCount": 0,
+      "hubNames": [],
+      "colors": [
+        "R",
+        "G"
+      ],
+      "colorPercentages": {
+        "white": 0,
+        "blue": 0,
+        "black": 0,
+        "red": 0.3,
+        "green": 0.7
+      },
+      "colorIdentity": [
+        "R",
+        "G"
+      ],
+      "colorIdentityPercentages": {
+        "white": 0,
+        "blue": 0,
+        "black": 0,
+        "red": 0.35,
+        "green": 0.65
+      },
+      "bracket": 4,
+      "userBracket": 4,
+      "autoBracket": 4,
+      "ignoreBrackets": false
+    },
+    {
+      "matchTypes": [],
+      "matchedCards": [],
+      "id": "adPbOb",
+      "name": "food",
+      "hasPrimer": false,
+      "format": "commander",
+      "areCommentsEnabled": true,
+      "visibility": "public",
+      "publicUrl": "https://moxfield.com/decks/WhGmnyLajkmXj2W09d4txQ",
+      "publicId": "WhGmnyLajkmXj2W09d4txQ",
+      "likeCount": 0,
+      "viewCount": 12,
+      "commentCount": 0,
+      "sfwCommentCount": 0,
+      "bookmarkCount": 0,
+      "isLegal": true,
+      "authorsCanEdit": false,
+      "isShared": false,
+      "mainCardId": "dXa4x",
+      "mainCardIdIsCardFace": false,
+      "mainCardIdIsBackFace": false,
+      "createdByUser": {
+        "userName": "kiwiidb",
+        "displayName": "kiwiidb",
+        "badges": []
+      },
+      "authors": [
+        {
+          "userName": "kiwiidb",
+          "displayName": "kiwiidb",
+          "badges": []
+        }
+      ],
+      "createdAtUtc": "2025-03-31T19:19:06.027Z",
+      "lastUpdatedAtUtc": "2025-03-31T20:12:03.737Z",
+      "mainboardCount": 100,
+      "sideboardCount": 0,
+      "maybeboardCount": 0,
+      "hubNames": [],
+      "colors": [
+        "W",
+        "B",
+        "G"
+      ],
+      "colorPercentages": {
+        "white": 0.34,
+        "blue": 0,
+        "black": 0.27,
+        "red": 0,
+        "green": 0.39
+      },
+      "colorIdentity": [
+        "W",
+        "B",
+        "G"
+      ],
+      "colorIdentityPercentages": {
+        "white": 0.36,
+        "blue": 0,
+        "black": 0.26,
+        "red": 0,
+        "green": 0.38
+      },
+      "bracket": 3,
+      "autoBracket": 3,
+      "ignoreBrackets": false
+    },
+    {
+      "matchTypes": [],
+      "matchedCards": [],
+      "id": "2rqVG1",
+      "name": "mimeo",
+      "hasPrimer": false,
+      "format": "commander",
+      "areCommentsEnabled": true,
+      "visibility": "public",
+      "publicUrl": "https://moxfield.com/decks/FQ-jyQmjsk2dREtwW5RJ-g",
+      "publicId": "FQ-jyQmjsk2dREtwW5RJ-g",
+      "likeCount": 0,
+      "viewCount": 12,
+      "commentCount": 0,
+      "sfwCommentCount": 0,
+      "bookmarkCount": 0,
+      "isLegal": true,
+      "authorsCanEdit": false,
+      "isShared": false,
+      "mainCardId": "61Jdq",
+      "mainCardIdIsCardFace": false,
+      "mainCardIdIsBackFace": false,
+      "createdByUser": {
+        "userName": "kiwiidb",
+        "displayName": "kiwiidb",
+        "badges": []
+      },
+      "authors": [
+        {
+          "userName": "kiwiidb",
+          "displayName": "kiwiidb",
+          "badges": []
+        }
+      ],
+      "createdAtUtc": "2025-02-15T09:15:12.517Z",
+      "lastUpdatedAtUtc": "2025-02-16T21:54:57.923Z",
+      "mainboardCount": 100,
+      "sideboardCount": 0,
+      "maybeboardCount": 0,
+      "hubNames": [],
+      "colors": [
+        "U",
+        "B",
+        "G"
+      ],
+      "colorPercentages": {
+        "white": 0,
+        "blue": 0.27,
+        "black": 0.25,
+        "red": 0,
+        "green": 0.48
+      },
+      "colorIdentity": [
+        "U",
+        "B",
+        "G"
+      ],
+      "colorIdentityPercentages": {
+        "white": 0,
+        "blue": 0.3,
+        "black": 0.27,
+        "red": 0,
+        "green": 0.43
+      },
+      "bracket": 2,
+      "autoBracket": 2,
+      "ignoreBrackets": false
+    },
+    {
+      "matchTypes": [],
+      "matchedCards": [],
+      "id": "qboQ6r",
+      "name": "jolly",
+      "hasPrimer": false,
+      "format": "commander",
+      "areCommentsEnabled": true,
+      "visibility": "public",
+      "publicUrl": "https://moxfield.com/decks/WZGdhwAmEEuYix0IHYvI_Q",
+      "publicId": "WZGdhwAmEEuYix0IHYvI_Q",
+      "likeCount": 0,
+      "viewCount": 31,
+      "commentCount": 0,
+      "sfwCommentCount": 0,
+      "bookmarkCount": 0,
+      "isLegal": true,
+      "authorsCanEdit": false,
+      "isShared": false,
+      "mainCardId": "Q4DvA",
+      "mainCardIdIsCardFace": false,
+      "mainCardIdIsBackFace": false,
+      "createdByUser": {
+        "userName": "kiwiidb",
+        "displayName": "kiwiidb",
+        "badges": []
+      },
+      "authors": [
+        {
+          "userName": "kiwiidb",
+          "displayName": "kiwiidb",
+          "badges": []
+        }
+      ],
+      "createdAtUtc": "2024-10-06T20:14:48.13Z",
+      "lastUpdatedAtUtc": "2024-10-17T17:38:54.48Z",
+      "mainboardCount": 100,
+      "sideboardCount": 0,
+      "maybeboardCount": 0,
+      "hubNames": [],
+      "colors": [
+        "W",
+        "R"
+      ],
+      "colorPercentages": {
+        "white": 0.57,
+        "blue": 0,
+        "black": 0,
+        "red": 0.43,
+        "green": 0
+      },
+      "colorIdentity": [
+        "W",
+        "R"
+      ],
+      "colorIdentityPercentages": {
+        "white": 0.55,
+        "blue": 0,
+        "black": 0,
+        "red": 0.45,
+        "green": 0
+      },
+      "bracket": 2,
+      "userBracket": 2,
+      "autoBracket": 2,
+      "ignoreBrackets": false
+    },
+    {
+      "matchTypes": [],
+      "matchedCards": [],
+      "id": "1QG1rz",
+      "name": "rats",
+      "hasPrimer": false,
+      "format": "commander",
+      "areCommentsEnabled": true,
+      "visibility": "public",
+      "publicUrl": "https://moxfield.com/decks/8YnX2vG1jESPC5u7Wd44Cg",
+      "publicId": "8YnX2vG1jESPC5u7Wd44Cg",
+      "likeCount": 0,
+      "viewCount": 12,
+      "commentCount": 0,
+      "sfwCommentCount": 0,
+      "bookmarkCount": 0,
+      "isLegal": true,
+      "authorsCanEdit": false,
+      "isShared": false,
+      "mainCardId": "kpoJB",
+      "mainCardIdIsCardFace": false,
+      "mainCardIdIsBackFace": false,
+      "createdByUser": {
+        "userName": "kiwiidb",
+        "displayName": "kiwiidb",
+        "badges": []
+      },
+      "authors": [
+        {
+          "userName": "kiwiidb",
+          "displayName": "kiwiidb",
+          "badges": []
+        }
+      ],
+      "createdAtUtc": "2024-07-30T16:29:32.627Z",
+      "lastUpdatedAtUtc": "2024-08-01T15:23:44.627Z",
+      "mainboardCount": 100,
+      "sideboardCount": 0,
+      "maybeboardCount": 0,
+      "hubNames": [],
+      "colors": [
+        "B"
+      ],
+      "colorPercentages": {
+        "white": 0,
+        "blue": 0,
+        "black": 1,
+        "red": 0,
+        "green": 0
+      },
+      "colorIdentity": [
+        "B"
+      ],
+      "colorIdentityPercentages": {
+        "white": 0,
+        "blue": 0,
+        "black": 1,
+        "red": 0,
+        "green": 0
+      },
+      "bracket": 2,
+      "userBracket": 2,
+      "autoBracket": 2,
+      "ignoreBrackets": false
+    },
+    {
+      "matchTypes": [],
+      "matchedCards": [],
+      "id": "MjaA3K",
+      "name": "Animar",
+      "hasPrimer": false,
+      "format": "commander",
+      "areCommentsEnabled": true,
+      "visibility": "public",
+      "publicUrl": "https://moxfield.com/decks/H7UoGFIzzEmETeSG6unuLQ",
+      "publicId": "H7UoGFIzzEmETeSG6unuLQ",
+      "likeCount": 0,
+      "viewCount": 27,
+      "commentCount": 0,
+      "sfwCommentCount": 0,
+      "bookmarkCount": 0,
+      "isLegal": true,
+      "authorsCanEdit": false,
+      "isShared": false,
+      "mainCardId": "BXKxv",
+      "mainCardIdIsCardFace": false,
+      "mainCardIdIsBackFace": false,
+      "createdByUser": {
+        "userName": "kiwiidb",
+        "displayName": "kiwiidb",
+        "badges": []
+      },
+      "authors": [
+        {
+          "userName": "kiwiidb",
+          "displayName": "kiwiidb",
+          "badges": []
+        }
+      ],
+      "createdAtUtc": "2024-07-28T08:59:18.983Z",
+      "lastUpdatedAtUtc": "2024-07-29T21:55:13.627Z",
+      "mainboardCount": 100,
+      "sideboardCount": 0,
+      "maybeboardCount": 0,
+      "hubNames": [],
+      "colors": [
+        "U",
+        "R",
+        "G"
+      ],
+      "colorPercentages": {
+        "white": 0,
+        "blue": 0.25,
+        "black": 0,
+        "red": 0.11,
+        "green": 0.65
+      },
+      "colorIdentity": [
+        "U",
+        "R",
+        "G"
+      ],
+      "colorIdentityPercentages": {
+        "white": 0,
+        "blue": 0.29,
+        "black": 0,
+        "red": 0.17,
+        "green": 0.54
+      },
+      "bracket": 3,
+      "autoBracket": 3,
+      "ignoreBrackets": false
+    }
+  ]
+}
