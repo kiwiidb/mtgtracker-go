@@ -11,6 +11,8 @@ Deck _$DeckFromJson(Map<String, dynamic> json) => Deck(
       crop: json['crop'] as String,
       secondaryImg: json['secondary_image'] as String,
       image: json['image'] as String,
+      colors:
+          (json['colors'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
 Map<String, dynamic> _$DeckToJson(Deck instance) => <String, dynamic>{
@@ -18,6 +20,7 @@ Map<String, dynamic> _$DeckToJson(Deck instance) => <String, dynamic>{
       'crop': instance.crop,
       'secondary_image': instance.secondaryImg,
       'image': instance.image,
+      'colors': instance.colors,
     };
 
 DeckWithCount _$DeckWithCountFromJson(Map<String, dynamic> json) =>

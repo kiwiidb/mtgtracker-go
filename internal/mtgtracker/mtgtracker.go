@@ -3,6 +3,7 @@ package mtgtracker
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/repository"
@@ -36,7 +37,10 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /player/v1/players", s.GetPlayers)
 	mux.HandleFunc("GET /player/v1/players/{playerId}", s.GetPlayer)
 	mux.HandleFunc("GET /player/v1/me", s.GetMyPlayer)
+	mux.HandleFunc("PUT /player/v1/me", s.UpdateMyPlayer)
 	mux.HandleFunc("POST /player/v1/profile-image/upload-url", s.GetProfileImageUploadURL)
+	mux.HandleFunc("GET /player/v1/players/{playerId}/decks", s.GetPlayerDecks)
+	mux.HandleFunc("POST /deck/v1/decks", s.CreateDeck)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
 	mux.HandleFunc("GET /game/v1/games/active", s.GetActiveGame)
@@ -161,15 +165,38 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "At least two rankings are required", http.StatusBadRequest)
 		return
 	}
+
+	// Validate rankings have either deck_id or inline deck
+	for i, rank := range request.Rankings {
+		if rank.DeckID == nil && rank.Deck == nil {
+			http.Error(w, "Each ranking must have either deck_id or deck provided", http.StatusBadRequest)
+			return
+		}
+		if rank.DeckID != nil && rank.Deck != nil {
+			http.Error(w, "Each ranking must have either deck_id OR deck, not both", http.StatusBadRequest)
+			return
+		}
+		// If inline deck is provided, validate required fields
+		if rank.Deck != nil && rank.Deck.Commander == "" {
+			http.Error(w, fmt.Sprintf("Ranking %d: deck.commander is required", i), http.StatusBadRequest)
+			return
+		}
+	}
+
 	// Call the repository to insert the game
 	var rankings []repository.Ranking
 	for _, rank := range request.Rankings {
-
 		toAdd := repository.Ranking{
 			PlayerID: rank.PlayerID,
 			Position: 0,
-			Deck:     convertDeck(rank.Deck),
+			DeckID:   rank.DeckID, // Optional deck reference
 		}
+
+		// If inline deck is provided (and no deck_id), use embedded deck
+		if rank.Deck != nil && rank.DeckID == nil {
+			toAdd.DeckEmbedded = convertDeck(*rank.Deck)
+		}
+
 		rankings = append(rankings, toAdd)
 	}
 	game, err := s.Repository.InsertGame(userID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
@@ -607,4 +634,107 @@ func (s *Service) DeleteRanking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Service) CreateDeck(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var request CreateDeckRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	deck, err := s.Repository.CreateDeck(
+		userID,
+		request.MoxfieldID,
+		request.Commander,
+		request.Image,
+		request.SecondaryImage,
+		request.Crop,
+		request.Themes,
+		request.Colors,
+		request.Bracket,
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to DTO (you may need to create a converter function)
+	result := convertDeckToDto(deck)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetPlayerDecks(w http.ResponseWriter, r *http.Request) {
+	playerID := r.PathValue("playerId")
+	if playerID == "" {
+		http.Error(w, "Player ID is required", http.StatusBadRequest)
+		return
+	}
+
+	decks, err := s.Repository.GetPlayerDecks(playerID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to DTO
+	result := make([]Deck, 0, len(decks))
+	for _, deck := range decks {
+		result = append(result, convertDeckToDto(&deck))
+	}
+
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) UpdateMyPlayer(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var request UpdatePlayerRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Build updates map
+	updates := make(map[string]interface{})
+	if request.MoxfieldUsername != nil {
+		updates["moxfield_username"] = *request.MoxfieldUsername
+	}
+
+	if len(updates) == 0 {
+		http.Error(w, "No fields to update", http.StatusBadRequest)
+		return
+	}
+
+	player, err := s.Repository.UpdatePlayer(userID, updates)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := convertPlayerToDto(player)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
 }

@@ -9,12 +9,14 @@ class Deck {
   @JsonKey(name: 'secondary_image')
   final String secondaryImg;
   final String image;
+  final List<String>? colors; // Scryfall color codes: W, U, B, R, G, C
 
   const Deck({
     required this.commander,
     required this.crop,
     required this.secondaryImg,
     required this.image,
+    this.colors,
   });
 
   factory Deck.fromJson(Map<String, dynamic> json) => _$DeckFromJson(json);

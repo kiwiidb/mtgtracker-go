@@ -34,6 +34,7 @@ func convertGameToDto(game *repository.Game) Game {
 func convertDeck(deck Deck) repository.Deck {
 	return repository.Deck{
 		Commander:      deck.Commander,
+		Colors:         deck.Colors,
 		Image:          deck.Image,
 		SecondaryImage: deck.SecondaryImg,
 		Crop:           deck.Crop,
@@ -48,14 +49,24 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 		if event.SourceRanking.Player != nil {
 			sourcePlayer = event.SourceRanking.Player.Name
 		}
-		sourceCommander = event.SourceRanking.Deck.Commander
+		// Get commander from either referenced deck or embedded deck
+		if event.SourceRanking.Deck != nil {
+			sourceCommander = event.SourceRanking.Deck.Commander
+		} else {
+			sourceCommander = event.SourceRanking.DeckEmbedded.Commander
+		}
 	}
 
 	if event.TargetRanking != nil {
 		if event.TargetRanking.Player != nil {
 			targetPlayer = event.TargetRanking.Player.Name
 		}
-		targetCommander = event.TargetRanking.Deck.Commander
+		// Get commander from either referenced deck or embedded deck
+		if event.TargetRanking.Deck != nil {
+			targetCommander = event.TargetRanking.Deck.Commander
+		} else {
+			targetCommander = event.TargetRanking.DeckEmbedded.Commander
+		}
 	}
 
 	return GameEvent{
@@ -88,6 +99,7 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 	}
 
 	for i, rank := range rankings {
+		// Determine which deck to use: referenced deck or embedded deck
 		// Get last life total from most recent event for this ranking
 		var lastLifeTotal *int
 		var lastLifeTotalTimestamp *time.Time
@@ -96,19 +108,34 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 			timestamp := event.CreatedAt
 			lastLifeTotalTimestamp = &timestamp
 		}
+		var deckData Deck
+		if rank.Deck != nil {
+			// Use referenced deck from player's deck collection
+			deckData = Deck{
+				Commander:    rank.Deck.Commander,
+				Colors:       rank.Deck.Colors,
+				Crop:         rank.Deck.Crop,
+				SecondaryImg: rank.Deck.SecondaryImage,
+				Image:        rank.Deck.Image,
+			}
+		} else {
+			// Use embedded deck data
+			deckData = Deck{
+				Commander:    rank.DeckEmbedded.Commander,
+				Colors:       rank.DeckEmbedded.Colors,
+				Crop:         rank.DeckEmbedded.Crop,
+				SecondaryImg: rank.DeckEmbedded.SecondaryImage,
+				Image:        rank.DeckEmbedded.Image,
+			}
+		}
 
 		result[i] = Ranking{
 			ID:                     rank.ID,
 			PlayerID:               rank.PlayerID,
 			Position:               rank.Position,
+			Deck:                   deckData,
 			LastLifeTotal:          lastLifeTotal,
 			LastLifeTotalTimestamp: lastLifeTotalTimestamp,
-			Deck: Deck{
-				Commander:    rank.Deck.Commander,
-				Crop:         rank.Deck.Crop,
-				SecondaryImg: rank.Deck.SecondaryImage,
-				Image:        rank.Deck.Image,
-			},
 			Player: func() *Player {
 				if rank.Player != nil {
 					return &Player{
@@ -126,15 +153,15 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 
 func convertPlayerToDto(player *repository.Player) Player {
 	result := Player{
-		ID:              player.FirebaseID,
-		Name:            player.Name,
-		ProfileImageURL: player.Image,
+		ID:               player.FirebaseID,
+		Name:             player.Name,
+		ProfileImageURL:  player.Image,
+		MoxfieldUsername: player.MoxfieldUsername,
 	}
 
 	// Calculate winrate and game statistics
 	totalGames := len(player.Games)
 	wins := 0
-	deckMap := make(map[string]DeckWithCount)
 	coPlayerMap := make(map[string]PlayerWithCount)
 	games := make([]Game, len(player.Games))
 
@@ -148,32 +175,11 @@ func convertPlayerToDto(player *repository.Player) Player {
 			continue
 		}
 
-		// Find this player's ranking in the game
+		// Find this player's ranking in the game to count wins
 		for _, ranking := range game.Rankings {
 			if ranking.PlayerID != nil && *ranking.PlayerID == player.FirebaseID {
-				deckKey := ranking.Deck.Commander
-				if _, exists := deckMap[deckKey]; !exists {
-					deckMap[deckKey] = DeckWithCount{Deck: Deck{
-						Commander:    ranking.Deck.Commander,
-						Crop:         ranking.Deck.Crop,
-						SecondaryImg: ranking.Deck.SecondaryImage,
-						Image:        ranking.Deck.Image,
-					},
-						Count: 1,
-					}
-
-				} else {
-					deckMap[deckKey] = DeckWithCount{
-						Deck:  deckMap[deckKey].Deck,
-						Count: deckMap[deckKey].Count + 1,
-						Wins:  deckMap[deckKey].Wins, // Keep the wins count intact
-					}
-				}
 				if ranking.Position == 1 {
 					wins++
-					entry := deckMap[deckKey]
-					entry.Wins++
-					deckMap[deckKey] = entry
 				}
 			}
 		}
@@ -222,15 +228,28 @@ func convertPlayerToDto(player *repository.Player) Player {
 		winrate = float64(wins) / float64(totalGames) * 100
 	}
 
-	// Convert maps to slices
-	decks := make([]DeckWithCount, 0, len(deckMap))
-	for _, deck := range deckMap {
-		decks = append(decks, deck)
+	// Convert player.Decks to DeckWithCount
+	decks := make([]DeckWithCount, 0, len(player.Decks))
+	for _, deck := range player.Decks {
+		decks = append(decks, DeckWithCount{
+			Deck: Deck{
+				Commander:    deck.Commander,
+				Colors:       deck.Colors,
+				Crop:         deck.Crop,
+				SecondaryImg: deck.SecondaryImage,
+				Image:        deck.Image,
+			},
+			Count: deck.GameCount,
+			Wins:  deck.WinCount,
+		})
 	}
 	// sort decks by count descending
 	sort.Slice(decks, func(i, j int) bool {
 		return decks[i].Count > decks[j].Count
 	})
+
+	// Calculate top 2 most played colors from decks
+	colors := calculateTopColors(decks, 2)
 
 	coPlayers := make([]PlayerWithCount, 0, len(coPlayerMap))
 	for _, coPlayer := range coPlayerMap {
@@ -241,11 +260,47 @@ func convertPlayerToDto(player *repository.Player) Player {
 		return coPlayers[i].Count > coPlayers[j].Count
 	})
 
+	result.Colors = colors
 	result.WinrateAllTime = winrate
 	result.NumberofGamesAllTime = totalGames
 	result.DecksAllTime = decks
 	result.CoPlayersAllTime = coPlayers
 	result.Games = games
+
+	return result
+}
+
+// calculateTopColors calculates the most played colors from decks
+func calculateTopColors(decks []DeckWithCount, topN int) []string {
+	// Count color occurrences weighted by game count
+	colorCounts := make(map[string]int)
+
+	for _, deckWithCount := range decks {
+		for _, color := range deckWithCount.Deck.Colors {
+			colorCounts[color] += deckWithCount.Count
+		}
+	}
+
+	// Convert to slice for sorting
+	type colorCount struct {
+		color string
+		count int
+	}
+	colorSlice := make([]colorCount, 0, len(colorCounts))
+	for color, count := range colorCounts {
+		colorSlice = append(colorSlice, colorCount{color: color, count: count})
+	}
+
+	// Sort by count descending
+	sort.Slice(colorSlice, func(i, j int) bool {
+		return colorSlice[i].count > colorSlice[j].count
+	})
+
+	// Get top N colors
+	result := make([]string, 0, topN)
+	for i := 0; i < topN && i < len(colorSlice); i++ {
+		result = append(result, colorSlice[i].color)
+	}
 
 	return result
 }
@@ -256,6 +311,7 @@ func convertPlayerToDtoSimple(player *repository.Player) Player {
 		ID:                   player.FirebaseID,
 		Name:                 player.Name,
 		ProfileImageURL:      player.Image,
+		MoxfieldUsername:     player.MoxfieldUsername,
 		WinrateAllTime:       0,
 		NumberofGamesAllTime: 0,
 		DecksAllTime:         []DeckWithCount{},
@@ -298,6 +354,16 @@ func convertActionsToDto(actions []repository.NotificationAction) []Notification
 		result[i] = NotificationAction(action)
 	}
 	return result
+}
+
+func convertDeckToDto(deck *repository.Deck) Deck {
+	return Deck{
+		Commander:    deck.Commander,
+		Colors:       deck.Colors,
+		Crop:         deck.Crop,
+		SecondaryImg: deck.SecondaryImage,
+		Image:        deck.Image,
+	}
 }
 
 func getImgContentType(s string) string {

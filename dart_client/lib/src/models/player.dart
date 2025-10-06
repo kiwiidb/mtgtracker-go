@@ -10,6 +10,9 @@ class Player {
   final String name;
   @JsonKey(name: 'profile_image_url')
   final String? profileImageUrl;
+  @JsonKey(name: 'moxfield_username')
+  final String? moxfieldUsername;
+  final List<String>? colors; // Top 2 most played colors
   @JsonKey(name: 'winrate_all_time')
   final double winrateAllTime;
   @JsonKey(name: 'number_of_games_all_time')
@@ -26,6 +29,8 @@ class Player {
     required this.id,
     required this.name,
     this.profileImageUrl,
+    this.moxfieldUsername,
+    this.colors,
     required this.winrateAllTime,
     required this.numberOfGamesAllTime,
     required this.decksAllTime,

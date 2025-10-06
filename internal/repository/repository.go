@@ -15,7 +15,7 @@ type Repository struct {
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	var player Player
-	err := r.DB.Where("firebase_id = ?", userID).First(&player).Error
+	err := r.DB.Preload("Decks").Where("firebase_id = ?", userID).First(&player).Error
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	err = r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
 		Where("rankings.player_id = ?", player.FirebaseID).
 		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Player")
+			return db.Preload("Player").Preload("Deck")
 		}).
 		Preload("GameEvents").
 		Distinct().
@@ -127,6 +127,12 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 
 	// Create finished game notifications if game was just finished
 	if finished != nil && *finished {
+		// Update deck statistics when game is finished
+		if err := r.updateDeckStatisticsOnFinish(res); err != nil {
+			log.Printf("Failed to update deck statistics: %v", err)
+			// Don't fail the game update if deck stats update fails
+		}
+
 		if err := r.CreateFinishedGameNotifications(res); err != nil {
 			log.Printf("Failed to create finished game notifications: %v", err)
 			// Don't fail the game update if notifications fail
@@ -139,7 +145,7 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 func (r *Repository) GetGames() ([]Game, error) {
 	var games []Game
 	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-		return db.Preload("Player")
+		return db.Preload("Player").Preload("Deck")
 	}).Preload("GameEvents").Order("Date desc").Find(&games).Error
 	if err != nil {
 		return nil, err
@@ -149,13 +155,13 @@ func (r *Repository) GetGames() ([]Game, error) {
 }
 
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Notification{})
+	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Notification{}, &Deck{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Add unique constraint for symmetrical follows
-	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_follow_pair 
+	db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_follow_pair
 		ON follows (player1_id, player2_id)`)
 
 	return &Repository{
@@ -170,7 +176,7 @@ func (r *Repository) InsertPlayer(name string, email string, userId string) (*Pl
 
 func (r *Repository) InsertGame(creatorID string, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 
-	// Ensure each ranking has valid player and deck (optional but safe)
+	// Ensure each ranking has valid player and deck
 	for i, rank := range rankings {
 		if rank.PlayerID != nil {
 			var player Player
@@ -181,8 +187,21 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 		} else {
 			rank.Player = nil
 		}
-		rankings[i] = rank
 
+		// If DeckID is provided, validate and load the deck
+		if rank.DeckID != nil {
+			var deck Deck
+			if err := r.DB.First(&deck, *rank.DeckID).Error; err != nil {
+				return nil, errors.New("invalid deck ID")
+			}
+			// Verify deck belongs to the player
+			if rank.PlayerID != nil && deck.PlayerID != nil && *deck.PlayerID != *rank.PlayerID {
+				return nil, errors.New("deck does not belong to player")
+			}
+			rank.Deck = &deck
+		}
+
+		rankings[i] = rank
 	}
 
 	game := Game{
@@ -227,8 +246,11 @@ func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
 	var game Game
 	err := r.DB.
 		Preload("Rankings.Player").
+		Preload("Rankings.Deck").
 		Preload("GameEvents.SourceRanking.Player").
+		Preload("GameEvents.SourceRanking.Deck").
 		Preload("GameEvents.TargetRanking.Player").
+		Preload("GameEvents.TargetRanking.Deck").
 		First(&game, gameID).Error
 	if err != nil {
 		return nil, err
@@ -338,6 +360,23 @@ func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error
 	return nil
 }
 
+func (r *Repository) UpdatePlayer(firebaseID string, updates map[string]interface{}) (*Player, error) {
+	result := r.DB.Model(&Player{}).Where("firebase_id = ?", firebaseID).Updates(updates)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("player not found")
+	}
+
+	// Fetch and return the updated player
+	var player Player
+	if err := r.DB.Where("firebase_id = ?", firebaseID).First(&player).Error; err != nil {
+		return nil, err
+	}
+	return &player, nil
+}
+
 func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notification, error) {
 	var notifications []Notification
 	query := r.DB.Where("user_id = ?", userID)
@@ -390,11 +429,19 @@ func (r *Repository) createGameCreatedNotifications(game *Game) error {
 	}
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
+			// Get commander name from either referenced deck or embedded deck
+			commanderName := ""
+			if ranking.Deck != nil {
+				commanderName = ranking.Deck.Commander
+			} else {
+				commanderName = ranking.DeckEmbedded.Commander
+			}
+
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
 				ReferredPlayerID: game.CreatorID,
 				Title:            fmt.Sprintf("%s started a game", creator.Name),
-				Body:             fmt.Sprintf("You're playing %s", ranking.Deck.Commander),
+				Body:             fmt.Sprintf("You're playing %s", commanderName),
 				Type:             "game_created",
 				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking, ActionAddImageGameEvent},
 				Read:             false,
@@ -507,6 +554,83 @@ func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
 		return errors.New("unauthorized to delete this ranking")
 	}
 
+	// Decrement deck statistics if this ranking has a deck reference
+	if ranking.DeckID != nil && game.Finished {
+		if err := r.decrementDeckStatistics(*ranking.DeckID, ranking.Position == 1); err != nil {
+			log.Printf("Failed to decrement deck statistics: %v", err)
+			// Don't fail the deletion if deck stats update fails
+		}
+	}
+
 	// Set player_id to nil instead of deleting the ranking
 	return r.DB.Model(&ranking).Update("player_id", nil).Error
+}
+
+func (r *Repository) updateDeckStatisticsOnFinish(game *Game) error {
+	for _, ranking := range game.Rankings {
+		// Only update if the ranking has a deck reference
+		if ranking.DeckID != nil {
+			isWinner := ranking.Position == 1
+			if err := r.incrementDeckStatistics(*ranking.DeckID, isWinner); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (r *Repository) incrementDeckStatistics(deckID uint, isWinner bool) error {
+	updates := map[string]interface{}{
+		"game_count": gorm.Expr("game_count + ?", 1),
+	}
+	if isWinner {
+		updates["win_count"] = gorm.Expr("win_count + ?", 1)
+	}
+	return r.DB.Model(&Deck{}).Where("id = ?", deckID).Updates(updates).Error
+}
+
+func (r *Repository) decrementDeckStatistics(deckID uint, wasWinner bool) error {
+	updates := map[string]interface{}{
+		"game_count": gorm.Expr("CASE WHEN game_count > 0 THEN game_count - 1 ELSE 0 END"),
+	}
+	if wasWinner {
+		updates["win_count"] = gorm.Expr("CASE WHEN win_count > 0 THEN win_count - 1 ELSE 0 END")
+	}
+	return r.DB.Model(&Deck{}).Where("id = ?", deckID).Updates(updates).Error
+}
+
+func (r *Repository) CreateDeck(playerID, moxfieldID, commander, image, secondaryImage, crop string, themes, colors []string, bracket uint) (*Deck, error) {
+	deck := Deck{
+		PlayerID:       &playerID,
+		MoxfieldID:     moxfieldID,
+		Themes:         themes,
+		Bracket:        bracket,
+		Commander:      commander,
+		Colors:         colors,
+		Image:          image,
+		SecondaryImage: secondaryImage,
+		Crop:           crop,
+	}
+
+	if err := r.DB.Create(&deck).Error; err != nil {
+		return nil, err
+	}
+
+	// Load the player relationship
+	if err := r.DB.Preload("Player").First(&deck, deck.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return &deck, nil
+}
+
+func (r *Repository) GetPlayerDecks(playerID string) ([]Deck, error) {
+	var decks []Deck
+	err := r.DB.Where("player_id = ?", playerID).
+		Order("game_count DESC, win_count DESC").
+		Find(&decks).Error
+	if err != nil {
+		return nil, err
+	}
+	return decks, nil
 }
