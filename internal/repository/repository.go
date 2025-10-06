@@ -127,6 +127,12 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 
 	// Create finished game notifications if game was just finished
 	if finished != nil && *finished {
+		// Update deck statistics when game is finished
+		if err := r.updateDeckStatisticsOnFinish(res); err != nil {
+			log.Printf("Failed to update deck statistics: %v", err)
+			// Don't fail the game update if deck stats update fails
+		}
+
 		if err := r.CreateFinishedGameNotifications(res); err != nil {
 			log.Printf("Failed to create finished game notifications: %v", err)
 			// Don't fail the game update if notifications fail
@@ -548,8 +554,49 @@ func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
 		return errors.New("unauthorized to delete this ranking")
 	}
 
+	// Decrement deck statistics if this ranking has a deck reference
+	if ranking.DeckID != nil && game.Finished {
+		if err := r.decrementDeckStatistics(*ranking.DeckID, ranking.Position == 1); err != nil {
+			log.Printf("Failed to decrement deck statistics: %v", err)
+			// Don't fail the deletion if deck stats update fails
+		}
+	}
+
 	// Set player_id to nil instead of deleting the ranking
 	return r.DB.Model(&ranking).Update("player_id", nil).Error
+}
+
+func (r *Repository) updateDeckStatisticsOnFinish(game *Game) error {
+	for _, ranking := range game.Rankings {
+		// Only update if the ranking has a deck reference
+		if ranking.DeckID != nil {
+			isWinner := ranking.Position == 1
+			if err := r.incrementDeckStatistics(*ranking.DeckID, isWinner); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (r *Repository) incrementDeckStatistics(deckID uint, isWinner bool) error {
+	updates := map[string]interface{}{
+		"game_count": gorm.Expr("game_count + ?", 1),
+	}
+	if isWinner {
+		updates["win_count"] = gorm.Expr("win_count + ?", 1)
+	}
+	return r.DB.Model(&Deck{}).Where("id = ?", deckID).Updates(updates).Error
+}
+
+func (r *Repository) decrementDeckStatistics(deckID uint, wasWinner bool) error {
+	updates := map[string]interface{}{
+		"game_count": gorm.Expr("CASE WHEN game_count > 0 THEN game_count - 1 ELSE 0 END"),
+	}
+	if wasWinner {
+		updates["win_count"] = gorm.Expr("CASE WHEN win_count > 0 THEN win_count - 1 ELSE 0 END")
+	}
+	return r.DB.Model(&Deck{}).Where("id = ?", deckID).Updates(updates).Error
 }
 
 func (r *Repository) CreateDeck(playerID, moxfieldID, commander, image, secondaryImage, crop string, themes []string, bracket uint) (*Deck, error) {
