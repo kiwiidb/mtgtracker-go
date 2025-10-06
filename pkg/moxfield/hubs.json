@@ -1,0 +1,1224 @@
+{
+  "pageNumber": 1,
+  "pageSize": 200,
+  "totalResults": 152,
+  "totalPages": 1,
+  "data": [
+    {
+      "id": 77,
+      "name": "+1/+1 Counters",
+      "description": "A strategy that revolves around +1/+1 counters.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:41:21.087Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:41:21.087Z"
+    },
+    {
+      "id": 78,
+      "name": "-1/-1 Counters",
+      "description": "A strategy that revolves around putting -1/-1 counters on creatures.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:42:13.023Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:42:13.023Z"
+    },
+    {
+      "id": 51,
+      "name": "Abzan (WBG)",
+      "description": "A white, black, and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:48:29.2Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:48:29.2Z"
+    },
+    {
+      "id": 29,
+      "name": "Affinity",
+      "description": "A deck archetype that plays a lot of small artifacts and generates an advantage from them.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:27:13.967Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:27:13.967Z"
+    },
+    {
+      "id": 62,
+      "name": "Aggression (WBRG)",
+      "description": "A four-color deck that doesn't play blue.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:52:53.853Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:36:14.857Z"
+    },
+    {
+      "id": 6,
+      "name": "Aggro",
+      "description": "An aggressive style deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T22:50:02.28Z",
+      "lastUpdatedAtUtc": "2020-06-16T22:50:02.28Z"
+    },
+    {
+      "id": 75,
+      "name": "Aikido",
+      "description": "A deck focused on using your opponents' strengths against them.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-07-09T19:00:38.517Z",
+      "lastUpdatedAtUtc": "2020-07-09T19:00:38.517Z"
+    },
+    {
+      "id": 63,
+      "name": "Altruism (WURG)",
+      "description": "A four-color deck that doesn't play black.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:53:08.317Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:36:02.02Z"
+    },
+    {
+      "id": 17,
+      "name": "Aristocrats",
+      "description": "A deck focused on playing cards like Blood Artist that gain you life while your opponents lose life.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:10:12.42Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:10:12.42Z"
+    },
+    {
+      "id": 18,
+      "name": "Artifacts",
+      "description": "A deck focused around playing artifacts.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:11:35.96Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:11:35.96Z"
+    },
+    {
+      "id": 65,
+      "name": "Artifice (WUBR)",
+      "description": "A four-color deck that doesn't play green.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:53:32.127Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:36:34.863Z"
+    },
+    {
+      "id": 125,
+      "name": "Attractions",
+      "description": "A deck themed around using Attractions.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-02-28T02:49:05.303Z",
+      "lastUpdatedAtUtc": "2023-02-28T02:49:05.303Z"
+    },
+    {
+      "id": 79,
+      "name": "Auras",
+      "description": "A strategy that revolves around playing auras on creatures.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:42:28.98Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:42:28.98Z"
+    },
+    {
+      "id": 41,
+      "name": "Azorius (WU) ",
+      "description": "A white and blue deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:41:08.907Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:41:08.907Z"
+    },
+    {
+      "id": 52,
+      "name": "Bant (GWU)",
+      "description": "A white, blue, and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:49:11.59Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:44:45.483Z"
+    },
+    {
+      "id": 80,
+      "name": "Battlecruiser",
+      "description": "A strategy that revolves around playing big threats and impactful spells.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:42:45.397Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:42:45.397Z"
+    },
+    {
+      "id": 81,
+      "name": "Birthing Pod / Pod",
+      "description": "A strategy that revolves around Birthing Pod and similar abilities.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:43:16.247Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:43:16.247Z"
+    },
+    {
+      "id": 82,
+      "name": "Blink / Flicker",
+      "description": "A strategy that revolves around repeatedly triggering enters-the-battlefield abilities.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:43:45.777Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:43:45.777Z"
+    },
+    {
+      "id": 83,
+      "name": "Blue Moon",
+      "description": "A Blue-Red Control deck that disrupts the opponent's manabase with Blood Moon and similar abilities.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:44:24.02Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:44:24.02Z"
+    },
+    {
+      "id": 42,
+      "name": "Boros (RW)",
+      "description": "A red and white deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:41:54.403Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:40:58.687Z"
+    },
+    {
+      "id": 2,
+      "name": "Budget",
+      "description": "Budget decks are built by selecting cards with restrictions on the price of the card.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-12T22:44:52.373Z",
+      "lastUpdatedAtUtc": "2020-06-16T03:50:25.08Z"
+    },
+    {
+      "id": 26,
+      "name": "Burn",
+      "description": "A deck that focuses on dealing direct damage to an opponent.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:23:21.293Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:23:21.293Z"
+    },
+    {
+      "id": 120,
+      "name": "Cascade",
+      "description": "A deck that is based on the keyword Cascade.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-10-06T23:26:15.337Z",
+      "lastUpdatedAtUtc": "2022-10-06T23:26:15.337Z"
+    },
+    {
+      "id": 4,
+      "name": "Casual",
+      "description": "Casual decks are not meant for competitive game play.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-12T22:45:08.297Z",
+      "lastUpdatedAtUtc": "2020-06-16T03:47:14.09Z"
+    },
+    {
+      "id": 122,
+      "name": "cEDH",
+      "description": "This is a competitive Commander / EDH deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-02-20T15:50:05.303Z",
+      "lastUpdatedAtUtc": "2023-02-20T15:50:05.303Z"
+    },
+    {
+      "id": 73,
+      "name": "Chaos",
+      "description": "A deck that intends to mess with the normal style of gameplay.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-07-09T18:35:46.75Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:35:46.75Z"
+    },
+    {
+      "id": 61,
+      "name": "Chaos (UBRG)",
+      "description": "A four-color deck that doesn't play white.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:52:40.877Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:36:44.777Z"
+    },
+    {
+      "id": 112,
+      "name": "Clones",
+      "description": "A deck focusing on clone effects, or the ability to copy another creature.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-10-12T22:50:14.563Z",
+      "lastUpdatedAtUtc": "2021-10-12T22:51:35.07Z"
+    },
+    {
+      "id": 154,
+      "name": "Coin Flips",
+      "description": "A deck theme that focuses on cards that flip coins.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2025-08-01T18:53:34.983Z",
+      "lastUpdatedAtUtc": "2025-08-01T18:53:34.983Z"
+    },
+    {
+      "id": 40,
+      "name": "Colorless",
+      "description": "A deck that plays only colorless cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:40:26.45Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:40:26.45Z"
+    },
+    {
+      "id": 7,
+      "name": "Combo",
+      "description": "A deck focused around winning with combos.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T22:50:29.61Z",
+      "lastUpdatedAtUtc": "2020-06-16T22:50:29.61Z"
+    },
+    {
+      "id": 3,
+      "name": "Competitive",
+      "description": "Competitive decks are optimized to execute their goal and win the game as quickly as possible.",
+      "showsInDeckList": true,
+      "createdAtUtc": "2020-06-12T22:45:01.457Z",
+      "lastUpdatedAtUtc": "2020-06-16T03:49:22.95Z"
+    },
+    {
+      "id": 8,
+      "name": "Control",
+      "description": "Control decks avoid racing and attempt to slow the game down by executing an attrition plan.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T22:51:33.56Z",
+      "lastUpdatedAtUtc": "2020-06-16T22:53:17.56Z"
+    },
+    {
+      "id": 84,
+      "name": "Cycling",
+      "description": "A deck that revolves around the Cycling ability.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:44:36.853Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:44:36.853Z"
+    },
+    {
+      "id": 32,
+      "name": "Death & Taxes",
+      "description": "A deck archetype that makes it more expensive for an opponent to play spells.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:33:38.713Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:33:38.713Z"
+    },
+    {
+      "id": 85,
+      "name": "Defender",
+      "description": "A strategy that revolves around creatures with the Defender ability.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:45:02.117Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:45:44.19Z"
+    },
+    {
+      "id": 30,
+      "name": "Delver",
+      "description": "A tempo style deck archetype that uses Delver of Secrets ",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:28:12.287Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:28:12.287Z"
+    },
+    {
+      "id": 86,
+      "name": "Devotion",
+      "description": "A strategy that revolves around controlling permanents with multiple of the same mana symbols.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:45:17.2Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:45:17.2Z"
+    },
+    {
+      "id": 43,
+      "name": "Dimir (UB)",
+      "description": "A black and blue deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:42:19.143Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:42:19.143Z"
+    },
+    {
+      "id": 25,
+      "name": "Discard",
+      "description": "A deck that focuses on getting rid of the cards in an opponent's hand.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:22:50.163Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:22:50.163Z"
+    },
+    {
+      "id": 131,
+      "name": "Discover",
+      "description": "A deck that uses the Discover mechanic as a main theme or strategy.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2024-01-08T15:34:28.49Z",
+      "lastUpdatedAtUtc": "2024-01-08T15:34:28.49Z"
+    },
+    {
+      "id": 126,
+      "name": "Donation",
+      "description": "A deck that is designed around giving away its cards. ",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-03-10T18:21:13.443Z",
+      "lastUpdatedAtUtc": "2023-03-10T18:21:13.443Z"
+    },
+    {
+      "id": 31,
+      "name": "Dredge",
+      "description": "A deck archetype that self-mills and utilizes cards in your graveyard for an advantage.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:30:30.727Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:30:30.727Z"
+    },
+    {
+      "id": 124,
+      "name": "Dungeons",
+      "description": "A deck theme based on Dungeon cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-02-28T02:48:31.643Z",
+      "lastUpdatedAtUtc": "2023-02-28T02:48:31.643Z"
+    },
+    {
+      "id": 88,
+      "name": "Eggs",
+      "description": "A strategy that revolves around sacrificing and recurring cheap artifacts.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:45:56.49Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:45:56.49Z"
+    },
+    {
+      "id": 74,
+      "name": "Enchantments",
+      "description": "A deck focused around playing enchantments.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-07-09T18:58:33.137Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:58:33.137Z"
+    },
+    {
+      "id": 153,
+      "name": "Energy",
+      "description": "A deck that focuses on using energy to get extra value of its cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2024-10-31T14:59:53.133Z",
+      "lastUpdatedAtUtc": "2024-10-31T14:59:53.133Z"
+    },
+    {
+      "id": 87,
+      "name": "Equipment",
+      "description": "A strategy that revolves around Equipment artifacts.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:45:35.953Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:45:35.953Z"
+    },
+    {
+      "id": 53,
+      "name": "Esper (WUB)",
+      "description": "A white, blue, and black deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:49:23Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:49:23Z"
+    },
+    {
+      "id": 89,
+      "name": "Extra Combats",
+      "description": "A strategy that revolves around taking as many extra combat steps as possible.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:46:10.357Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:46:10.357Z"
+    },
+    {
+      "id": 90,
+      "name": "Extra Turns",
+      "description": "A strategy that revolves around taking as many extra turns as possible.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:46:19.983Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:46:19.983Z"
+    },
+    {
+      "id": 69,
+      "name": "Farm",
+      "description": "A deck that uses low-CMC creatures and spells to take advantage of Ad Nauseam.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-17T14:18:32.983Z",
+      "lastUpdatedAtUtc": "2020-06-17T14:18:32.983Z"
+    },
+    {
+      "id": 66,
+      "name": "Five Color (WUBRG)",
+      "description": "A deck that plays all five colors.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:53:53.47Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:53:53.47Z"
+    },
+    {
+      "id": 91,
+      "name": "Flying",
+      "description": "A deck that primarily utilizes flying creatures.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:46:48.973Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:46:48.973Z"
+    },
+    {
+      "id": 76,
+      "name": "Formula X-1",
+      "description": "A high powered tier of EDH that prioritizes fun over winning.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-01-08T18:23:36.96Z",
+      "lastUpdatedAtUtc": "2021-01-11T13:38:45.4Z"
+    },
+    {
+      "id": 132,
+      "name": "Goad",
+      "description": "A deck that uses goad to get its opponents to attack each other first.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2024-03-11T17:43:44.847Z",
+      "lastUpdatedAtUtc": "2024-03-11T17:43:44.847Z"
+    },
+    {
+      "id": 44,
+      "name": "Golgari (BG)",
+      "description": "A black and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:45:11.413Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:45:11.413Z"
+    },
+    {
+      "id": 92,
+      "name": "Goodstuff",
+      "description": "A deck that plays individually strong cards without any obvious synergy.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:48:06.303Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:48:06.303Z"
+    },
+    {
+      "id": 54,
+      "name": "Grixis (UBR)",
+      "description": "A blue, black, and red deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:49:36.527Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:49:36.527Z"
+    },
+    {
+      "id": 19,
+      "name": "Group Hug",
+      "description": "A deck that tries to stay neutral in the game by helping it's opponents as long as possible.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:12:10.923Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:12:10.923Z"
+    },
+    {
+      "id": 93,
+      "name": "Group Slug",
+      "description": "A strategy that attempts to punish all opponents simultaneously.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:48:19.64Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:48:19.64Z"
+    },
+    {
+      "id": 64,
+      "name": "Growth (WUBG)",
+      "description": "A four-color deck that doesn't play red.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:53:20.367Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:37:00.163Z"
+    },
+    {
+      "id": 45,
+      "name": "Gruul (RG)",
+      "description": "A red and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:45:23.773Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:45:23.773Z"
+    },
+    {
+      "id": 94,
+      "name": "Hatebears",
+      "description": "A strategy that revolves around playing small, disruptive, silver-bullet creatures.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:48:32.983Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:48:32.983Z"
+    },
+    {
+      "id": 72,
+      "name": "Help Wanted",
+      "description": "The author is requesting feedback (comments) on how to improve this deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-07-07T13:42:04.363Z",
+      "lastUpdatedAtUtc": "2020-07-07T13:42:04.363Z"
+    },
+    {
+      "id": 95,
+      "name": "Historic",
+      "description": "A deck that revolves around Historic spells.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:48:46.883Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:48:46.883Z"
+    },
+    {
+      "id": 33,
+      "name": "Infect",
+      "description": "A deck archetype that wins by dealing infect damage as quick as possible.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:34:42.123Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:34:42.123Z"
+    },
+    {
+      "id": 46,
+      "name": "Izzet (UR)",
+      "description": "A blue and red deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:45:34.237Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:45:34.237Z"
+    },
+    {
+      "id": 96,
+      "name": "Jank",
+      "description": "A deck that is designed to follow a certain style or theme, without trying to be efficient.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:49:01.017Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:49:01.017Z"
+    },
+    {
+      "id": 55,
+      "name": "Jeskai (URW)",
+      "description": "A white, blue, and red deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:49:48.46Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:42:45.183Z"
+    },
+    {
+      "id": 56,
+      "name": "Jund (BRG)",
+      "description": "A black, red, and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:49:59.22Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:49:59.22Z"
+    },
+    {
+      "id": 70,
+      "name": "Kindred",
+      "description": "A deck that is themed around a specific creature type (e.g., Goblin, etc). Formally tribal & typal.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-17T17:28:41.127Z",
+      "lastUpdatedAtUtc": "2023-11-19T21:09:42.097Z"
+    },
+    {
+      "id": 24,
+      "name": "Land Destruction",
+      "description": "A deck that focuses on destroying an opponent's lands.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:22:08.263Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:22:08.263Z"
+    },
+    {
+      "id": 67,
+      "name": "Lands Matter",
+      "description": "A deck focused on utilizing lands as a win condition.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-17T14:09:42.427Z",
+      "lastUpdatedAtUtc": "2020-06-17T14:09:42.427Z"
+    },
+    {
+      "id": 129,
+      "name": "Legends Matter",
+      "description": "A deck themed around legendary permanents and spells.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-08-21T20:30:49.067Z",
+      "lastUpdatedAtUtc": "2023-08-21T20:30:49.067Z"
+    },
+    {
+      "id": 28,
+      "name": "Life Bargain",
+      "description": "A deck that uses life as a resource in a bargain to try to kill an opponent.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:25:50.87Z",
+      "lastUpdatedAtUtc": "2023-09-03T20:32:08.817Z"
+    },
+    {
+      "id": 12,
+      "name": "Life Gain",
+      "description": "A deck focused on gaining life.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:02:47.607Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:02:47.607Z"
+    },
+    {
+      "id": 57,
+      "name": "Mardu (RWB)",
+      "description": "A white, black, and red deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:50:18.183Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:40:45.89Z"
+    },
+    {
+      "id": 97,
+      "name": "Maverick",
+      "description": "A toolbox deck that uses tutors to play silver-bullet creatures.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:49:30.813Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:49:30.813Z"
+    },
+    {
+      "id": 9,
+      "name": "Midrange",
+      "description": "A typical midrange deck has an early game plan of mana ramp and control, but begins to play threats.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T22:52:56.713Z",
+      "lastUpdatedAtUtc": "2020-06-16T22:52:56.713Z"
+    },
+    {
+      "id": 13,
+      "name": "Mill",
+      "description": "A deck that wins by putting all of an opponents library into their graveyard as quick as possible.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:03:54.137Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:03:54.137Z"
+    },
+    {
+      "id": 99,
+      "name": "Miracles",
+      "description": "A strategy that revolves around casting Miracle spells.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:49:55.04Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:49:55.04Z"
+    },
+    {
+      "id": 115,
+      "name": "Modified",
+      "description": "A deck based on the modified theme (i.e., equipments, auras, and counters).",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-02-14T15:15:43.457Z",
+      "lastUpdatedAtUtc": "2022-02-14T15:15:43.457Z"
+    },
+    {
+      "id": 117,
+      "name": "Modular",
+      "description": "This deck has groups of cards that can be swapped out to change its strategy.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-04-25T13:12:55.517Z",
+      "lastUpdatedAtUtc": "2022-04-25T13:12:55.517Z"
+    },
+    {
+      "id": 127,
+      "name": "Monarch",
+      "description": "A deck focused on the Monarch mechanic. ",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-07-23T03:44:02.267Z",
+      "lastUpdatedAtUtc": "2023-07-23T03:44:02.267Z"
+    },
+    {
+      "id": 36,
+      "name": "Mono Black",
+      "description": "A deck that plays only black cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:38:03.77Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:38:03.77Z"
+    },
+    {
+      "id": 37,
+      "name": "Mono Blue",
+      "description": "A deck that plays only blue cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:38:21.833Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:38:21.833Z"
+    },
+    {
+      "id": 39,
+      "name": "Mono Green",
+      "description": "A deck that plays only green cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:39:56.46Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:39:56.46Z"
+    },
+    {
+      "id": 38,
+      "name": "Mono Red",
+      "description": "A deck that plays only red cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:39:39.717Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:39:39.717Z"
+    },
+    {
+      "id": 35,
+      "name": "Mono White",
+      "description": "A deck that plays only white cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:37:44.47Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:37:44.47Z"
+    },
+    {
+      "id": 98,
+      "name": "Morph",
+      "description": "A deck that revolves around the Morph ability.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:49:42.793Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:49:42.793Z"
+    },
+    {
+      "id": 133,
+      "name": "MTGO - Week 1",
+      "description": "MTGO League, week 1",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T17:57:16.487Z",
+      "lastUpdatedAtUtc": "2024-05-30T17:57:16.487Z"
+    },
+    {
+      "id": 142,
+      "name": "MTGO - Week 10",
+      "description": "MTGO League, week 10",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 143,
+      "name": "MTGO - Week 11",
+      "description": "MTGO League, week 11",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 144,
+      "name": "MTGO - Week 12",
+      "description": "MTGO League, week 12",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 145,
+      "name": "MTGO - Week 13",
+      "description": "MTGO League, week 13",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 146,
+      "name": "MTGO - Week 14",
+      "description": "MTGO League, week 14",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 147,
+      "name": "MTGO - Week 15",
+      "description": "MTGO League, week 15",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 148,
+      "name": "MTGO - Week 16",
+      "description": "MTGO League, week 16",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 149,
+      "name": "MTGO - Week 17",
+      "description": "MTGO League, week 17",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 150,
+      "name": "MTGO - Week 18",
+      "description": "MTGO League, week 18",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 151,
+      "name": "MTGO - Week 19",
+      "description": "MTGO League, week 19",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 134,
+      "name": "MTGO - Week 2",
+      "description": "MTGO League, week 2",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 152,
+      "name": "MTGO - Week 20",
+      "description": "MTGO League, week 20",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 135,
+      "name": "MTGO - Week 3",
+      "description": "MTGO League, week 3",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 136,
+      "name": "MTGO - Week 4",
+      "description": "MTGO League, week 4",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 137,
+      "name": "MTGO - Week 5",
+      "description": "MTGO League, week 5",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 138,
+      "name": "MTGO - Week 6",
+      "description": "MTGO League, week 6",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 139,
+      "name": "MTGO - Week 7",
+      "description": "MTGO League, week 7",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 140,
+      "name": "MTGO - Week 8",
+      "description": "MTGO League, week 8",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 141,
+      "name": "MTGO - Week 9",
+      "description": "MTGO League, week 9",
+      "showsInDeckList": true,
+      "createdAtUtc": "2024-05-30T18:06:07.31Z",
+      "lastUpdatedAtUtc": "2024-05-30T18:06:07.31Z"
+    },
+    {
+      "id": 100,
+      "name": "Mutate",
+      "description": "A deck that revolves around the Mutate ability.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:50:08.913Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:50:08.913Z"
+    },
+    {
+      "id": 58,
+      "name": "Naya (RGW)",
+      "description": "A white, red, and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:50:28.557Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:44:21.937Z"
+    },
+    {
+      "id": 47,
+      "name": "Orzhov (WB)",
+      "description": "A black and white deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:46:15.37Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:46:15.37Z"
+    },
+    {
+      "id": 21,
+      "name": "Pillowfort",
+      "description": "A deck that tries to protect itself from being attacked with cards like Propaganda.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:14:27.363Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:14:27.363Z"
+    },
+    {
+      "id": 106,
+      "name": "PlayEDH - Battlecruiser",
+      "description": "This deck is ready for use in the \"Battlecruiser\" power level on PlayEDH.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-03-20T23:07:26.08Z",
+      "lastUpdatedAtUtc": "2021-03-25T21:42:43.747Z"
+    },
+    {
+      "id": 109,
+      "name": "PlayEDH - High",
+      "description": "This deck is ready for use in the \"High\" power level on PlayEDH.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-03-20T23:08:24.793Z",
+      "lastUpdatedAtUtc": "2021-03-25T01:47:52.38Z"
+    },
+    {
+      "id": 107,
+      "name": "PlayEDH - Low",
+      "description": "This deck is ready for use in the \"Low\" power level on PlayEDH.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-03-20T23:08:11.023Z",
+      "lastUpdatedAtUtc": "2021-03-25T01:47:43.723Z"
+    },
+    {
+      "id": 110,
+      "name": "PlayEDH - Maximum",
+      "description": "This deck is ready for use in the \"Maximum\" power level on PlayEDH.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-03-20T23:08:32Z",
+      "lastUpdatedAtUtc": "2021-03-25T14:22:54.363Z"
+    },
+    {
+      "id": 108,
+      "name": "PlayEDH - Mid",
+      "description": "This deck is ready for use in the \"Mid\" power level on PlayEDH.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-03-20T23:08:18.06Z",
+      "lastUpdatedAtUtc": "2021-03-25T01:48:34.1Z"
+    },
+    {
+      "id": 121,
+      "name": "Poison",
+      "description": "A deck focused around killing an opponent with poison counters.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-01-27T14:57:03.257Z",
+      "lastUpdatedAtUtc": "2023-01-27T14:57:03.257Z"
+    },
+    {
+      "id": 5,
+      "name": "Primer",
+      "description": "This deck has a primer.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T03:54:34.333Z",
+      "lastUpdatedAtUtc": "2020-06-16T03:54:43.357Z"
+    },
+    {
+      "id": 128,
+      "name": "Prison",
+      "description": "A style of deck that aims to completely deny your opponent from resources or mechanics of the game.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-08-01T23:24:52.59Z",
+      "lastUpdatedAtUtc": "2023-08-01T23:24:52.59Z"
+    },
+    {
+      "id": 48,
+      "name": "Rakdos (BR)",
+      "description": "A black and red deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:46:30.993Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:46:30.993Z"
+    },
+    {
+      "id": 71,
+      "name": "Ramp",
+      "description": "A deck that focuses on ramping lands very quickly.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-23T12:34:42.323Z",
+      "lastUpdatedAtUtc": "2020-06-23T12:34:42.323Z"
+    },
+    {
+      "id": 34,
+      "name": "Reanimator",
+      "description": "A deck archetype that casts huge creatures from the graveyard.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:36:59.717Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:36:59.717Z"
+    },
+    {
+      "id": 101,
+      "name": "Rock",
+      "description": "A midrange deck that uses removal and hand disruption.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:50:29.877Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:50:29.877Z"
+    },
+    {
+      "id": 130,
+      "name": "Rule Zero",
+      "description": "This deck doesn't follow the normal rules and restrictions for the selected format.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-10-18T04:52:46.357Z",
+      "lastUpdatedAtUtc": "2023-10-18T04:52:46.357Z"
+    },
+    {
+      "id": 49,
+      "name": "Selesnya (GW)",
+      "description": "A white and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:47:07.273Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:38:34.83Z"
+    },
+    {
+      "id": 50,
+      "name": "Simic (GU)",
+      "description": "A blue and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:47:37.837Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:40:21.473Z"
+    },
+    {
+      "id": 103,
+      "name": "Snow",
+      "description": "A strategy that relies on the snow-subtype.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:50:58.317Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:50:58.317Z"
+    },
+    {
+      "id": 102,
+      "name": "Spellslinger",
+      "description": "A strategy that revolves around playing instant and sorcery spells.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:50:45.367Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:50:45.367Z"
+    },
+    {
+      "id": 20,
+      "name": "Stax",
+      "description": "A style of deck based on cards that tax an opponent's resources, making it harder to play the game.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:13:59.533Z",
+      "lastUpdatedAtUtc": "2023-08-01T23:31:54.253Z"
+    },
+    {
+      "id": 104,
+      "name": "Stoneblade",
+      "description": "A midrange deck that utilizes Stoneforge Mystic.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:51:15.777Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:51:15.777Z"
+    },
+    {
+      "id": 22,
+      "name": "Storm",
+      "description": "A deck focused on playing enough spells in a single turn to win by casting a Storm card.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:16:40.297Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:16:40.297Z"
+    },
+    {
+      "id": 59,
+      "name": "Sultai (BGU)",
+      "description": "A blue, black, and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:51:14.19Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:40:03.463Z"
+    },
+    {
+      "id": 16,
+      "name": "Super Friends",
+      "description": "A deck that focused around planeswalkers.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:07:44.277Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:07:44.277Z"
+    },
+    {
+      "id": 10,
+      "name": "Tempo",
+      "description": "A deck that tries to out attrition their opponent leading them to victory.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:01:10.73Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:01:10.73Z"
+    },
+    {
+      "id": 60,
+      "name": "Temur (GUR)",
+      "description": "A blue, red, and green deck.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:51:26.227Z",
+      "lastUpdatedAtUtc": "2020-07-09T18:37:36.623Z"
+    },
+    {
+      "id": 113,
+      "name": "Thieves",
+      "description": "A deck focusing on stealing cards from other players.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-10-12T22:53:16.613Z",
+      "lastUpdatedAtUtc": "2021-10-12T22:53:16.613Z"
+    },
+    {
+      "id": 14,
+      "name": "Tokens",
+      "description": "A deck that makes a lot of tokens.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:04:08.68Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:04:08.68Z"
+    },
+    {
+      "id": 68,
+      "name": "Toolbox",
+      "description": "A deck that uses tutors to find answers to anything an opponent plays.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-17T14:17:32.657Z",
+      "lastUpdatedAtUtc": "2020-06-17T14:17:32.657Z"
+    },
+    {
+      "id": 23,
+      "name": "Tron",
+      "description": "A deck that uses the Urza lands to generate mana advantage to play large spells like Karn Liberated.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:21:21.493Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:21:21.493Z"
+    },
+    {
+      "id": 118,
+      "name": "Turbo",
+      "description": "A combo deck that forgoes protection and interaction for speed.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-04-26T12:38:02.493Z",
+      "lastUpdatedAtUtc": "2022-04-26T12:38:02.493Z"
+    },
+    {
+      "id": 116,
+      "name": "Unmaintained",
+      "description": "This deck is no longer maintained by the owner and most likely won't see changed any time soon.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-03-23T02:39:26.653Z",
+      "lastUpdatedAtUtc": "2022-03-23T02:39:26.653Z"
+    },
+    {
+      "id": 105,
+      "name": "Vehicles",
+      "description": "A deck that revolves around Vehicle artifacts.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2021-02-16T19:51:28.413Z",
+      "lastUpdatedAtUtc": "2021-02-16T19:51:28.413Z"
+    },
+    {
+      "id": 15,
+      "name": "Voltron",
+      "description": "A deck that attempts to win by enhancing a single creature to become a bigger and bigger threat.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:04:47.223Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:04:47.223Z"
+    },
+    {
+      "id": 114,
+      "name": "Vorthos",
+      "description": "Deck that are based on the lore of the game. ",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-01-27T15:59:54.873Z",
+      "lastUpdatedAtUtc": "2022-01-27T15:59:54.873Z"
+    },
+    {
+      "id": 119,
+      "name": "Webcam Friendly",
+      "description": "This deck is webcam-friendly because it does not physically interact with its opponents cards.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2022-08-13T17:08:07.487Z",
+      "lastUpdatedAtUtc": "2022-08-13T17:08:07.487Z"
+    },
+    {
+      "id": 11,
+      "name": "Wheels",
+      "description": "A deck focused around using wheel cards (i.e., Wheel of Fortune).",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:02:31.233Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:02:31.233Z"
+    },
+    {
+      "id": 123,
+      "name": "X Spells",
+      "description": "A deck centered around playing spells with X in their casting cost.",
+      "showsInDeckList": false,
+      "createdAtUtc": "2023-02-23T14:02:02.043Z",
+      "lastUpdatedAtUtc": "2023-02-23T14:02:02.043Z"
+    },
+    {
+      "id": 27,
+      "name": "Zoo",
+      "description": "A deck that plays small mana efficient creatures that usually depict zoo animals (i.e., Kird Ape)",
+      "showsInDeckList": false,
+      "createdAtUtc": "2020-06-16T23:24:38.737Z",
+      "lastUpdatedAtUtc": "2020-06-16T23:24:38.737Z"
+    }
+  ]
+}
