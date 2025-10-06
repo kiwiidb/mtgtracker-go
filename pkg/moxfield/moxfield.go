@@ -85,8 +85,14 @@ func GetDecksForUser(username string) ([]Deck, error) {
 	// Build search URL with username parameter
 	searchURL := fmt.Sprintf("%s?authorUserName=%s&pageSize=100&fmt=commander", moxFieldSearchUrl, url.QueryEscape(username))
 
-	// Make HTTP request
-	resp, err := http.Get(searchURL)
+	// Make HTTP request with User-Agent header
+	req, err := http.NewRequest("GET", searchURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("User-Agent", "MTGTracker/1.0")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch decks: %w", err)
 	}
@@ -130,7 +136,14 @@ func GetDeckByID(deckID string) (*Deck, error) {
 	// Fetch deck details
 	deckURL := fmt.Sprintf("%s%s", moxFieldDeckUrl, url.PathEscape(deckID))
 
-	resp, err := http.Get(deckURL)
+	// Make HTTP request with User-Agent header
+	req, err := http.NewRequest("GET", deckURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("User-Agent", "MTGTracker/1.0")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deck: %w", err)
 	}
