@@ -159,7 +159,6 @@ func convertPlayerToDto(player *repository.Player) Player {
 	// Calculate winrate and game statistics
 	totalGames := len(player.Games)
 	wins := 0
-	deckMap := make(map[string]DeckWithCount)
 	coPlayerMap := make(map[string]PlayerWithCount)
 	games := make([]Game, len(player.Games))
 
@@ -173,32 +172,11 @@ func convertPlayerToDto(player *repository.Player) Player {
 			continue
 		}
 
-		// Find this player's ranking in the game
+		// Find this player's ranking in the game to count wins
 		for _, ranking := range game.Rankings {
 			if ranking.PlayerID != nil && *ranking.PlayerID == player.FirebaseID {
-				deckKey := ranking.Deck.Commander
-				if _, exists := deckMap[deckKey]; !exists {
-					deckMap[deckKey] = DeckWithCount{Deck: Deck{
-						Commander:    ranking.Deck.Commander,
-						Crop:         ranking.Deck.Crop,
-						SecondaryImg: ranking.Deck.SecondaryImage,
-						Image:        ranking.Deck.Image,
-					},
-						Count: 1,
-					}
-
-				} else {
-					deckMap[deckKey] = DeckWithCount{
-						Deck:  deckMap[deckKey].Deck,
-						Count: deckMap[deckKey].Count + 1,
-						Wins:  deckMap[deckKey].Wins, // Keep the wins count intact
-					}
-				}
 				if ranking.Position == 1 {
 					wins++
-					entry := deckMap[deckKey]
-					entry.Wins++
-					deckMap[deckKey] = entry
 				}
 			}
 		}
@@ -247,10 +225,19 @@ func convertPlayerToDto(player *repository.Player) Player {
 		winrate = float64(wins) / float64(totalGames) * 100
 	}
 
-	// Convert maps to slices
-	decks := make([]DeckWithCount, 0, len(deckMap))
-	for _, deck := range deckMap {
-		decks = append(decks, deck)
+	// Convert player.Decks to DeckWithCount
+	decks := make([]DeckWithCount, 0, len(player.Decks))
+	for _, deck := range player.Decks {
+		decks = append(decks, DeckWithCount{
+			Deck: Deck{
+				Commander:    deck.Commander,
+				Crop:         deck.Crop,
+				SecondaryImg: deck.SecondaryImage,
+				Image:        deck.Image,
+			},
+			Count: deck.GameCount,
+			Wins:  deck.WinCount,
+		})
 	}
 	// sort decks by count descending
 	sort.Slice(decks, func(i, j int) bool {

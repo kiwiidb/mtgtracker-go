@@ -15,7 +15,7 @@ type Repository struct {
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	var player Player
-	err := r.DB.Where("firebase_id = ?", userID).First(&player).Error
+	err := r.DB.Preload("Decks").Where("firebase_id = ?", userID).First(&player).Error
 	if err != nil {
 		return nil, err
 	}
