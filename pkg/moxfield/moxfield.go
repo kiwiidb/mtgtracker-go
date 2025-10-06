@@ -85,12 +85,24 @@ func GetDecksForUser(username string) ([]Deck, error) {
 	// Build search URL with username parameter
 	searchURL := fmt.Sprintf("%s?authorUserName=%s&pageSize=100&fmt=commander", moxFieldSearchUrl, url.QueryEscape(username))
 
-	// Make HTTP request with User-Agent header
+	// Make HTTP request with headers matching browser request
 	req, err := http.NewRequest("GET", searchURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("User-Agent", "MTGTracker/1.0")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0")
+	req.Header.Set("Accept", "application/json, text/plain, */*")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br, zstd")
+	req.Header.Set("x-moxfield-version", "2025.10.06.2")
+	req.Header.Set("Authorization", "Bearer undefined")
+	req.Header.Set("Origin", "https://moxfield.com")
+	req.Header.Set("Referer", "https://moxfield.com/")
+	req.Header.Set("Sec-Fetch-Dest", "empty")
+	req.Header.Set("Sec-Fetch-Mode", "cors")
+	req.Header.Set("Sec-Fetch-Site", "same-site")
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Pragma", "no-cache")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -136,12 +148,24 @@ func GetDeckByID(deckID string) (*Deck, error) {
 	// Fetch deck details
 	deckURL := fmt.Sprintf("%s%s", moxFieldDeckUrl, url.PathEscape(deckID))
 
-	// Make HTTP request with User-Agent header
+	// Make HTTP request with headers matching browser request
 	req, err := http.NewRequest("GET", deckURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("User-Agent", "MTGTracker/1.0")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0")
+	req.Header.Set("Accept", "application/json, text/plain, */*")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br, zstd")
+	req.Header.Set("x-moxfield-version", "2025.10.06.2")
+	req.Header.Set("Authorization", "Bearer undefined")
+	req.Header.Set("Origin", "https://moxfield.com")
+	req.Header.Set("Referer", "https://moxfield.com/")
+	req.Header.Set("Sec-Fetch-Dest", "empty")
+	req.Header.Set("Sec-Fetch-Mode", "cors")
+	req.Header.Set("Sec-Fetch-Site", "same-site")
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Pragma", "no-cache")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

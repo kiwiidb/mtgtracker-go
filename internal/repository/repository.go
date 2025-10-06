@@ -602,7 +602,7 @@ func (r *Repository) decrementDeckStatistics(deckID uint, wasWinner bool) error 
 func (r *Repository) CreateDeck(playerID, commander, image, secondaryImage, crop string, moxFieldID *string, themes, colors []string, bracket uint) (*Deck, error) {
 	deck := Deck{
 		PlayerID:       &playerID,
-		MoxfieldID:     moxFieldID,
+		MoxfieldURL:    moxFieldID,
 		Themes:         themes,
 		Bracket:        bracket,
 		Commander:      commander,

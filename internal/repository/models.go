@@ -15,7 +15,7 @@ const (
 
 type Deck struct {
 	gorm.Model
-	MoxfieldID     *string  `json:"moxfield_id"`
+	MoxfieldURL    *string  `json:"moxfield_url"`
 	Themes         []string `gorm:"serializer:json" json:"themes"`
 	Bracket        uint     `json:"bracket"`
 	Commander      string   `json:"commander"`

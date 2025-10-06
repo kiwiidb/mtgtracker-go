@@ -655,7 +655,7 @@ func (s *Service) CreateDeck(w http.ResponseWriter, r *http.Request) {
 		request.Image,
 		request.SecondaryImage,
 		request.Crop,
-		request.MoxfieldID,
+		request.MoxfieldURL,
 		request.Themes,
 		request.Colors,
 		request.Bracket,
