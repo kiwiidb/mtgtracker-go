@@ -20,11 +20,14 @@ class SignupPlayerRequest {
 class CreateRankingRequest {
   @JsonKey(name: 'player_id')
   final String? playerId;
-  final Deck deck;
+  @JsonKey(name: 'deck_id')
+  final int? deckId;
+  final Deck? deck;
 
   const CreateRankingRequest({
     this.playerId,
-    required this.deck,
+    this.deckId,
+    this.deck,
   });
 
   factory CreateRankingRequest.fromJson(Map<String, dynamic> json) =>

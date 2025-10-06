@@ -17,13 +17,17 @@ CreateRankingRequest _$CreateRankingRequestFromJson(
         Map<String, dynamic> json) =>
     CreateRankingRequest(
       playerId: json['player_id'] as String?,
-      deck: Deck.fromJson(json['deck'] as Map<String, dynamic>),
+      deckId: (json['deck_id'] as num?)?.toInt(),
+      deck: json['deck'] == null
+          ? null
+          : Deck.fromJson(json['deck'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$CreateRankingRequestToJson(
         CreateRankingRequest instance) =>
     <String, dynamic>{
       'player_id': instance.playerId,
+      'deck_id': instance.deckId,
       'deck': instance.deck,
     };
 
