@@ -599,10 +599,10 @@ func (r *Repository) decrementDeckStatistics(deckID uint, wasWinner bool) error 
 	return r.DB.Model(&Deck{}).Where("id = ?", deckID).Updates(updates).Error
 }
 
-func (r *Repository) CreateDeck(playerID, moxfieldID, commander, image, secondaryImage, crop string, themes, colors []string, bracket uint) (*Deck, error) {
+func (r *Repository) CreateDeck(playerID, commander, image, secondaryImage, crop string, moxFieldID *string, themes, colors []string, bracket uint) (*Deck, error) {
 	deck := Deck{
 		PlayerID:       &playerID,
-		MoxfieldID:     moxfieldID,
+		MoxfieldID:     moxFieldID,
 		Themes:         themes,
 		Bracket:        bracket,
 		Commander:      commander,

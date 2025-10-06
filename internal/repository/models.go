@@ -15,7 +15,7 @@ const (
 
 type Deck struct {
 	gorm.Model
-	MoxfieldID     string   `json:"moxfield_id"`
+	MoxfieldID     *string  `json:"moxfield_id"`
 	Themes         []string `gorm:"serializer:json" json:"themes"`
 	Bracket        uint     `json:"bracket"`
 	Commander      string   `json:"commander"`
@@ -42,7 +42,7 @@ type Player struct {
 	Name             string `gorm:"unique;not null" json:"name"`
 	Email            string `gorm:"unique;not null" json:"email"`
 	Image            string
-	MoxfieldUsername string         `json:"moxfield_username"`
+	MoxfieldUsername string `json:"moxfield_username"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
@@ -75,8 +75,8 @@ type Ranking struct {
 	PlayerName     string  `gorm:"-"`
 
 	Player       *Player    `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
-	Deck         *Deck      `gorm:"foreignKey:DeckID;references:ID" json:"deck,omitempty"`   // Reference to Deck model
-	DeckEmbedded SimpleDeck `gorm:"embedded" json:"deck_embedded,omitempty"` // Embedded deck info for games without deck reference
+	Deck         *Deck      `gorm:"foreignKey:DeckID;references:ID" json:"deck,omitempty"` // Reference to Deck model
+	DeckEmbedded SimpleDeck `gorm:"embedded" json:"deck_embedded,omitempty"`               // Embedded deck info for games without deck reference
 }
 
 type DeckWin struct {

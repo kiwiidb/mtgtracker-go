@@ -651,11 +651,11 @@ func (s *Service) CreateDeck(w http.ResponseWriter, r *http.Request) {
 
 	deck, err := s.Repository.CreateDeck(
 		userID,
-		request.MoxfieldID,
 		request.Commander,
 		request.Image,
 		request.SecondaryImage,
 		request.Crop,
+		request.MoxfieldID,
 		request.Themes,
 		request.Colors,
 		request.Bracket,
