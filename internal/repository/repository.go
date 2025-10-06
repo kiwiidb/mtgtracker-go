@@ -580,6 +580,7 @@ func (r *Repository) updateDeckStatisticsOnFinish(game *Game) error {
 }
 
 func (r *Repository) incrementDeckStatistics(deckID uint, isWinner bool) error {
+	log.Println("Incrementing stats for deck", deckID, "winner:", isWinner)
 	updates := map[string]interface{}{
 		"game_count": gorm.Expr("game_count + ?", 1),
 	}
