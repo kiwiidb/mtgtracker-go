@@ -120,6 +120,20 @@ class MTGTrackerClient {
     return _handleListResponse(response, Game.fromJson);
   }
 
+  Future<Game?> getActiveGame() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/game/v1/games/active'),
+      headers: _headers,
+    );
+
+    // 204 No Content means no active game
+    if (response.statusCode == 204) {
+      return null;
+    }
+
+    return _handleResponse(response, Game.fromJson);
+  }
+
   Future<Game> getGame(int gameId) async {
     final response = await _httpClient.get(
       Uri.parse('$baseUrl/game/v1/games/$gameId'),

@@ -12,6 +12,10 @@ class Ranking {
   int position;
   @JsonKey(name: 'life_total')
   final int? lifeTotal;
+  @JsonKey(name: 'last_life_total')
+  final int? lastLifeTotal;
+  @JsonKey(name: 'last_life_total_timestamp')
+  final DateTime? lastLifeTotalTimestamp;
   final Deck deck;
   final Player? player;
   final String? status;
@@ -21,6 +25,8 @@ class Ranking {
     this.playerId,
     required this.position,
     this.lifeTotal,
+    this.lastLifeTotal,
+    this.lastLifeTotalTimestamp,
     required this.deck,
     this.player,
     this.status,

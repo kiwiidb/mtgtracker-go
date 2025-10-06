@@ -41,6 +41,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /deck/v1/decks", s.CreateDeck)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
+	mux.HandleFunc("GET /game/v1/games/active", s.GetActiveGame)
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
@@ -291,6 +292,31 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 		// Convert the game to a DTO
 		result = append(result, convertGameToDto(&game))
 	}
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetActiveGame(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	game, err := s.Repository.GetActiveGameForPlayer(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if game == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	result := convertGameToDto(game)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
