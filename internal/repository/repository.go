@@ -190,6 +190,7 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 
 		// If DeckID is provided, validate and load the deck
 		if rank.DeckID != nil {
+			log.Println("DECKID PROVIDED:", *rank.DeckID)
 			var deck Deck
 			if err := r.DB.First(&deck, *rank.DeckID).Error; err != nil {
 				return nil, errors.New("invalid deck ID")
