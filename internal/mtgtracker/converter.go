@@ -248,6 +248,9 @@ func convertPlayerToDto(player *repository.Player) Player {
 		return decks[i].Count > decks[j].Count
 	})
 
+	// Calculate top 2 most played colors from decks
+	colors := calculateTopColors(decks, 2)
+
 	coPlayers := make([]PlayerWithCount, 0, len(coPlayerMap))
 	for _, coPlayer := range coPlayerMap {
 		coPlayers = append(coPlayers, coPlayer)
@@ -257,11 +260,47 @@ func convertPlayerToDto(player *repository.Player) Player {
 		return coPlayers[i].Count > coPlayers[j].Count
 	})
 
+	result.Colors = colors
 	result.WinrateAllTime = winrate
 	result.NumberofGamesAllTime = totalGames
 	result.DecksAllTime = decks
 	result.CoPlayersAllTime = coPlayers
 	result.Games = games
+
+	return result
+}
+
+// calculateTopColors calculates the most played colors from decks
+func calculateTopColors(decks []DeckWithCount, topN int) []string {
+	// Count color occurrences weighted by game count
+	colorCounts := make(map[string]int)
+
+	for _, deckWithCount := range decks {
+		for _, color := range deckWithCount.Deck.Colors {
+			colorCounts[color] += deckWithCount.Count
+		}
+	}
+
+	// Convert to slice for sorting
+	type colorCount struct {
+		color string
+		count int
+	}
+	colorSlice := make([]colorCount, 0, len(colorCounts))
+	for color, count := range colorCounts {
+		colorSlice = append(colorSlice, colorCount{color: color, count: count})
+	}
+
+	// Sort by count descending
+	sort.Slice(colorSlice, func(i, j int) bool {
+		return colorSlice[i].count > colorSlice[j].count
+	})
+
+	// Get top N colors
+	result := make([]string, 0, topN)
+	for i := 0; i < topN && i < len(colorSlice); i++ {
+		result = append(result, colorSlice[i].color)
+	}
 
 	return result
 }
