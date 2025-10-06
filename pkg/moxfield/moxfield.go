@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -12,6 +13,23 @@ const (
 	moxFieldSearchUrl = "https://api2.moxfield.com/v2/decks/search-sfw"
 	moxFieldDeckUrl   = "https://api2.moxfield.com/v3/decks/all/"
 )
+
+type Service struct{}
+
+func NewService() *Service {
+	return &Service{}
+}
+
+func (s *Service) RegisterRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /moxfield/v1/themes", s.GetThemes)
+}
+
+func (s *Service) GetThemes(w http.ResponseWriter, r *http.Request) {
+	err := json.NewEncoder(w).Encode(ValidThemes)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
 
 type Deck struct {
 	ID             string   `json:"id"`

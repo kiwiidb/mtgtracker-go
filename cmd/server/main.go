@@ -6,6 +6,7 @@ import (
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/mtgtracker"
 	"mtgtracker/internal/repository"
+	"mtgtracker/pkg/moxfield"
 	"net/http"
 	"os"
 
@@ -55,10 +56,13 @@ func main() {
 
 	// // Initialize the service
 	service := mtgtracker.NewService(repo, storage)
+	moxfieldService := moxfield.NewService()
+
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
 
 	service.RegisterRoutes(mux)
+	moxfieldService.RegisterRoutes(mux)
 	// add middleware chain
 	handler := middleware.ApacheLogMw(mux)
 	handler = middleware.CorsMw(handler)
