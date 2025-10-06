@@ -31,10 +31,9 @@ func convertGameToDto(game *repository.Game) Game {
 	return result
 }
 
-func convertDeck(deck Deck) repository.Deck {
-	return repository.Deck{
+func convertSimpleDeck(deck Deck) repository.SimpleDeck {
+	return repository.SimpleDeck{
 		Commander:      deck.Commander,
-		Colors:         deck.Colors,
 		Image:          deck.Image,
 		SecondaryImage: deck.SecondaryImg,
 		Crop:           deck.Crop,
@@ -122,7 +121,7 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 			// Use embedded deck data
 			deckData = Deck{
 				Commander:    rank.DeckEmbedded.Commander,
-				Colors:       rank.DeckEmbedded.Colors,
+				Colors:       nil, // Embedded decks don't store colors
 				Crop:         rank.DeckEmbedded.Crop,
 				SecondaryImg: rank.DeckEmbedded.SecondaryImage,
 				Image:        rank.DeckEmbedded.Image,

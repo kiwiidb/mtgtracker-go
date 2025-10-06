@@ -30,6 +30,13 @@ type Deck struct {
 	Player *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
 }
 
+type SimpleDeck struct {
+	Commander      string `json:"commander"`
+	Image          string `json:"image"`
+	SecondaryImage string `json:"secondary_image"`
+	Crop           string `json:"crop"`
+}
+
 type Player struct {
 	FirebaseID       string `gorm:"primaryKey" json:"firebase_id"`
 	Name             string `gorm:"unique;not null" json:"name"`
@@ -67,9 +74,9 @@ type Ranking struct {
 	StartingPlayer bool    `json:"starting_player"`
 	PlayerName     string  `gorm:"-"`
 
-	Player       *Player `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
-	Deck         *Deck   `gorm:"foreignKey:DeckID;references:ID" json:"deck,omitempty"` // Reference to Deck model
-	DeckEmbedded Deck    `gorm:"embedded;embeddedPrefix:deck_" json:"deck_embedded"`    // Embedded deck info for games without deck reference
+	Player       *Player    `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
+	Deck         *Deck      `gorm:"foreignKey:DeckID;references:ID" json:"deck,omitempty"`   // Reference to Deck model
+	DeckEmbedded SimpleDeck `gorm:"embedded" json:"deck_embedded,omitempty"` // Embedded deck info for games without deck reference
 }
 
 type DeckWin struct {

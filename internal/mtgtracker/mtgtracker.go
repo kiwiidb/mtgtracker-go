@@ -194,7 +194,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 		// If inline deck is provided (and no deck_id), use embedded deck
 		if rank.Deck != nil && rank.DeckID == nil {
-			toAdd.DeckEmbedded = convertDeck(*rank.Deck)
+			toAdd.DeckEmbedded = convertSimpleDeck(*rank.Deck)
 		}
 
 		rankings = append(rankings, toAdd)
