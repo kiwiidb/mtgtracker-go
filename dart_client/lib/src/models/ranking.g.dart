@@ -11,6 +11,10 @@ Ranking _$RankingFromJson(Map<String, dynamic> json) => Ranking(
       playerId: json['player_id'] as String?,
       position: (json['position'] as num).toInt(),
       lifeTotal: (json['life_total'] as num?)?.toInt(),
+      lastLifeTotal: (json['last_life_total'] as num?)?.toInt(),
+      lastLifeTotalTimestamp: json['last_life_total_timestamp'] == null
+          ? null
+          : DateTime.parse(json['last_life_total_timestamp'] as String),
       deck: Deck.fromJson(json['deck'] as Map<String, dynamic>),
       player: json['player'] == null
           ? null
@@ -23,6 +27,9 @@ Map<String, dynamic> _$RankingToJson(Ranking instance) => <String, dynamic>{
       'player_id': instance.playerId,
       'position': instance.position,
       'life_total': instance.lifeTotal,
+      'last_life_total': instance.lastLifeTotal,
+      'last_life_total_timestamp':
+          instance.lastLifeTotalTimestamp?.toIso8601String(),
       'deck': instance.deck,
       'player': instance.player,
       'status': instance.status,

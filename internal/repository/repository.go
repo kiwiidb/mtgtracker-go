@@ -59,6 +59,29 @@ func (r *Repository) GetPlayers(search string) ([]Player, error) {
 	return players, nil
 }
 
+func (r *Repository) GetActiveGameForPlayer(playerID string) (*Game, error) {
+	var game Game
+	err := r.DB.
+		Joins("JOIN rankings ON games.id = rankings.game_id").
+		Where("rankings.player_id = ?", playerID).
+		Where("games.finished = ?", false).
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player")
+		}).
+		Preload("GameEvents.SourceRanking.Player").
+		Preload("GameEvents.TargetRanking.Player").
+		Preload("Creator").
+		Order("games.created_at DESC").
+		First(&game).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil // No active game found, return nil without error
+		}
+		return nil, err
+	}
+	return &game, nil
+}
+
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
 	return r.DB.Transaction(func(tx *gorm.DB) error {

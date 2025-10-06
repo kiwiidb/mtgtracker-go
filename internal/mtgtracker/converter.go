@@ -4,6 +4,7 @@ import (
 	"mtgtracker/internal/repository"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 func convertGameToDto(game *repository.Game) Game {
@@ -14,7 +15,7 @@ func convertGameToDto(game *repository.Game) Game {
 		Date:       game.Date,
 		Comments:   game.Comments,
 		Finished:   game.Finished,
-		Rankings:   convertRankingsToDto(game.Rankings),
+		Rankings:   convertRankingsWithLifeTotal(game.Rankings, game.GameEvents),
 		GameEvents: make([]GameEvent, len(game.GameEvents)),
 	}
 
@@ -72,13 +73,36 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 	}
 }
 
-func convertRankingsToDto(rankings []repository.Ranking) []Ranking {
+func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []repository.GameEvent) []Ranking {
 	result := make([]Ranking, len(rankings))
+
+	// Build a map of ranking ID to most recent life total event
+	lifeTotalMap := make(map[uint]*repository.GameEvent)
+	for i := range gameEvents {
+		event := &gameEvents[i]
+		if event.TargetRankingID != nil {
+			// Keep the most recent event (events are assumed to be sorted by CreatedAt)
+			// If not sorted, we'll take the last one which should be most recent
+			lifeTotalMap[*event.TargetRankingID] = event
+		}
+	}
+
 	for i, rank := range rankings {
+		// Get last life total from most recent event for this ranking
+		var lastLifeTotal *int
+		var lastLifeTotalTimestamp *time.Time
+		if event, exists := lifeTotalMap[rank.ID]; exists {
+			lastLifeTotal = &event.TargetLifeTotalAfter
+			timestamp := event.CreatedAt
+			lastLifeTotalTimestamp = &timestamp
+		}
+
 		result[i] = Ranking{
-			ID:       rank.ID,
-			PlayerID: rank.PlayerID,
-			Position: rank.Position,
+			ID:                     rank.ID,
+			PlayerID:               rank.PlayerID,
+			Position:               rank.Position,
+			LastLifeTotal:          lastLifeTotal,
+			LastLifeTotalTimestamp: lastLifeTotalTimestamp,
 			Deck: Deck{
 				Commander:    rank.Deck.Commander,
 				Crop:         rank.Deck.Crop,

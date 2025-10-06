@@ -91,12 +91,13 @@ type GameEvent struct {
 }
 
 type Ranking struct {
-	ID        uint    `json:"id"`
-	PlayerID  *string `json:"player_id,omitempty"`
-	Position  int     `json:"position"`
-	LifeTotal *uint   `json:"life_total,omitempty"`
-	Deck      Deck    `json:"deck"`
-	Player    *Player `json:"player,omitempty"` // Optional, can be omitted if not needed
+	ID                     uint       `json:"id"`
+	PlayerID               *string    `json:"player_id,omitempty"`
+	Position               int        `json:"position"`
+	LastLifeTotal          *int       `json:"last_life_total,omitempty"`
+	LastLifeTotalTimestamp *time.Time `json:"last_life_total_timestamp,omitempty"`
+	Deck                   Deck       `json:"deck"`
+	Player                 *Player    `json:"player,omitempty"` // Optional, can be omitted if not needed
 }
 
 type Deck struct {
