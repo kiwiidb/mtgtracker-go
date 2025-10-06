@@ -116,7 +116,7 @@ type Deck struct {
 }
 
 type CreateDeckRequest struct {
-	MoxfieldURL    *string  `json:"moxfield_id"`
+	MoxfieldURL    *string  `json:"moxfield_url"`
 	Themes         []string `json:"themes"`
 	Bracket        uint     `json:"bracket"`
 	Commander      string   `json:"commander"`

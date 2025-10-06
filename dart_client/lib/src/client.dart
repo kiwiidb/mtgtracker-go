@@ -100,6 +100,32 @@ class MTGTrackerClient {
     return _handleListResponse(response, Deck.fromJson);
   }
 
+  Future<Deck> createDeck(CreateDeckRequest request) async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/deck/v1/decks'),
+      headers: _headers,
+      body: jsonEncode(request.toJson()),
+    );
+    return _handleResponse(response, Deck.fromJson);
+  }
+
+  Future<List<String>> getThemes() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/moxfield/v1/themes'),
+      headers: _headers,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.cast<String>();
+    } else {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   /// Get a signed URL for uploading a profile image to S3
   Future<ProfileImageUploadUrlResponse> getProfileImageUploadUrl(
       ProfileImageUploadUrlRequest request) async {

@@ -139,3 +139,29 @@ Map<String, dynamic> _$UpdateProfileImageRequestToJson(
     <String, dynamic>{
       'image_url': instance.imageUrl,
     };
+
+CreateDeckRequest _$CreateDeckRequestFromJson(Map<String, dynamic> json) =>
+    CreateDeckRequest(
+      moxfieldUrl: json['moxfield_url'] as String?,
+      themes:
+          (json['themes'] as List<dynamic>).map((e) => e as String).toList(),
+      bracket: (json['bracket'] as num).toInt(),
+      commander: json['commander'] as String,
+      colors:
+          (json['colors'] as List<dynamic>).map((e) => e as String).toList(),
+      image: json['image'] as String,
+      secondaryImage: json['secondary_image'] as String,
+      crop: json['crop'] as String,
+    );
+
+Map<String, dynamic> _$CreateDeckRequestToJson(CreateDeckRequest instance) =>
+    <String, dynamic>{
+      'moxfield_url': instance.moxfieldUrl,
+      'themes': instance.themes,
+      'bracket': instance.bracket,
+      'commander': instance.commander,
+      'colors': instance.colors,
+      'image': instance.image,
+      'secondary_image': instance.secondaryImage,
+      'crop': instance.crop,
+    };

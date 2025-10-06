@@ -162,3 +162,32 @@ class UpdateProfileImageRequest {
       _$UpdateProfileImageRequestFromJson(json);
   Map<String, dynamic> toJson() => _$UpdateProfileImageRequestToJson(this);
 }
+
+@JsonSerializable()
+class CreateDeckRequest {
+  @JsonKey(name: 'moxfield_url')
+  final String? moxfieldUrl;
+  final List<String> themes;
+  final int bracket;
+  final String commander;
+  final List<String> colors;
+  final String image;
+  @JsonKey(name: 'secondary_image')
+  final String secondaryImage;
+  final String crop;
+
+  const CreateDeckRequest({
+    this.moxfieldUrl,
+    required this.themes,
+    required this.bracket,
+    required this.commander,
+    required this.colors,
+    required this.image,
+    required this.secondaryImage,
+    required this.crop,
+  });
+
+  factory CreateDeckRequest.fromJson(Map<String, dynamic> json) =>
+      _$CreateDeckRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$CreateDeckRequestToJson(this);
+}
