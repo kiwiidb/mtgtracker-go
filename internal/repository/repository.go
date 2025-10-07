@@ -450,6 +450,7 @@ func (r *Repository) GetNotifications(userID string, readFilter *bool, limit, of
 		}).
 		Preload("Player").
 		Preload("Game.Rankings.Player").
+		Preload("Game.Rankings.Deck").
 		Preload("Game.GameEvents").
 		Preload("Game.Creator").
 		Preload("ReferredPlayer").
