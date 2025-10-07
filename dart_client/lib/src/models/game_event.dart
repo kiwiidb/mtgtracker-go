@@ -23,6 +23,8 @@ class GameEvent {
   final String imageUrl;
   @JsonKey(name: 'upload_image_url')
   final String? uploadImageUrl;
+  @JsonKey(name: 'comment')
+  final String? comment;
 
   const GameEvent({
     required this.gameId,
@@ -34,8 +36,10 @@ class GameEvent {
     this.targetRanking,
     required this.imageUrl,
     this.uploadImageUrl,
+    this.comment,
   });
 
-  factory GameEvent.fromJson(Map<String, dynamic> json) => _$GameEventFromJson(json);
+  factory GameEvent.fromJson(Map<String, dynamic> json) =>
+      _$GameEventFromJson(json);
   Map<String, dynamic> toJson() => _$GameEventToJson(this);
 }

@@ -130,6 +130,7 @@ type GameEvent struct {
 	TargetRanking        *Ranking  `json:"target_ranking,omitempty"`
 	ImageUrl             string    `json:"image_url"`                  // URL of the uploaded image
 	UploadImageUrl       string    `json:"upload_image_url,omitempty"` // Presigned URL for image upload
+	Comment              *string   `json:"comment,omitempty"`          // New field for text description
 }
 
 type Ranking struct {

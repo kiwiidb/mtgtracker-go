@@ -62,6 +62,7 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 		EventType:            event.EventType,
 		DamageDelta:          event.DamageDelta,
 		CreatedAt:            event.CreatedAt,
+		Comment:              event.Comment,
 		TargetLifeTotalAfter: event.TargetLifeTotalAfter,
 		SourceRanking:        sourceRanking,
 		TargetRanking:        targetRanking,

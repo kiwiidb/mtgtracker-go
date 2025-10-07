@@ -20,6 +20,7 @@ GameEvent _$GameEventFromJson(Map<String, dynamic> json) => GameEvent(
           : Ranking.fromJson(json['target_ranking'] as Map<String, dynamic>),
       imageUrl: json['image_url'] as String,
       uploadImageUrl: json['upload_image_url'] as String?,
+      comment: json['comment'] as String?,
     );
 
 Map<String, dynamic> _$GameEventToJson(GameEvent instance) => <String, dynamic>{
@@ -32,4 +33,5 @@ Map<String, dynamic> _$GameEventToJson(GameEvent instance) => <String, dynamic>{
       'target_ranking': instance.targetRanking,
       'image_url': instance.imageUrl,
       'upload_image_url': instance.uploadImageUrl,
+      'comment': instance.comment,
     };
