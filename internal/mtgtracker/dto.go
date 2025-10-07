@@ -101,7 +101,6 @@ type Player struct {
 	NumberofGamesAllTime int               `json:"number_of_games_all_time"`
 	DecksAllTime         []DeckWithCount   `json:"decks_all_time"`
 	CoPlayersAllTime     []PlayerWithCount `json:"co_players_all_time"`
-	Games                []Game            `json:"games"`
 	CurrentGame          *Game             `json:"current_game,omitempty"`
 }
 

@@ -21,7 +21,6 @@ class Player {
   final List<DeckWithCount>? decksAllTime;
   @JsonKey(name: 'co_players_all_time')
   final List<PlayerWithCount>? coPlayersAllTime;
-  final List<Game>? games;
   @JsonKey(name: 'current_game')
   final Game? currentGame;
 
@@ -35,7 +34,6 @@ class Player {
     required this.numberOfGamesAllTime,
     required this.decksAllTime,
     required this.coPlayersAllTime,
-    required this.games,
     this.currentGame,
   });
 

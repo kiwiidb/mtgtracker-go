@@ -213,7 +213,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertGameToDto(game)
+	result := convertGameToDto(game, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -282,7 +282,7 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// convert the game to a DTO
-	result := convertGameToDto(game)
+	result := convertGameToDto(game, true)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -319,7 +319,7 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]Game, 0, len(games))
 	for _, game := range games {
-		items = append(items, convertGameToDto(&game))
+		items = append(items, convertGameToDto(&game, false))
 	}
 
 	result := PaginatedResult[Game]{
@@ -353,7 +353,7 @@ func (s *Service) GetActiveGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertGameToDto(game)
+	result := convertGameToDto(game, true)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -400,7 +400,7 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertGameToDto(updatedGame)
+	result := convertGameToDto(updatedGame, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)

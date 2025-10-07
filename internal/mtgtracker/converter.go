@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func convertGameToDto(game *repository.Game) Game {
+func convertGameToDto(game *repository.Game, addEvents bool) Game {
 	result := Game{
 		ID:         game.ID,
 		CreatorID:  game.CreatorID,
@@ -25,6 +25,10 @@ func convertGameToDto(game *repository.Game) Game {
 		result.Creator = &creator
 	}
 
+	if !addEvents {
+		// If not adding events, return early
+		return result
+	}
 	for i, event := range game.GameEvents {
 		result.GameEvents[i] = convertGameEvent(&event, "")
 	}
@@ -168,7 +172,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 	for i, game := range player.Games {
 		// Convert game to DTO
-		games[i] = convertGameToDto(&game)
+		games[i] = convertGameToDto(&game, false)
 
 		// Normally you will only have 1 game in progress at a time
 		if !game.Finished {
@@ -269,7 +273,6 @@ func convertPlayerToDto(player *repository.Player) Player {
 	result.NumberofGamesAllTime = totalGames
 	result.DecksAllTime = decks
 	result.CoPlayersAllTime = coPlayers
-	result.Games = games
 
 	return result
 }
@@ -320,7 +323,6 @@ func convertPlayerToDtoSimple(player *repository.Player) Player {
 		NumberofGamesAllTime: 0,
 		DecksAllTime:         []DeckWithCount{},
 		CoPlayersAllTime:     []PlayerWithCount{},
-		Games:                []Game{},
 		CurrentGame:          nil,
 	}
 }
@@ -340,7 +342,7 @@ func convertNotificationToDto(notification *repository.Notification) Notificatio
 	}
 
 	if notification.Game != nil {
-		game := convertGameToDto(notification.Game)
+		game := convertGameToDto(notification.Game, false)
 		result.Game = &game
 	}
 
