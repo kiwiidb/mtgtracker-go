@@ -533,6 +533,8 @@ func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
 	for _, ranking := range game.Rankings {
 		if ranking.Player != nil {
 			playerNames = append(playerNames, ranking.Player.Name)
+		} else {
+			playerNames = append(playerNames, "guest")
 		}
 	}
 
