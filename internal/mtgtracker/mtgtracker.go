@@ -50,8 +50,6 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /ranking/v1/rankings/{rankingId}", s.DeleteRanking)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
 	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
-	mux.HandleFunc("GET /follow/v1/follows", s.GetMyFollows)
-	mux.HandleFunc("GET /follow/v1/follows/{playerId}", s.GetPlayerFollows)
 	mux.HandleFunc("GET /notification/v1/notifications", s.GetNotifications)
 	mux.HandleFunc("PUT /notification/v1/notifications/{notificationId}/read", s.MarkNotificationAsRead)
 }
