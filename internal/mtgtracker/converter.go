@@ -116,6 +116,8 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 				Crop:         rank.Deck.Crop,
 				SecondaryImg: rank.Deck.SecondaryImage,
 				Image:        rank.Deck.Image,
+				MoxfieldURL:  rank.Deck.MoxfieldURL,
+				Bracket:      rank.Deck.Bracket,
 			}
 		} else {
 			// Use embedded deck data
@@ -238,6 +240,8 @@ func convertPlayerToDto(player *repository.Player) Player {
 				Crop:         deck.Crop,
 				SecondaryImg: deck.SecondaryImage,
 				Image:        deck.Image,
+				MoxfieldURL:  deck.MoxfieldURL,
+				Bracket:      deck.Bracket,
 			},
 			Count: deck.GameCount,
 			Wins:  deck.WinCount,
@@ -364,6 +368,8 @@ func convertDeckToDto(deck *repository.Deck) Deck {
 		Crop:         deck.Crop,
 		SecondaryImg: deck.SecondaryImage,
 		Image:        deck.Image,
+		MoxfieldURL:  deck.MoxfieldURL,
+		Bracket:      deck.Bracket,
 	}
 }
 

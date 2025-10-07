@@ -14,6 +14,8 @@ Deck _$DeckFromJson(Map<String, dynamic> json) => Deck(
       image: json['image'] as String,
       colors:
           (json['colors'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      moxfieldUrl: json['moxfield_url'] as String?,
+      bracket: (json['bracket'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$DeckToJson(Deck instance) => <String, dynamic>{
@@ -23,6 +25,8 @@ Map<String, dynamic> _$DeckToJson(Deck instance) => <String, dynamic>{
       'secondary_image': instance.secondaryImg,
       'image': instance.image,
       'colors': instance.colors,
+      'moxfield_url': instance.moxfieldUrl,
+      'bracket': instance.bracket,
     };
 
 DeckWithCount _$DeckWithCountFromJson(Map<String, dynamic> json) =>

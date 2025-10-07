@@ -114,6 +114,8 @@ type Deck struct {
 	SecondaryImg string   `json:"secondary_image"`
 	Image        string   `json:"image"`
 	Colors       []string `json:"colors,omitempty"` // Scryfall color codes: W, U, B, R, G, C
+	MoxfieldURL  *string  `json:"moxfield_url,omitempty"`
+	Bracket      uint     `json:"bracket,omitempty"`
 }
 
 type CreateDeckRequest struct {

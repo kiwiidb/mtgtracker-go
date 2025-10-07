@@ -11,6 +11,9 @@ class Deck {
   final String secondaryImg;
   final String image;
   final List<String>? colors; // Scryfall color codes: W, U, B, R, G, C
+  @JsonKey(name: 'moxfield_url')
+  final String? moxfieldUrl;
+  final int? bracket;
 
   const Deck({
     this.id,
@@ -19,6 +22,8 @@ class Deck {
     required this.secondaryImg,
     required this.image,
     this.colors,
+    this.moxfieldUrl,
+    this.bracket,
   });
 
   factory Deck.fromJson(Map<String, dynamic> json) => _$DeckFromJson(json);
