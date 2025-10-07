@@ -292,7 +292,7 @@ func (r *Repository) createInitGameEvents(game *Game) error {
 	return nil
 }
 
-func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta, lifeAfter int, source, target *uint, imageUrl string) (*GameEvent, error) {
+func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta, lifeAfter int, source, target *uint, imageUrl string, comment *string) (*GameEvent, error) {
 	event := GameEvent{
 		GameID:               gameId,
 		EventType:            eventType,
@@ -301,6 +301,7 @@ func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta,
 		SourceRankingID:      source,
 		TargetRankingID:      target,
 		ImageUrl:             imageUrl,
+		Comment:              comment,
 	}
 	if err := r.DB.Create(&event).Error; err != nil {
 		return nil, err

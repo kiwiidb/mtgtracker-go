@@ -257,7 +257,13 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the event using the repository
-	event, err := s.Repository.InsertGameEvent(uint(gameId), req.EventType, req.DamageDelta, req.TargetLifeTotalAfter, req.SourceRankingId, req.TargetRankingId, strings.Split(uploadImgUrl, "?")[0])
+	event, err := s.Repository.InsertGameEvent(
+		uint(gameId), req.EventType,
+		req.DamageDelta, req.TargetLifeTotalAfter,
+		req.SourceRankingId, req.TargetRankingId,
+		strings.Split(uploadImgUrl, "?")[0],
+		req.Comment,
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

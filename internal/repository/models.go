@@ -99,9 +99,10 @@ type GameEvent struct {
 	EventType            string
 	DamageDelta          int
 	TargetLifeTotalAfter int
-	SourceRankingID      *uint  // Made nullable with pointer
-	TargetRankingID      *uint  // Made nullable with pointer
-	ImageUrl             string // New field for uploaded image URL
+	SourceRankingID      *uint   // Made nullable with pointer
+	TargetRankingID      *uint   // Made nullable with pointer
+	ImageUrl             string  // New field for uploaded image URL
+	Comment              *string // New field for text description
 
 	SourceRanking *Ranking `gorm:"foreignKey:SourceRankingID;references:ID"` // Made nullable with pointer
 	TargetRanking *Ranking `gorm:"foreignKey:TargetRankingID;references:ID"` // Made nullable with pointer
