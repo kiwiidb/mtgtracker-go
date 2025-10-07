@@ -19,12 +19,12 @@ void main() async {
     // Example: Get all players
     print('\nFetching all players...');
     final players = await client.getPlayers();
-    print('Found ${players.length} players');
+    print('Found ${players.items.length} players');
 
     // Example: Search for players
     print('\nSearching for players named "Alice"...');
     final searchResults = await client.getPlayers(search: 'Alice');
-    print('Found ${searchResults.length} players matching "Alice"');
+    print('Found ${searchResults.totalCount} players matching "Alice"');
 
     // Example: Get current user's profile
     print('\nFetching my player profile...');
@@ -40,11 +40,11 @@ void main() async {
     // Example: Get all games
     print('\nFetching all games...');
     final games = await client.getGames();
-    print('Found ${games.length} games');
+    print('Found ${games.totalCount} games');
 
     // Example: Add a game event (if you have a game)
-    if (games.isNotEmpty) {
-      final gameId = games.first.id;
+    if (games.items.isNotEmpty) {
+      final gameId = games.items.first.id;
       print('\nAdding event to game $gameId...');
 
       final eventRequest = GameEventRequest(

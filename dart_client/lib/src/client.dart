@@ -57,6 +57,23 @@ class MTGTrackerClient {
     }
   }
 
+  Future<PaginatedResult<T>> _handlePaginatedResponse<T>(
+    http.Response response,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      return PaginatedResult.fromJson(json, (itemJson) {
+        return fromJson(itemJson as Map<String, dynamic>);
+      });
+    } else {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   // Player endpoints
   Future<Player> signupPlayer(SignupPlayerRequest request) async {
     final response = await _httpClient.post(
@@ -67,13 +84,21 @@ class MTGTrackerClient {
     return _handleResponse(response, Player.fromJson);
   }
 
-  Future<List<Player>> getPlayers({String? search}) async {
-    final uri = Uri.parse('$baseUrl/player/v1/players');
-    final finalUri =
-        search != null ? uri.replace(queryParameters: {'search': search}) : uri;
+  Future<PaginatedResult<Player>> getPlayers({
+    String? search,
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (search != null) queryParams['search'] = search;
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
 
-    final response = await _httpClient.get(finalUri, headers: _headers);
-    return _handleListResponse(response, Player.fromJson);
+    final uri = Uri.parse('$baseUrl/player/v1/players')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, Player.fromJson);
   }
 
   Future<Player> getPlayer(String playerId) async {
@@ -92,12 +117,36 @@ class MTGTrackerClient {
     return _handleResponse(response, Player.fromJson);
   }
 
-  Future<List<Deck>> getPlayerDecks(String playerId) async {
-    final response = await _httpClient.get(
-      Uri.parse('$baseUrl/player/v1/players/$playerId/decks'),
-      headers: _headers,
-    );
-    return _handleListResponse(response, Deck.fromJson);
+  Future<PaginatedResult<Deck>> getPlayerDecks(
+    String playerId, {
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/player/v1/players/$playerId/decks')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, Deck.fromJson);
+  }
+
+  Future<PaginatedResult<Game>> getPlayerGames(
+    String playerId, {
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/player/v1/players/$playerId/games')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, Game.fromJson);
   }
 
   Future<Deck> createDeck(CreateDeckRequest request) async {
@@ -146,12 +195,19 @@ class MTGTrackerClient {
     return _handleResponse(response, Game.fromJson);
   }
 
-  Future<List<Game>> getGames() async {
-    final response = await _httpClient.get(
-      Uri.parse('$baseUrl/game/v1/games'),
-      headers: _headers,
-    );
-    return _handleListResponse(response, Game.fromJson);
+  Future<PaginatedResult<Game>> getGames({
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/game/v1/games')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, Game.fromJson);
   }
 
   Future<Game?> getActiveGame() async {
@@ -209,17 +265,21 @@ class MTGTrackerClient {
   }
 
   // Notification endpoints
-  Future<List<MtgNotification>> getNotifications({bool? read}) async {
-    final uri = Uri.parse('$baseUrl/notification/v1/notifications');
-    final finalUri = read != null
-        ? uri.replace(queryParameters: {'read': read.toString()})
-        : uri;
+  Future<PaginatedResult<MtgNotification>> getNotifications({
+    bool? read,
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (read != null) queryParams['read'] = read.toString();
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
 
-    final response = await _httpClient.get(
-      finalUri,
-      headers: _headers,
-    );
-    return _handleListResponse(response, MtgNotification.fromJson);
+    final uri = Uri.parse('$baseUrl/notification/v1/notifications')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, MtgNotification.fromJson);
   }
 
   Future<void> markNotificationAsRead(int notificationId) async {

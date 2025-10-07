@@ -40,6 +40,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /player/v1/me", s.UpdateMyPlayer)
 	mux.HandleFunc("POST /player/v1/profile-image/upload-url", s.GetProfileImageUploadURL)
 	mux.HandleFunc("GET /player/v1/players/{playerId}/decks", s.GetPlayerDecks)
+	mux.HandleFunc("GET /player/v1/players/{playerId}/games", s.GetPlayerGames)
 	mux.HandleFunc("POST /deck/v1/decks", s.CreateDeck)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
@@ -319,7 +320,7 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]Game, 0, len(games))
 	for _, game := range games {
-		items = append(items, convertGameToDto(&game, false))
+		items = append(items, convertGameToDto(&game, true))
 	}
 
 	result := PaginatedResult[Game]{
@@ -721,6 +722,40 @@ func (s *Service) GetPlayerDecks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := PaginatedResult[Deck]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
+	}
+
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) GetPlayerGames(w http.ResponseWriter, r *http.Request) {
+	playerID := r.PathValue("playerId")
+	if playerID == "" {
+		http.Error(w, "Player ID is required", http.StatusBadRequest)
+		return
+	}
+
+	p := ParsePagination(r)
+
+	games, total, err := s.Repository.GetPlayerGames(playerID, p.PerPage, p.Offset())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to DTO
+	items := make([]Game, 0, len(games))
+	for _, game := range games {
+		items = append(items, convertGameToDto(&game, true))
+	}
+
+	result := PaginatedResult[Game]{
 		Items:      items,
 		TotalCount: total,
 		Page:       p.Page,

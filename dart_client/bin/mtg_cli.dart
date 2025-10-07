@@ -164,7 +164,7 @@ Future<void> handlePlayerCommand(
     case 'list':
       final search = args.length > 1 ? args[1] : null;
       final players = await client.getPlayers(search: search);
-      print(jsonEncode(players.map((p) => p.toJson()).toList()));
+      print(jsonEncode(players.items.map((p) => p.toJson()).toList()));
       break;
 
     case 'get':
@@ -255,7 +255,7 @@ Future<void> handleGameCommand(
 
     case 'list':
       final games = await client.getGames();
-      print(jsonEncode(games.map((g) => g.toJson()).toList()));
+      print(jsonEncode(games.items.map((g) => g.toJson()).toList()));
       break;
 
     case 'get':
