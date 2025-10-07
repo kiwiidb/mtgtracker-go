@@ -110,20 +110,30 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
-	// Call the repository to get the players
-	// use the search query parameters if needed
+	p := ParsePagination(r)
+
+	// Get search query parameter
 	search := r.URL.Query().Get("search")
-	players, err := s.Repository.GetPlayers(search)
+
+	// Call the repository to get the players
+	players, total, err := s.Repository.GetPlayers(search, p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Player, 0, len(players))
+	items := make([]Player, 0, len(players))
 	for _, player := range players {
-		// Convert the player to a DTO
-		result = append(result, convertPlayerToDto(&player))
+		items = append(items, convertPlayerToDto(&player))
 	}
+
+	result := PaginatedResult[Player]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
+	}
+
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -298,18 +308,27 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
+	p := ParsePagination(r)
+
 	// Call the repository to get the games
-	games, err := s.Repository.GetGames()
+	games, total, err := s.Repository.GetGames(p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Game, 0, len(games))
+	items := make([]Game, 0, len(games))
 	for _, game := range games {
-		// Convert the game to a DTO
-		result = append(result, convertGameToDto(&game))
+		items = append(items, convertGameToDto(&game))
 	}
+
+	result := PaginatedResult[Game]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
+	}
+
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -548,6 +567,8 @@ func (s *Service) GetNotifications(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p := ParsePagination(r)
+
 	// Get the read filter from query params (optional)
 	readParam := r.URL.Query().Get("read")
 	var readFilter *bool
@@ -562,15 +583,22 @@ func (s *Service) GetNotifications(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	notifications, err := s.Repository.GetNotifications(userID, readFilter)
+	notifications, total, err := s.Repository.GetNotifications(userID, readFilter, p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]Notification, 0, len(notifications))
+	items := make([]Notification, 0, len(notifications))
 	for _, notification := range notifications {
-		result = append(result, convertNotificationToDto(&notification))
+		items = append(items, convertNotificationToDto(&notification))
+	}
+
+	result := PaginatedResult[Notification]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
 	}
 
 	err = json.NewEncoder(w).Encode(result)
@@ -678,16 +706,25 @@ func (s *Service) GetPlayerDecks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decks, err := s.Repository.GetPlayerDecks(playerID)
+	p := ParsePagination(r)
+
+	decks, total, err := s.Repository.GetPlayerDecks(playerID, p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Convert to DTO
-	result := make([]Deck, 0, len(decks))
+	items := make([]Deck, 0, len(decks))
 	for _, deck := range decks {
-		result = append(result, convertDeckToDto(&deck))
+		items = append(items, convertDeckToDto(&deck))
+	}
+
+	result := PaginatedResult[Deck]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
 	}
 
 	err = json.NewEncoder(w).Encode(result)

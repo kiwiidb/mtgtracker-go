@@ -42,21 +42,29 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 	return &player, nil
 }
 
-func (r *Repository) GetPlayers(search string) ([]Player, error) {
+func (r *Repository) GetPlayers(search string, limit, offset int) ([]Player, int64, error) {
 	var players []Player
+	var total int64
+
+	query := r.DB.Model(&Player{})
+
 	// If search is provided, filter players by name
 	if search != "" {
-		err := r.DB.Where("name LIKE ?", "%"+search+"%").Find(&players).Error
-		if err != nil {
-			return nil, err
-		}
-		return players, nil
+		query = query.Where("name LIKE ?", "%"+search+"%")
 	}
-	err := r.DB.Find(&players).Error
+
+	// Get total count
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	err := query.Order("name ASC").Limit(limit).Offset(offset).Find(&players).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return players, nil
+
+	return players, total, nil
 }
 
 func (r *Repository) GetActiveGameForPlayer(playerID string) (*Game, error) {
@@ -142,16 +150,24 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 	return res, nil
 }
 
-func (r *Repository) GetGames() ([]Game, error) {
+func (r *Repository) GetGames(limit, offset int) ([]Game, int64, error) {
 	var games []Game
-	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-		return db.Preload("Player").Preload("Deck")
-	}).Preload("GameEvents").Order("Date desc").Find(&games).Error
-	if err != nil {
-		return nil, err
+	var total int64
+
+	// Get total count
+	if err := r.DB.Model(&Game{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return games, nil
+	// Get paginated results
+	err := r.DB.Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+		return db.Preload("Player").Preload("Deck")
+	}).Preload("GameEvents").Order("Date desc").Limit(limit).Offset(offset).Find(&games).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return games, total, nil
 }
 
 func NewRepository(db *gorm.DB) *Repository {
@@ -378,16 +394,30 @@ func (r *Repository) UpdatePlayer(firebaseID string, updates map[string]interfac
 	return &player, nil
 }
 
-func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notification, error) {
+func (r *Repository) GetNotifications(userID string, readFilter *bool, limit, offset int) ([]Notification, int64, error) {
 	var notifications []Notification
-	query := r.DB.Where("user_id = ?", userID)
+	var total int64
+
+	query := r.DB.Model(&Notification{}).Where("user_id = ?", userID)
 
 	// Apply read filter if provided
 	if readFilter != nil {
 		query = query.Where("read = ?", *readFilter)
 	}
 
-	err := query.
+	// Get total count
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	err := r.DB.Where("user_id = ?", userID).
+		Scopes(func(db *gorm.DB) *gorm.DB {
+			if readFilter != nil {
+				return db.Where("read = ?", *readFilter)
+			}
+			return db
+		}).
 		Preload("Player").
 		Preload("Game.Rankings.Player").
 		Preload("Game.GameEvents").
@@ -395,9 +425,10 @@ func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notifi
 		Preload("ReferredPlayer").
 		Preload("PlayerRanking").
 		Order("created_at DESC").
+		Limit(limit).Offset(offset).
 		Find(&notifications).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	for _, n := range notifications {
 		log.Println(len(n.Game.Rankings))
@@ -406,7 +437,7 @@ func (r *Repository) GetNotifications(userID string, readFilter *bool) ([]Notifi
 
 		}
 	}
-	return notifications, nil
+	return notifications, total, nil
 }
 
 func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) error {
@@ -626,13 +657,24 @@ func (r *Repository) CreateDeck(playerID, commander, image, secondaryImage, crop
 	return &deck, nil
 }
 
-func (r *Repository) GetPlayerDecks(playerID string) ([]Deck, error) {
+func (r *Repository) GetPlayerDecks(playerID string, limit, offset int) ([]Deck, int64, error) {
 	var decks []Deck
+	var total int64
+
+	query := r.DB.Model(&Deck{}).Where("player_id = ?", playerID)
+
+	// Get total count
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
 	err := r.DB.Where("player_id = ?", playerID).
 		Order("game_count DESC, win_count DESC").
+		Limit(limit).Offset(offset).
 		Find(&decks).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return decks, nil
+	return decks, total, nil
 }
