@@ -8,10 +8,12 @@ GameEvent _$GameEventFromJson(Map<String, dynamic> json) => GameEvent(
       damageDelta: (json['damage_delta'] as num).toInt(),
       createdAt: DateTime.parse(json['created_at'] as String),
       targetLifeTotalAfter: (json['target_life_total_after'] as num).toInt(),
-      sourcePlayer: json['source_player'] as String,
-      targetPlayer: json['target_player'] as String,
-      sourceCommander: json['source_commander'] as String,
-      targetCommander: json['target_commander'] as String,
+      sourceRanking: json['source_ranking'] == null
+          ? null
+          : Ranking.fromJson(json['source_ranking'] as Map<String, dynamic>),
+      targetRanking: json['target_ranking'] == null
+          ? null
+          : Ranking.fromJson(json['target_ranking'] as Map<String, dynamic>),
       imageUrl: json['image_url'] as String,
       uploadImageUrl: json['upload_image_url'] as String?,
     );
@@ -22,10 +24,8 @@ Map<String, dynamic> _$GameEventToJson(GameEvent instance) => <String, dynamic>{
       'damage_delta': instance.damageDelta,
       'created_at': instance.createdAt.toIso8601String(),
       'target_life_total_after': instance.targetLifeTotalAfter,
-      'source_player': instance.sourcePlayer,
-      'target_player': instance.targetPlayer,
-      'source_commander': instance.sourceCommander,
-      'target_commander': instance.targetCommander,
+      'source_ranking': instance.sourceRanking,
+      'target_ranking': instance.targetRanking,
       'image_url': instance.imageUrl,
       'upload_image_url': instance.uploadImageUrl,
     };

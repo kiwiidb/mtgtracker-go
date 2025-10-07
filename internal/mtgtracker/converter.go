@@ -45,31 +45,16 @@ func convertSimpleDeck(deck Deck) repository.SimpleDeck {
 }
 
 func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
-	var sourcePlayer, targetPlayer string
-	var sourceCommander, targetCommander string
+	var sourceRanking, targetRanking *Ranking
 
 	if event.SourceRanking != nil {
-		if event.SourceRanking.Player != nil {
-			sourcePlayer = event.SourceRanking.Player.Name
-		}
-		// Get commander from either referenced deck or embedded deck
-		if event.SourceRanking.Deck != nil {
-			sourceCommander = event.SourceRanking.Deck.Commander
-		} else {
-			sourceCommander = event.SourceRanking.DeckEmbedded.Commander
-		}
+		ranking := convertRankingToDto(event.SourceRanking)
+		sourceRanking = &ranking
 	}
 
 	if event.TargetRanking != nil {
-		if event.TargetRanking.Player != nil {
-			targetPlayer = event.TargetRanking.Player.Name
-		}
-		// Get commander from either referenced deck or embedded deck
-		if event.TargetRanking.Deck != nil {
-			targetCommander = event.TargetRanking.Deck.Commander
-		} else {
-			targetCommander = event.TargetRanking.DeckEmbedded.Commander
-		}
+		ranking := convertRankingToDto(event.TargetRanking)
+		targetRanking = &ranking
 	}
 
 	return GameEvent{
@@ -78,12 +63,50 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 		DamageDelta:          event.DamageDelta,
 		CreatedAt:            event.CreatedAt,
 		TargetLifeTotalAfter: event.TargetLifeTotalAfter,
-		SourcePlayer:         sourcePlayer,
-		TargetPlayer:         targetPlayer,
-		SourceCommander:      sourceCommander,
-		TargetCommander:      targetCommander,
+		SourceRanking:        sourceRanking,
+		TargetRanking:        targetRanking,
 		ImageUrl:             event.ImageUrl,
 		UploadImageUrl:       uploadUrl,
+	}
+}
+
+func convertDeckFromRanking(rank *repository.Ranking) Deck {
+	if rank.Deck != nil {
+		return Deck{
+			Commander:    rank.Deck.Commander,
+			Colors:       rank.Deck.Colors,
+			Crop:         rank.Deck.Crop,
+			SecondaryImg: rank.Deck.SecondaryImage,
+			Image:        rank.Deck.Image,
+			MoxfieldURL:  rank.Deck.MoxfieldURL,
+			Bracket:      rank.Deck.Bracket,
+		}
+	}
+	return Deck{
+		Commander:    rank.DeckEmbedded.Commander,
+		Colors:       nil,
+		Crop:         rank.DeckEmbedded.Crop,
+		SecondaryImg: rank.DeckEmbedded.SecondaryImage,
+		Image:        rank.DeckEmbedded.Image,
+	}
+}
+
+func convertRankingToDto(rank *repository.Ranking) Ranking {
+	return Ranking{
+		ID:       rank.ID,
+		PlayerID: rank.PlayerID,
+		Position: rank.Position,
+		Deck:     convertDeckFromRanking(rank),
+		Player: func() *Player {
+			if rank.Player != nil {
+				return &Player{
+					ID:              rank.Player.FirebaseID,
+					Name:            rank.Player.Name,
+					ProfileImageURL: rank.Player.Image,
+				}
+			}
+			return nil
+		}(),
 	}
 }
 
@@ -102,7 +125,6 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 	}
 
 	for i, rank := range rankings {
-		// Determine which deck to use: referenced deck or embedded deck
 		// Get last life total from most recent event for this ranking
 		var lastLifeTotal *int
 		var lastLifeTotalTimestamp *time.Time
@@ -111,34 +133,12 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 			timestamp := event.CreatedAt
 			lastLifeTotalTimestamp = &timestamp
 		}
-		var deckData Deck
-		if rank.Deck != nil {
-			// Use referenced deck from player's deck collection
-			deckData = Deck{
-				Commander:    rank.Deck.Commander,
-				Colors:       rank.Deck.Colors,
-				Crop:         rank.Deck.Crop,
-				SecondaryImg: rank.Deck.SecondaryImage,
-				Image:        rank.Deck.Image,
-				MoxfieldURL:  rank.Deck.MoxfieldURL,
-				Bracket:      rank.Deck.Bracket,
-			}
-		} else {
-			// Use embedded deck data
-			deckData = Deck{
-				Commander:    rank.DeckEmbedded.Commander,
-				Colors:       nil, // Embedded decks don't store colors
-				Crop:         rank.DeckEmbedded.Crop,
-				SecondaryImg: rank.DeckEmbedded.SecondaryImage,
-				Image:        rank.DeckEmbedded.Image,
-			}
-		}
 
 		result[i] = Ranking{
 			ID:                     rank.ID,
 			PlayerID:               rank.PlayerID,
 			Position:               rank.Position,
-			Deck:                   deckData,
+			Deck:                   convertDeckFromRanking(&rank),
 			LastLifeTotal:          lastLifeTotal,
 			LastLifeTotalTimestamp: lastLifeTotalTimestamp,
 			Player: func() *Player {
@@ -246,6 +246,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 				Image:        deck.Image,
 				MoxfieldURL:  deck.MoxfieldURL,
 				Bracket:      deck.Bracket,
+				Themes:       deck.Themes,
 			},
 			Count: deck.GameCount,
 			Wins:  deck.WinCount,

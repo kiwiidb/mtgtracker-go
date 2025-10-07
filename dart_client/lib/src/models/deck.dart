@@ -11,6 +11,7 @@ class Deck {
   final String secondaryImg;
   final String image;
   final List<String>? colors; // Scryfall color codes: W, U, B, R, G, C
+  final List<String>? themes; // New field for deck themes
   @JsonKey(name: 'moxfield_url')
   final String? moxfieldUrl;
   final int? bracket;
@@ -22,6 +23,7 @@ class Deck {
     required this.secondaryImg,
     required this.image,
     this.colors,
+    this.themes,
     this.moxfieldUrl,
     this.bracket,
   });

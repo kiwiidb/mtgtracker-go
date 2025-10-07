@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'ranking.dart';
 
 part 'game_event.g.dart';
 
@@ -14,14 +15,10 @@ class GameEvent {
   final DateTime createdAt;
   @JsonKey(name: 'target_life_total_after')
   final int targetLifeTotalAfter;
-  @JsonKey(name: 'source_player')
-  final String sourcePlayer;
-  @JsonKey(name: 'target_player')
-  final String targetPlayer;
-  @JsonKey(name: 'source_commander')
-  final String sourceCommander;
-  @JsonKey(name: 'target_commander')
-  final String targetCommander;
+  @JsonKey(name: 'source_ranking')
+  final Ranking? sourceRanking;
+  @JsonKey(name: 'target_ranking')
+  final Ranking? targetRanking;
   @JsonKey(name: 'image_url')
   final String imageUrl;
   @JsonKey(name: 'upload_image_url')
@@ -33,10 +30,8 @@ class GameEvent {
     required this.damageDelta,
     required this.createdAt,
     required this.targetLifeTotalAfter,
-    required this.sourcePlayer,
-    required this.targetPlayer,
-    required this.sourceCommander,
-    required this.targetCommander,
+    this.sourceRanking,
+    this.targetRanking,
     required this.imageUrl,
     this.uploadImageUrl,
   });

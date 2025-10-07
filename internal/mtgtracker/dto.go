@@ -92,16 +92,16 @@ type DeckWithCount struct {
 	Wins  int  `json:"wins"`
 }
 type Player struct {
-	ID                   string                     `json:"id"`
-	Name                 string                     `json:"name"`
-	ProfileImageURL      string                     `json:"profile_image_url,omitempty"`
-	MoxfieldUsername     string                     `json:"moxfield_username,omitempty"`
-	Colors               []string                   `json:"colors,omitempty"` // Top 2 most played colors
-	WinrateAllTime       float64                    `json:"winrate_all_time"`
-	NumberofGamesAllTime int                        `json:"number_of_games_all_time"`
-	DecksAllTime         []DeckWithCount            `json:"decks_all_time"`
-	OpponentsAllTime     []PlayerOpponentWithCount  `json:"opponents_all_time"`
-	CurrentGame          *Game                      `json:"current_game,omitempty"`
+	ID                   string                    `json:"id"`
+	Name                 string                    `json:"name"`
+	ProfileImageURL      string                    `json:"profile_image_url,omitempty"`
+	MoxfieldUsername     string                    `json:"moxfield_username,omitempty"`
+	Colors               []string                  `json:"colors,omitempty"` // Top 2 most played colors
+	WinrateAllTime       float64                   `json:"winrate_all_time"`
+	NumberofGamesAllTime int                       `json:"number_of_games_all_time"`
+	DecksAllTime         []DeckWithCount           `json:"decks_all_time"`
+	OpponentsAllTime     []PlayerOpponentWithCount `json:"opponents_all_time"`
+	CurrentGame          *Game                     `json:"current_game,omitempty"`
 }
 
 type UpdatePlayerRequest struct {
@@ -126,10 +126,8 @@ type GameEvent struct {
 	DamageDelta          int       `json:"damage_delta"`
 	CreatedAt            time.Time `json:"created_at"`
 	TargetLifeTotalAfter int       `json:"target_life_total_after"`
-	SourcePlayer         string    `json:"source_player"`
-	TargetPlayer         string    `json:"target_player"`
-	SourceCommander      string    `json:"source_commander"`
-	TargetCommander      string    `json:"target_commander"`
+	SourceRanking        *Ranking  `json:"source_ranking,omitempty"`
+	TargetRanking        *Ranking  `json:"target_ranking,omitempty"`
 	ImageUrl             string    `json:"image_url"`                  // URL of the uploaded image
 	UploadImageUrl       string    `json:"upload_image_url,omitempty"` // Presigned URL for image upload
 }
@@ -153,6 +151,7 @@ type Deck struct {
 	Colors       []string `json:"colors,omitempty"` // Scryfall color codes: W, U, B, R, G, C
 	MoxfieldURL  *string  `json:"moxfield_url,omitempty"`
 	Bracket      uint     `json:"bracket,omitempty"`
+	Themes       []string `json:"themes,omitempty"`
 }
 
 type CreateDeckRequest struct {
