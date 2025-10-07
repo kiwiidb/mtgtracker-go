@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	EventTypeInit      = "init"
 	EventTypeIncrement = "increment"
 	EventTypeDecrement = "decrement"
 	EventTypeImage     = "image"

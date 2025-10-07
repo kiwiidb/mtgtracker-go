@@ -269,8 +269,27 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 		log.Printf("Failed to create game notifications: %v", err)
 		// Don't fail the game creation if notifications fail
 	}
+	if err := r.createInitGameEvents(&game); err != nil {
+		log.Printf("Failed to create initial game events: %v", err)
+		// Don't fail the game creation if initial game events fail
+	}
 
 	return &game, nil
+}
+
+func (r *Repository) createInitGameEvents(game *Game) error {
+	for _, ranking := range game.Rankings {
+		event := GameEvent{
+			GameID:               game.ID,
+			EventType:            EventTypeInit,
+			TargetRankingID:      &ranking.ID,
+			TargetLifeTotalAfter: 40, // Default starting life total for Commander
+		}
+		if err := r.DB.Create(&event).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *Repository) InsertGameEvent(gameId uint, eventType string, damageDelta, lifeAfter int, source, target *uint, imageUrl string) (*GameEvent, error) {
