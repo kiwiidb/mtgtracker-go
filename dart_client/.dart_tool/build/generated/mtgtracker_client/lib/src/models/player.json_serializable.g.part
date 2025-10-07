@@ -14,8 +14,9 @@ Player _$PlayerFromJson(Map<String, dynamic> json) => Player(
       decksAllTime: (json['decks_all_time'] as List<dynamic>?)
           ?.map((e) => DeckWithCount.fromJson(e as Map<String, dynamic>))
           .toList(),
-      coPlayersAllTime: (json['co_players_all_time'] as List<dynamic>?)
-          ?.map((e) => PlayerWithCount.fromJson(e as Map<String, dynamic>))
+      opponentsAllTime: (json['opponents_all_time'] as List<dynamic>?)
+          ?.map((e) =>
+              PlayerOpponentWithCount.fromJson(e as Map<String, dynamic>))
           .toList(),
       currentGame: json['current_game'] == null
           ? null
@@ -31,17 +32,19 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'winrate_all_time': instance.winrateAllTime,
       'number_of_games_all_time': instance.numberOfGamesAllTime,
       'decks_all_time': instance.decksAllTime,
-      'co_players_all_time': instance.coPlayersAllTime,
+      'opponents_all_time': instance.opponentsAllTime,
       'current_game': instance.currentGame,
     };
 
-PlayerWithCount _$PlayerWithCountFromJson(Map<String, dynamic> json) =>
-    PlayerWithCount(
+PlayerOpponentWithCount _$PlayerOpponentWithCountFromJson(
+        Map<String, dynamic> json) =>
+    PlayerOpponentWithCount(
       player: Player.fromJson(json['player'] as Map<String, dynamic>),
       count: (json['count'] as num).toInt(),
     );
 
-Map<String, dynamic> _$PlayerWithCountToJson(PlayerWithCount instance) =>
+Map<String, dynamic> _$PlayerOpponentWithCountToJson(
+        PlayerOpponentWithCount instance) =>
     <String, dynamic>{
       'player': instance.player,
       'count': instance.count,

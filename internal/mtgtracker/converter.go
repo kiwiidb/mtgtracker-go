@@ -167,7 +167,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 	// Calculate winrate and game statistics
 	totalGames := len(player.Games)
 	wins := 0
-	coPlayerMap := make(map[string]PlayerWithCount)
+	opponentMap := make(map[string]PlayerOpponentWithCount)
 	games := make([]Game, len(player.Games))
 
 	for i, game := range player.Games {
@@ -189,14 +189,14 @@ func convertPlayerToDto(player *repository.Player) Player {
 			}
 		}
 
-		// Collect co-players
+		// Collect opponents
 		for _, ranking := range game.Rankings {
 			if ranking.PlayerID != nil && *ranking.PlayerID != player.FirebaseID {
-				if coPlayer, exists := coPlayerMap[*ranking.PlayerID]; exists {
-					coPlayer.Count++
-					coPlayerMap[*ranking.PlayerID] = coPlayer
+				if opponent, exists := opponentMap[*ranking.PlayerID]; exists {
+					opponent.Count++
+					opponentMap[*ranking.PlayerID] = opponent
 				} else {
-					coPlayerMap[*ranking.PlayerID] = PlayerWithCount{
+					opponentMap[*ranking.PlayerID] = PlayerOpponentWithCount{
 						Player: Player{
 							ID: func() string {
 								if ranking.Player != nil {
@@ -259,20 +259,20 @@ func convertPlayerToDto(player *repository.Player) Player {
 	// Calculate top 2 most played colors from decks
 	colors := calculateTopColors(decks, 2)
 
-	coPlayers := make([]PlayerWithCount, 0, len(coPlayerMap))
-	for _, coPlayer := range coPlayerMap {
-		coPlayers = append(coPlayers, coPlayer)
+	opponents := make([]PlayerOpponentWithCount, 0, len(opponentMap))
+	for _, opponent := range opponentMap {
+		opponents = append(opponents, opponent)
 	}
-	//sort coPlayers by count descending
-	sort.Slice(coPlayers, func(i, j int) bool {
-		return coPlayers[i].Count > coPlayers[j].Count
+	//sort opponents by count descending
+	sort.Slice(opponents, func(i, j int) bool {
+		return opponents[i].Count > opponents[j].Count
 	})
 
 	result.Colors = colors
 	result.WinrateAllTime = winrate
 	result.NumberofGamesAllTime = totalGames
 	result.DecksAllTime = decks
-	result.CoPlayersAllTime = coPlayers
+	result.OpponentsAllTime = opponents
 
 	return result
 }
@@ -322,7 +322,7 @@ func convertPlayerToDtoSimple(player *repository.Player) Player {
 		WinrateAllTime:       0,
 		NumberofGamesAllTime: 0,
 		DecksAllTime:         []DeckWithCount{},
-		CoPlayersAllTime:     []PlayerWithCount{},
+		OpponentsAllTime:     []PlayerOpponentWithCount{},
 		CurrentGame:          nil,
 	}
 }

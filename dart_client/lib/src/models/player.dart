@@ -19,8 +19,8 @@ class Player {
   final int numberOfGamesAllTime;
   @JsonKey(name: 'decks_all_time')
   final List<DeckWithCount>? decksAllTime;
-  @JsonKey(name: 'co_players_all_time')
-  final List<PlayerWithCount>? coPlayersAllTime;
+  @JsonKey(name: 'opponents_all_time')
+  final List<PlayerOpponentWithCount>? opponentsAllTime;
   @JsonKey(name: 'current_game')
   final Game? currentGame;
 
@@ -33,7 +33,7 @@ class Player {
     required this.winrateAllTime,
     required this.numberOfGamesAllTime,
     required this.decksAllTime,
-    required this.coPlayersAllTime,
+    required this.opponentsAllTime,
     this.currentGame,
   });
 
@@ -42,16 +42,16 @@ class Player {
 }
 
 @JsonSerializable()
-class PlayerWithCount {
+class PlayerOpponentWithCount {
   final Player player;
   final int count;
 
-  const PlayerWithCount({
+  const PlayerOpponentWithCount({
     required this.player,
     required this.count,
   });
 
-  factory PlayerWithCount.fromJson(Map<String, dynamic> json) =>
-      _$PlayerWithCountFromJson(json);
-  Map<String, dynamic> toJson() => _$PlayerWithCountToJson(this);
+  factory PlayerOpponentWithCount.fromJson(Map<String, dynamic> json) =>
+      _$PlayerOpponentWithCountFromJson(json);
+  Map<String, dynamic> toJson() => _$PlayerOpponentWithCountToJson(this);
 }

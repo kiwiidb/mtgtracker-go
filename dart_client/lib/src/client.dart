@@ -40,23 +40,6 @@ class MTGTrackerClient {
     }
   }
 
-  Future<List<T>> _handleListResponse<T>(
-    http.Response response,
-    T Function(Map<String, dynamic>) fromJson,
-  ) async {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final List<dynamic> jsonList = jsonDecode(response.body);
-      return jsonList
-          .map((json) => fromJson(json as Map<String, dynamic>))
-          .toList();
-    } else {
-      throw MTGTrackerException(
-        statusCode: response.statusCode,
-        message: response.body,
-      );
-    }
-  }
-
   Future<PaginatedResult<T>> _handlePaginatedResponse<T>(
     http.Response response,
     T Function(Map<String, dynamic>) fromJson,

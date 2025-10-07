@@ -82,7 +82,7 @@ type GameEventRequest struct {
 	TargetRankingId      *uint   `json:"target_ranking_id,omitempty"` // Made nullable with pointer
 }
 
-type PlayerWithCount struct {
+type PlayerOpponentWithCount struct {
 	Player Player `json:"player"`
 	Count  int    `json:"count"`
 }
@@ -92,16 +92,16 @@ type DeckWithCount struct {
 	Wins  int  `json:"wins"`
 }
 type Player struct {
-	ID                   string            `json:"id"`
-	Name                 string            `json:"name"`
-	ProfileImageURL      string            `json:"profile_image_url,omitempty"`
-	MoxfieldUsername     string            `json:"moxfield_username,omitempty"`
-	Colors               []string          `json:"colors,omitempty"` // Top 2 most played colors
-	WinrateAllTime       float64           `json:"winrate_all_time"`
-	NumberofGamesAllTime int               `json:"number_of_games_all_time"`
-	DecksAllTime         []DeckWithCount   `json:"decks_all_time"`
-	CoPlayersAllTime     []PlayerWithCount `json:"co_players_all_time"`
-	CurrentGame          *Game             `json:"current_game,omitempty"`
+	ID                   string                     `json:"id"`
+	Name                 string                     `json:"name"`
+	ProfileImageURL      string                     `json:"profile_image_url,omitempty"`
+	MoxfieldUsername     string                     `json:"moxfield_username,omitempty"`
+	Colors               []string                   `json:"colors,omitempty"` // Top 2 most played colors
+	WinrateAllTime       float64                    `json:"winrate_all_time"`
+	NumberofGamesAllTime int                        `json:"number_of_games_all_time"`
+	DecksAllTime         []DeckWithCount            `json:"decks_all_time"`
+	OpponentsAllTime     []PlayerOpponentWithCount  `json:"opponents_all_time"`
+	CurrentGame          *Game                      `json:"current_game,omitempty"`
 }
 
 type UpdatePlayerRequest struct {
