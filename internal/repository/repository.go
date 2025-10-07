@@ -74,7 +74,7 @@ func (r *Repository) GetActiveGameForPlayer(playerID string) (*Game, error) {
 		Where("rankings.player_id = ?", playerID).
 		Where("games.finished = ?", false).
 		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Player")
+			return db.Preload("Player").Preload("Deck")
 		}).
 		Preload("GameEvents.SourceRanking.Player").
 		Preload("GameEvents.TargetRanking.Player").
