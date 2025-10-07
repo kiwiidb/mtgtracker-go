@@ -1,0 +1,29 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'paginated_result.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+PaginatedResult<T> _$PaginatedResultFromJson<T>(
+  Map<String, dynamic> json,
+  T Function(Object? json) fromJsonT,
+) =>
+    PaginatedResult<T>(
+      items: (json['items'] as List<dynamic>).map(fromJsonT).toList(),
+      totalCount: (json['total_count'] as num).toInt(),
+      page: (json['page'] as num).toInt(),
+      perPage: (json['per_page'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$PaginatedResultToJson<T>(
+  PaginatedResult<T> instance,
+  Object? Function(T value) toJsonT,
+) =>
+    <String, dynamic>{
+      'items': instance.items.map(toJsonT).toList(),
+      'total_count': instance.totalCount,
+      'page': instance.page,
+      'per_page': instance.perPage,
+    };
