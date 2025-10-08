@@ -374,6 +374,7 @@ func convertDeckToDto(deck *repository.Deck) Deck {
 		Image:        deck.Image,
 		MoxfieldURL:  deck.MoxfieldURL,
 		Bracket:      deck.Bracket,
+		Themes:       deck.Themes,
 	}
 }
 
