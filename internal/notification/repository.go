@@ -40,6 +40,14 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+func NewRepository(db *gorm.DB) *Repository {
+	err := db.AutoMigrate(&Notification{})
+	if err != nil {
+		log.Fatalf("Failed to migrate Notification repo: %v", err)
+	}
+	return &Repository{DB: db}
+}
+
 func (r *Repository) GetNotifications(userID string, readFilter *bool, limit, offset int) ([]Notification, int64, error) {
 	var notifications []Notification
 	var total int64
@@ -100,7 +108,7 @@ func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) 
 	return nil
 }
 
-func (r *Repository) createGameCreatedNotifications(game *mtgtracker.Game, creator *mtgtracker.Player) error {
+func (r *Repository) GameCreated(game *repository.Game, creator *repository.Player) error {
 	// Create notifications for all players in the game
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
@@ -129,7 +137,7 @@ func (r *Repository) createGameCreatedNotifications(game *mtgtracker.Game, creat
 	return nil
 }
 
-func (r *Repository) CreateFinishedGameNotifications(game *mtgtracker.Game) error {
+func (r *Repository) GameFinished(game *repository.Game) error {
 	// Delete all game_created notifications for this game
 	if err := r.DB.Where("game_id = ? AND type = ?", game.ID, "game_created").Delete(&Notification{}).Error; err != nil {
 		log.Printf("Failed to delete game_created notifications for game %d: %v", game.ID, err)

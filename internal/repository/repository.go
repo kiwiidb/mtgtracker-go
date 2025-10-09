@@ -9,13 +9,13 @@ import (
 )
 
 type Repository struct {
-	DB       *gorm.DB
-	notifier Notifier
+	DB            *gorm.DB
+	notifications Notifications
 }
 
-type Notifier interface {
-	gameCreated(game *Game) error
-	gameFinished(game *Game) error
+type Notifications interface {
+	GameCreated(game *Game, creator *Player) error
+	GameFinished(game *Game) error
 }
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
@@ -146,7 +146,7 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 			// Don't fail the game update if deck stats update fails
 		}
 
-		if err := r.notifier.gameFinished(res); err != nil {
+		if err := r.notifications.GameFinished(res); err != nil {
 			log.Printf("Failed to create finished game notifications: %v", err)
 			// Don't fail the game update if notifications fail
 		}
@@ -205,7 +205,7 @@ func (r *Repository) GetPlayerGames(playerID string, limit, offset int) ([]Game,
 	return games, total, nil
 }
 
-func NewRepository(db *gorm.DB) *Repository {
+func NewRepository(db *gorm.DB, notifier Notifications) *Repository {
 	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Deck{})
 	if err != nil {
 		log.Fatal(err)
@@ -216,7 +216,8 @@ func NewRepository(db *gorm.DB) *Repository {
 		ON follows (player1_id, player2_id)`)
 
 	return &Repository{
-		DB: db,
+		DB:            db,
+		notifications: notifier,
 	}
 }
 func (r *Repository) InsertPlayer(name string, email string, userId string) (*Player, error) {
@@ -225,7 +226,7 @@ func (r *Repository) InsertPlayer(name string, email string, userId string) (*Pl
 	return &player, result.Error
 }
 
-func (r *Repository) InsertGame(creatorID string, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
+func (r *Repository) InsertGame(creator *Player, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 
 	// Ensure each ranking has valid player and deck
 	for i, rank := range rankings {
@@ -257,7 +258,7 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 	}
 
 	game := Game{
-		CreatorID: &creatorID,
+		CreatorID: &creator.FirebaseID,
 		Duration:  duration,
 		Date:      date,
 		Comments:  comments,
@@ -270,7 +271,7 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 	}
 
 	// Create notifications for all players in the game
-	if err := r.notifier.gameCreated(&game); err != nil {
+	if err := r.notifications.GameCreated(&game, creator); err != nil {
 		log.Printf("Failed to create game notifications: %v", err)
 		// Don't fail the game creation if notifications fail
 	}

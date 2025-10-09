@@ -162,7 +162,12 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
+	// find the current user
+	user, err := s.Repository.GetPlayerByFirebaseID(userID)
+	if err != nil {
+		http.Error(w, "Player not found", http.StatusNotFound)
+		return
+	}
 	var request CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -207,7 +212,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 		rankings = append(rankings, toAdd)
 	}
-	game, err := s.Repository.InsertGame(userID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
+	game, err := s.Repository.InsertGame(user, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

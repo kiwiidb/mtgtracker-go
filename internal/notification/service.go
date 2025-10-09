@@ -14,6 +14,10 @@ type Service struct {
 	Repository *Repository
 }
 
+func NewService(repo *Repository) *Service {
+	return &Service{Repository: repo}
+}
+
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /notification/v1/notifications", s.GetNotifications)
 	mux.HandleFunc("PUT /notification/v1/notifications/{notificationId}/read", s.MarkNotificationAsRead)
