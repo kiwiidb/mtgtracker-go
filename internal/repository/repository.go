@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -10,7 +9,13 @@ import (
 )
 
 type Repository struct {
-	DB *gorm.DB
+	DB       *gorm.DB
+	notifier Notifier
+}
+
+type Notifier interface {
+	gameCreated(game *Game) error
+	gameFinished(game *Game) error
 }
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
@@ -141,7 +146,7 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 			// Don't fail the game update if deck stats update fails
 		}
 
-		if err := r.CreateFinishedGameNotifications(res); err != nil {
+		if err := r.notifier.gameFinished(res); err != nil {
 			log.Printf("Failed to create finished game notifications: %v", err)
 			// Don't fail the game update if notifications fail
 		}
@@ -201,7 +206,7 @@ func (r *Repository) GetPlayerGames(playerID string, limit, offset int) ([]Game,
 }
 
 func NewRepository(db *gorm.DB) *Repository {
-	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Notification{}, &Deck{})
+	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Deck{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -265,7 +270,7 @@ func (r *Repository) InsertGame(creatorID string, duration *int, comments, image
 	}
 
 	// Create notifications for all players in the game
-	if err := r.createGameCreatedNotifications(&game); err != nil {
+	if err := r.notifier.gameCreated(&game); err != nil {
 		log.Printf("Failed to create game notifications: %v", err)
 		// Don't fail the game creation if notifications fail
 	}
@@ -442,173 +447,6 @@ func (r *Repository) UpdatePlayer(firebaseID string, updates map[string]interfac
 		return nil, err
 	}
 	return &player, nil
-}
-
-func (r *Repository) GetNotifications(userID string, readFilter *bool, limit, offset int) ([]Notification, int64, error) {
-	var notifications []Notification
-	var total int64
-
-	query := r.DB.Model(&Notification{}).Where("user_id = ?", userID)
-
-	// Apply read filter if provided
-	if readFilter != nil {
-		query = query.Where("read = ?", *readFilter)
-	}
-
-	// Get total count
-	if err := query.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	// Get paginated results
-	err := r.DB.Where("user_id = ?", userID).
-		Scopes(func(db *gorm.DB) *gorm.DB {
-			if readFilter != nil {
-				return db.Where("read = ?", *readFilter)
-			}
-			return db
-		}).
-		Preload("Player").
-		Preload("Game.Rankings.Player").
-		Preload("Game.Rankings.Deck").
-		Preload("Game.GameEvents").
-		Preload("Game.Creator").
-		Preload("ReferredPlayer").
-		Preload("PlayerRanking").
-		Order("created_at DESC").
-		Limit(limit).Offset(offset).
-		Find(&notifications).Error
-	if err != nil {
-		return nil, 0, err
-	}
-	for _, n := range notifications {
-		log.Println(len(n.Game.Rankings))
-		for _, rk := range n.Game.Rankings {
-			log.Println(rk.ID)
-
-		}
-	}
-	return notifications, total, nil
-}
-
-func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) error {
-	result := r.DB.Model(&Notification{}).
-		Where("id = ? AND user_id = ?", notificationID, userID).
-		Update("read", true)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return errors.New("notification not found or access denied")
-	}
-	return nil
-}
-
-func (r *Repository) createGameCreatedNotifications(game *Game) error {
-	// Create notifications for all players in the game
-	creator, err := r.GetPlayerByFirebaseID(*game.CreatorID)
-	if err != nil {
-		return err
-	}
-	for _, ranking := range game.Rankings {
-		if ranking.PlayerID != nil {
-			// Get commander name from either referenced deck or embedded deck
-			commanderName := ""
-			if ranking.Deck != nil {
-				commanderName = ranking.Deck.Commander
-			} else {
-				commanderName = ranking.DeckEmbedded.Commander
-			}
-
-			notification := Notification{
-				UserID:           *ranking.PlayerID,
-				ReferredPlayerID: game.CreatorID,
-				Title:            fmt.Sprintf("%s started a game", creator.Name),
-				Body:             fmt.Sprintf("You're playing %s", commanderName),
-				Type:             "game_created",
-				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking, ActionAddImageGameEvent},
-				Read:             false,
-				GameID:           &game.ID,
-				PlayerRankingID:  &ranking.ID,
-			}
-
-			if err := r.DB.Create(&notification).Error; err != nil {
-				log.Printf("Failed to create notification for player %s: %v", *ranking.PlayerID, err)
-				// Continue creating notifications for other players even if one fails
-			}
-		}
-	}
-	return nil
-}
-
-func (r *Repository) CreateFinishedGameNotifications(game *Game) error {
-	// Delete all game_created notifications for this game
-	if err := r.DB.Where("game_id = ? AND type = ?", game.ID, "game_created").Delete(&Notification{}).Error; err != nil {
-		log.Printf("Failed to delete game_created notifications for game %d: %v", game.ID, err)
-		// Don't fail the entire operation if deletion fails
-	}
-
-	// Get all player names for the body
-	playerNames := make([]string, 0, len(game.Rankings))
-	for _, ranking := range game.Rankings {
-		if ranking.Player != nil {
-			playerNames = append(playerNames, ranking.Player.Name)
-		} else {
-			playerNames = append(playerNames, "guest")
-		}
-	}
-
-	// Create notifications for all players
-	for _, ranking := range game.Rankings {
-		if ranking.PlayerID != nil {
-			// Build list of other players (excluding current player)
-			otherPlayers := make([]string, 0, len(playerNames)-1)
-			for _, name := range playerNames {
-				if ranking.Player != nil && name != ranking.Player.Name {
-					otherPlayers = append(otherPlayers, name)
-				}
-			}
-
-			var title, notificationType string
-			if ranking.Position == 1 {
-				title = "🎉 You won the game!"
-				notificationType = "game_finished_won"
-			} else {
-				title = "Game finished"
-				notificationType = "game_finished"
-			}
-
-			body := "Opponents "
-			if len(otherPlayers) > 0 {
-				body += otherPlayers[0]
-				for i := 1; i < len(otherPlayers); i++ {
-					if i == len(otherPlayers)-1 {
-						body += " and " + otherPlayers[i]
-					} else {
-						body += ", " + otherPlayers[i]
-					}
-				}
-			}
-
-			notification := Notification{
-				UserID:           *ranking.PlayerID,
-				ReferredPlayerID: game.CreatorID,
-				Title:            title,
-				Body:             body,
-				Type:             notificationType,
-				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking},
-				Read:             false,
-				GameID:           &game.ID,
-				PlayerRankingID:  &ranking.ID,
-			}
-
-			if err := r.DB.Create(&notification).Error; err != nil {
-				log.Printf("Failed to create finished game notification for player %s: %v", *ranking.PlayerID, err)
-				// Continue creating notifications for other players even if one fails
-			}
-		}
-	}
-	return nil
 }
 
 func (r *Repository) DeleteRanking(rankingID uint, userID string) error {

@@ -1,46 +1,8 @@
 package mtgtracker
 
 import (
-	"net/http"
-	"strconv"
 	"time"
 )
-
-type Pagination struct {
-	Page    int `json:"page"`
-	PerPage int `json:"per_page"`
-}
-
-func (p *Pagination) Normalize() {
-	if p.Page < 1 {
-		p.Page = 1
-	}
-	if p.PerPage <= 0 {
-		p.PerPage = 10
-	} else if p.PerPage > 100 {
-		p.PerPage = 100
-	}
-}
-
-func (p Pagination) Offset() int {
-	return (p.Page - 1) * p.PerPage
-}
-
-func ParsePagination(r *http.Request) Pagination {
-	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	perPage, _ := strconv.Atoi(r.URL.Query().Get("per_page"))
-
-	p := Pagination{Page: page, PerPage: perPage}
-	p.Normalize()
-	return p
-}
-
-type PaginatedResult[T any] struct {
-	Items      []T   `json:"items"`
-	TotalCount int64 `json:"total_count"`
-	Page       int   `json:"page"`
-	PerPage    int   `json:"per_page"`
-}
 
 type SignupPlayerRequest struct {
 	Name string `json:"name"`
@@ -165,26 +127,3 @@ type CreateDeckRequest struct {
 	SecondaryImage string   `json:"secondary_image"`
 	Crop           string   `json:"crop"`
 }
-
-type Notification struct {
-	ID               uint                 `json:"id"`
-	Title            string               `json:"title"`
-	Body             string               `json:"body"`
-	Type             string               `json:"type"`
-	Actions          []NotificationAction `json:"actions"`
-	Read             bool                 `json:"read"`
-	CreatedAt        time.Time            `json:"created_at"`
-	GameID           *uint                `json:"game_id,omitempty"`
-	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
-	PlayerRankingID  *uint                `json:"player_ranking_id,omitempty"`
-	Game             *Game                `json:"game,omitempty"`
-	ReferredPlayer   *Player              `json:"referred_player,omitempty"`
-}
-
-type NotificationAction string
-
-const (
-	ActionDeleteRanking     NotificationAction = "delete_ranking"
-	ActionViewGame          NotificationAction = "view_game"
-	ActionAddImageGameEvent NotificationAction = "add_image_game_event"
-)

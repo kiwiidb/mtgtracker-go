@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func convertGameToDto(game *repository.Game, addEvents bool) Game {
+func ConvertGameToDto(game *repository.Game, addEvents bool) Game {
 	result := Game{
 		ID:         game.ID,
 		CreatorID:  game.CreatorID,
@@ -173,7 +173,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 	for i, game := range player.Games {
 		// Convert game to DTO
-		games[i] = convertGameToDto(&game, false)
+		games[i] = ConvertGameToDto(&game, false)
 
 		// Normally you will only have 1 game in progress at a time
 		if !game.Finished {
@@ -315,7 +315,7 @@ func calculateTopColors(decks []DeckWithCount, topN int) []string {
 }
 
 // convertPlayerToDtoSimple converts a player for notification context without game statistics
-func convertPlayerToDtoSimple(player *repository.Player) Player {
+func ConvertPlayerToDtoSimple(player *repository.Player) Player {
 	return Player{
 		ID:                   player.FirebaseID,
 		Name:                 player.Name,
@@ -328,42 +328,6 @@ func convertPlayerToDtoSimple(player *repository.Player) Player {
 		CurrentGame:          nil,
 	}
 }
-
-func convertNotificationToDto(notification *repository.Notification) Notification {
-	result := Notification{
-		ID:               notification.ID,
-		Title:            notification.Title,
-		Body:             notification.Body,
-		Type:             notification.Type,
-		Actions:          convertActionsToDto(notification.Actions),
-		Read:             notification.Read,
-		CreatedAt:        notification.CreatedAt,
-		GameID:           notification.GameID,
-		ReferredPlayerID: notification.ReferredPlayerID,
-		PlayerRankingID:  notification.PlayerRankingID,
-	}
-
-	if notification.Game != nil {
-		game := convertGameToDto(notification.Game, false)
-		result.Game = &game
-	}
-
-	if notification.ReferredPlayer != nil {
-		player := convertPlayerToDtoSimple(notification.ReferredPlayer)
-		result.ReferredPlayer = &player
-	}
-
-	return result
-}
-
-func convertActionsToDto(actions []repository.NotificationAction) []NotificationAction {
-	result := make([]NotificationAction, len(actions))
-	for i, action := range actions {
-		result[i] = NotificationAction(action)
-	}
-	return result
-}
-
 func convertDeckToDto(deck *repository.Deck) Deck {
 	return Deck{
 		ID:           &deck.ID,
