@@ -48,9 +48,9 @@ func (r *Repository) GetPlayers(search string, limit, offset int) ([]Player, int
 
 	query := r.DB.Model(&Player{})
 
-	// If search is provided, filter players by name
+	// If search is provided, filter players by name (case insensitive)
 	if search != "" {
-		query = query.Where("name LIKE ?", "%"+search+"%")
+		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+search+"%")
 	}
 
 	// Get total count
