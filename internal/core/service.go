@@ -1,4 +1,4 @@
-package mtgtracker
+package core
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"mtgtracker/internal/middleware"
-	"mtgtracker/internal/repository"
+	"mtgtracker/internal/pagination"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,11 +16,11 @@ type Storage interface {
 	GeneratePresignedUploadURL(fileName string, contentType string) (string, error)
 }
 type Service struct {
-	Repository *repository.Repository
+	Repository *Repository
 	Storage    Storage
 }
 
-func NewService(repo *repository.Repository, storage Storage) *Service {
+func NewService(repo *Repository, storage Storage) *Service {
 	return &Service{
 		Repository: repo,
 		Storage:    storage,
@@ -50,9 +50,10 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
 	mux.HandleFunc("DELETE /ranking/v1/rankings/{rankingId}", s.DeleteRanking)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
-	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
-	mux.HandleFunc("GET /notification/v1/notifications", s.GetNotifications)
-	mux.HandleFunc("PUT /notification/v1/notifications/{notificationId}/read", s.MarkNotificationAsRead)
+}
+
+func (s *Service) GetPlayerByFirebaseID(firebaseID string) (*Player, error) {
+	return s.Repository.GetPlayerByFirebaseID(firebaseID)
 }
 
 func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +71,7 @@ func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -103,7 +104,7 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -111,7 +112,7 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
-	p := ParsePagination(r)
+	p := pagination.ParsePagination(r)
 
 	// Get search query parameter
 	search := r.URL.Query().Get("search")
@@ -123,12 +124,12 @@ func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := make([]Player, 0, len(players))
+	items := make([]PlayerResponse, 0, len(players))
 	for _, player := range players {
-		items = append(items, convertPlayerToDto(&player))
+		items = append(items, s.ConvertPlayerToResponse(&player))
 	}
 
-	result := PaginatedResult[Player]{
+	result := pagination.PaginatedResult[PlayerResponse]{
 		Items:      items,
 		TotalCount: total,
 		Page:       p.Page,
@@ -149,7 +150,7 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -163,7 +164,12 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
+	// find the current user
+	user, err := s.Repository.GetPlayerByFirebaseID(userID)
+	if err != nil {
+		http.Error(w, "Player not found", http.StatusNotFound)
+		return
+	}
 	var request CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -193,9 +199,9 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the repository to insert the game
-	var rankings []repository.Ranking
+	var rankings []Ranking
 	for _, rank := range request.Rankings {
-		toAdd := repository.Ranking{
+		toAdd := Ranking{
 			PlayerID: rank.PlayerID,
 			Position: 0,
 			DeckID:   rank.DeckID, // Optional deck reference
@@ -208,13 +214,13 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 		rankings = append(rankings, toAdd)
 	}
-	game, err := s.Repository.InsertGame(userID, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
+	game, err := s.Repository.InsertGame(user, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := convertGameToDto(game, false)
+	result := s.ConvertGameToDto(game, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -243,7 +249,7 @@ func (s *Service) AddGameEvent(w http.ResponseWriter, r *http.Request) {
 	var uploadImgUrl string
 	// If this is an image event, generate a presigned upload URL
 	// add the current timestamp to the filename to avoid conflicts
-	if req.EventType == repository.EventTypeImage {
+	if req.EventType == EventTypeImage {
 		if req.EventImageName == nil {
 			http.Error(w, "Event image name is required for image events", http.StatusBadRequest)
 			return
@@ -289,7 +295,7 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// convert the game to a DTO
-	result := convertGameToDto(game, true)
+	result := s.ConvertGameToDto(game, true)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -315,7 +321,7 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
-	p := ParsePagination(r)
+	p := pagination.ParsePagination(r)
 
 	// Call the repository to get the games
 	games, total, err := s.Repository.GetGames(p.PerPage, p.Offset())
@@ -324,12 +330,12 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := make([]Game, 0, len(games))
+	items := make([]GameResponse, 0, len(games))
 	for _, game := range games {
-		items = append(items, convertGameToDto(&game, true))
+		items = append(items, s.ConvertGameToDto(&game, true))
 	}
 
-	result := PaginatedResult[Game]{
+	result := pagination.PaginatedResult[GameResponse]{
 		Items:      items,
 		TotalCount: total,
 		Page:       p.Page,
@@ -360,7 +366,7 @@ func (s *Service) GetActiveGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertGameToDto(game, true)
+	result := s.ConvertGameToDto(game, true)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -383,8 +389,8 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// find the rankings for that game
-	rankings := []repository.Ranking{}
-	err = s.Repository.DB.Model(&repository.Ranking{}).Where("game_id = ?", gameId).Find(&rankings).Error
+	rankings := []Ranking{}
+	err = s.Repository.DB.Model(&Ranking{}).Where("game_id = ?", gameId).Find(&rankings).Error
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -407,87 +413,7 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertGameToDto(updatedGame, false)
-	err = json.NewEncoder(w).Encode(result)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
-
-func (s *Service) DeleteFollow(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	targetPlayerID := r.PathValue("playerId")
-
-	// Get the current user's player record
-	currentPlayer, err := s.Repository.GetPlayerByFirebaseID(userID)
-	if err != nil {
-		http.Error(w, "Player not found", http.StatusNotFound)
-		return
-	}
-
-	err = s.Repository.DeleteFollow(currentPlayer.FirebaseID, targetPlayerID)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Get the current user's player record
-	currentPlayer, err := s.Repository.GetPlayerByFirebaseID(userID)
-	if err != nil {
-		http.Error(w, "Player not found", http.StatusNotFound)
-		return
-	}
-
-	follows, err := s.Repository.GetFollows(currentPlayer.FirebaseID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	result := make([]Player, 0, len(follows))
-	for _, player := range follows {
-		result = append(result, convertPlayerToDto(&player))
-	}
-
-	err = json.NewEncoder(w).Encode(result)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
-
-func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
-	playerID := r.PathValue("playerId")
-
-	follows, err := s.Repository.GetFollows(playerID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	result := make([]Player, 0, len(follows))
-	for _, player := range follows {
-		result = append(result, convertPlayerToDto(&player))
-	}
-
+	result := s.ConvertGameToDto(updatedGame, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -496,19 +422,19 @@ func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
 
 // validateAndReorderRankings validates that the request rankings match existing rankings
 // and returns them with sequential positions (1, 2, 3, etc.) based on request order
-func validateAndReorderRankings(requestRankings []UpdateRanking, existingRankings []repository.Ranking) ([]repository.Ranking, error) {
+func validateAndReorderRankings(requestRankings []UpdateRanking, existingRankings []Ranking) ([]Ranking, error) {
 	// Validate that request rankings match existing rankings count
 	if len(requestRankings) != len(existingRankings) {
 		return nil, errors.New("rankings count must match existing rankings")
 	}
 
 	// Create map of existing rankings by RankingID string value for quick lookup
-	existingMap := make(map[uint]repository.Ranking)
+	existingMap := make(map[uint]Ranking)
 	for _, ranking := range existingRankings {
 		existingMap[ranking.ID] = ranking
 	}
 
-	newRankings := make([]repository.Ranking, len(requestRankings))
+	newRankings := make([]Ranking, len(requestRankings))
 	for i, reqRanking := range requestRankings {
 		existing, exists := existingMap[reqRanking.RankingID]
 		if !exists {
@@ -566,81 +492,6 @@ func (s *Service) GetProfileImageUploadURL(w http.ResponseWriter, r *http.Reques
 		log.Println("Error encoding response:", err)
 	}
 }
-
-func (s *Service) GetNotifications(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	p := ParsePagination(r)
-
-	// Get the read filter from query params (optional)
-	readParam := r.URL.Query().Get("read")
-	var readFilter *bool
-	if readParam != "" {
-		switch readParam {
-		case "true":
-			trueVal := true
-			readFilter = &trueVal
-		case "false":
-			falseVal := false
-			readFilter = &falseVal
-		}
-	}
-
-	notifications, total, err := s.Repository.GetNotifications(userID, readFilter, p.PerPage, p.Offset())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	items := make([]Notification, 0, len(notifications))
-	for _, notification := range notifications {
-		items = append(items, convertNotificationToDto(&notification))
-	}
-
-	result := PaginatedResult[Notification]{
-		Items:      items,
-		TotalCount: total,
-		Page:       p.Page,
-		PerPage:    p.PerPage,
-	}
-
-	err = json.NewEncoder(w).Encode(result)
-	if err != nil {
-		log.Println("Error encoding response:", err)
-	}
-}
-
-func (s *Service) MarkNotificationAsRead(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r)
-	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	notificationIDStr := r.PathValue("notificationId")
-	notificationID, err := strconv.Atoi(notificationIDStr)
-	if err != nil {
-		http.Error(w, "Invalid notification ID", http.StatusBadRequest)
-		return
-	}
-
-	err = s.Repository.MarkNotificationAsRead(uint(notificationID), userID)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "access denied") {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func (s *Service) DeleteRanking(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r)
 	if userID == "" {
@@ -713,7 +564,7 @@ func (s *Service) GetPlayerDecks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := ParsePagination(r)
+	p := pagination.ParsePagination(r)
 
 	decks, total, err := s.Repository.GetPlayerDecks(playerID, p.PerPage, p.Offset())
 	if err != nil {
@@ -722,12 +573,12 @@ func (s *Service) GetPlayerDecks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert to DTO
-	items := make([]Deck, 0, len(decks))
+	items := make([]DeckResponse, 0, len(decks))
 	for _, deck := range decks {
 		items = append(items, convertDeckToDto(&deck))
 	}
 
-	result := PaginatedResult[Deck]{
+	result := pagination.PaginatedResult[DeckResponse]{
 		Items:      items,
 		TotalCount: total,
 		Page:       p.Page,
@@ -747,7 +598,7 @@ func (s *Service) GetPlayerGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := ParsePagination(r)
+	p := pagination.ParsePagination(r)
 
 	games, total, err := s.Repository.GetPlayerGames(playerID, p.PerPage, p.Offset())
 	if err != nil {
@@ -756,12 +607,12 @@ func (s *Service) GetPlayerGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert to DTO
-	items := make([]Game, 0, len(games))
+	items := make([]GameResponse, 0, len(games))
 	for _, game := range games {
-		items = append(items, convertGameToDto(&game, true))
+		items = append(items, s.ConvertGameToDto(&game, true))
 	}
 
-	result := PaginatedResult[Game]{
+	result := pagination.PaginatedResult[GameResponse]{
 		Items:      items,
 		TotalCount: total,
 		Page:       p.Page,
@@ -808,7 +659,7 @@ func (s *Service) UpdateMyPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)

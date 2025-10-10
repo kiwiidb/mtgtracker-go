@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"mtgtracker/internal/core"
+	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
-	"mtgtracker/internal/mtgtracker"
-	"mtgtracker/internal/repository"
+	"mtgtracker/internal/notification"
 	"mtgtracker/pkg/moxfield"
 	"net/http"
 	"os"
@@ -47,22 +48,29 @@ func main() {
 		log.Fatal("failed to connect to database", err)
 	}
 
-	// // Initialize the repository
-	repo := repository.NewRepository(db)
+	// // Initialize the repositories
+	notificationsRepo := notification.NewRepository(db)
+	coreRepo := core.NewRepository(db, notificationsRepo)
+	followRepo := follows.NewRepository(db)
 
 	// // Initialize the S3 storage
 	log.Println("initializing storage")
 	storage := storage.InitStorage()
 
-	// // Initialize the service
-	service := mtgtracker.NewService(repo, storage)
+	// // Initialize the services
+	coreService := core.NewService(coreRepo, storage)
+	notificationsSvc := notification.NewService(notificationsRepo, coreService)
 	moxfieldService := moxfield.NewService()
+	followService := follows.NewService(followRepo, coreService)
 
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
 
-	service.RegisterRoutes(mux)
+	coreService.RegisterRoutes(mux)
 	moxfieldService.RegisterRoutes(mux)
+	notificationsSvc.RegisterRoutes(mux)
+	followService.RegisterRoutes(mux)
+
 	// add middleware chain
 	handler := middleware.ApacheLogMw(mux)
 	handler = middleware.CorsMw(handler)

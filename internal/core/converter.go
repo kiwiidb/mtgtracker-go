@@ -1,14 +1,13 @@
-package mtgtracker
+package core
 
 import (
-	"mtgtracker/internal/repository"
 	"path/filepath"
 	"sort"
 	"time"
 )
 
-func convertGameToDto(game *repository.Game, addEvents bool) Game {
-	result := Game{
+func (svc *Service) ConvertGameToDto(game *Game, addEvents bool) GameResponse {
+	result := GameResponse{
 		ID:         game.ID,
 		CreatorID:  game.CreatorID,
 		Duration:   game.Duration,
@@ -16,12 +15,12 @@ func convertGameToDto(game *repository.Game, addEvents bool) Game {
 		Comments:   game.Comments,
 		Finished:   game.Finished,
 		Rankings:   convertRankingsWithLifeTotal(game.Rankings, game.GameEvents),
-		GameEvents: make([]GameEvent, len(game.GameEvents)),
+		GameEvents: make([]GameEventResponse, len(game.GameEvents)),
 	}
 
 	// Include creator information if available
 	if game.Creator != nil && game.Creator.FirebaseID != "" {
-		creator := convertPlayerToDto(game.Creator)
+		creator := svc.ConvertPlayerToResponse(game.Creator)
 		result.Creator = &creator
 	}
 
@@ -35,17 +34,17 @@ func convertGameToDto(game *repository.Game, addEvents bool) Game {
 	return result
 }
 
-func convertSimpleDeck(deck Deck) repository.SimpleDeck {
-	return repository.SimpleDeck{
+func convertSimpleDeck(deck Deck) SimpleDeck {
+	return SimpleDeck{
 		Commander:      deck.Commander,
 		Image:          deck.Image,
-		SecondaryImage: deck.SecondaryImg,
+		SecondaryImage: deck.SecondaryImage,
 		Crop:           deck.Crop,
 	}
 }
 
-func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
-	var sourceRanking, targetRanking *Ranking
+func convertGameEvent(event *GameEvent, uploadUrl string) GameEventResponse {
+	var sourceRanking, targetRanking *RankingResponse
 
 	if event.SourceRanking != nil {
 		ranking := convertRankingToDto(event.SourceRanking)
@@ -57,7 +56,7 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 		targetRanking = &ranking
 	}
 
-	return GameEvent{
+	return GameEventResponse{
 		GameID:               event.GameID,
 		EventType:            event.EventType,
 		DamageDelta:          event.DamageDelta,
@@ -71,9 +70,10 @@ func convertGameEvent(event *repository.GameEvent, uploadUrl string) GameEvent {
 	}
 }
 
-func convertDeckFromRanking(rank *repository.Ranking) Deck {
+func convertDeckFromRanking(rank *Ranking) DeckResponse {
 	if rank.Deck != nil {
-		return Deck{
+		return DeckResponse{
+			ID:           &rank.Deck.ID,
 			Commander:    rank.Deck.Commander,
 			Colors:       rank.Deck.Colors,
 			Crop:         rank.Deck.Crop,
@@ -83,7 +83,7 @@ func convertDeckFromRanking(rank *repository.Ranking) Deck {
 			Bracket:      rank.Deck.Bracket,
 		}
 	}
-	return Deck{
+	return DeckResponse{
 		Commander:    rank.DeckEmbedded.Commander,
 		Colors:       nil,
 		Crop:         rank.DeckEmbedded.Crop,
@@ -92,15 +92,15 @@ func convertDeckFromRanking(rank *repository.Ranking) Deck {
 	}
 }
 
-func convertRankingToDto(rank *repository.Ranking) Ranking {
-	return Ranking{
+func convertRankingToDto(rank *Ranking) RankingResponse {
+	return RankingResponse{
 		ID:       rank.ID,
 		PlayerID: rank.PlayerID,
 		Position: rank.Position,
 		Deck:     convertDeckFromRanking(rank),
-		Player: func() *Player {
+		Player: func() *PlayerResponse {
 			if rank.Player != nil {
-				return &Player{
+				return &PlayerResponse{
 					ID:              rank.Player.FirebaseID,
 					Name:            rank.Player.Name,
 					ProfileImageURL: rank.Player.Image,
@@ -111,11 +111,11 @@ func convertRankingToDto(rank *repository.Ranking) Ranking {
 	}
 }
 
-func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []repository.GameEvent) []Ranking {
-	result := make([]Ranking, len(rankings))
+func convertRankingsWithLifeTotal(rankings []Ranking, gameEvents []GameEvent) []RankingResponse {
+	result := make([]RankingResponse, len(rankings))
 
 	// Build a map of ranking ID to most recent life total event
-	lifeTotalMap := make(map[uint]*repository.GameEvent)
+	lifeTotalMap := make(map[uint]*GameEvent)
 	for i := range gameEvents {
 		event := &gameEvents[i]
 		if event.TargetRankingID != nil {
@@ -135,16 +135,16 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 			lastLifeTotalTimestamp = &timestamp
 		}
 
-		result[i] = Ranking{
+		result[i] = RankingResponse{
 			ID:                     rank.ID,
 			PlayerID:               rank.PlayerID,
 			Position:               rank.Position,
 			Deck:                   convertDeckFromRanking(&rank),
 			LastLifeTotal:          lastLifeTotal,
 			LastLifeTotalTimestamp: lastLifeTotalTimestamp,
-			Player: func() *Player {
+			Player: func() *PlayerResponse {
 				if rank.Player != nil {
-					return &Player{
+					return &PlayerResponse{
 						ID:              rank.Player.FirebaseID,
 						Name:            rank.Player.Name,
 						ProfileImageURL: rank.Player.Image,
@@ -157,8 +157,8 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 	return result
 }
 
-func convertPlayerToDto(player *repository.Player) Player {
-	result := Player{
+func (svc *Service) ConvertPlayerToResponse(player *Player) PlayerResponse {
+	result := PlayerResponse{
 		ID:               player.FirebaseID,
 		Name:             player.Name,
 		ProfileImageURL:  player.Image,
@@ -169,11 +169,11 @@ func convertPlayerToDto(player *repository.Player) Player {
 	totalGames := len(player.Games)
 	wins := 0
 	opponentMap := make(map[string]PlayerOpponentWithCount)
-	games := make([]Game, len(player.Games))
+	games := make([]GameResponse, len(player.Games))
 
 	for i, game := range player.Games {
 		// Convert game to DTO
-		games[i] = convertGameToDto(&game, false)
+		games[i] = svc.ConvertGameToDto(&game, false)
 
 		// Normally you will only have 1 game in progress at a time
 		if !game.Finished {
@@ -198,7 +198,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 					opponentMap[*ranking.PlayerID] = opponent
 				} else {
 					opponentMap[*ranking.PlayerID] = PlayerOpponentWithCount{
-						Player: Player{
+						Player: PlayerResponse{
 							ID: func() string {
 								if ranking.Player != nil {
 									return ranking.Player.FirebaseID
@@ -238,7 +238,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 	decks := make([]DeckWithCount, 0, len(player.Decks))
 	for _, deck := range player.Decks {
 		decks = append(decks, DeckWithCount{
-			Deck: Deck{
+			Deck: DeckResponse{
 				ID:           &deck.ID,
 				Commander:    deck.Commander,
 				Colors:       deck.Colors,
@@ -315,8 +315,8 @@ func calculateTopColors(decks []DeckWithCount, topN int) []string {
 }
 
 // convertPlayerToDtoSimple converts a player for notification context without game statistics
-func convertPlayerToDtoSimple(player *repository.Player) Player {
-	return Player{
+func ConvertPlayerToDtoSimple(player *Player) PlayerResponse {
+	return PlayerResponse{
 		ID:                   player.FirebaseID,
 		Name:                 player.Name,
 		ProfileImageURL:      player.Image,
@@ -328,44 +328,8 @@ func convertPlayerToDtoSimple(player *repository.Player) Player {
 		CurrentGame:          nil,
 	}
 }
-
-func convertNotificationToDto(notification *repository.Notification) Notification {
-	result := Notification{
-		ID:               notification.ID,
-		Title:            notification.Title,
-		Body:             notification.Body,
-		Type:             notification.Type,
-		Actions:          convertActionsToDto(notification.Actions),
-		Read:             notification.Read,
-		CreatedAt:        notification.CreatedAt,
-		GameID:           notification.GameID,
-		ReferredPlayerID: notification.ReferredPlayerID,
-		PlayerRankingID:  notification.PlayerRankingID,
-	}
-
-	if notification.Game != nil {
-		game := convertGameToDto(notification.Game, false)
-		result.Game = &game
-	}
-
-	if notification.ReferredPlayer != nil {
-		player := convertPlayerToDtoSimple(notification.ReferredPlayer)
-		result.ReferredPlayer = &player
-	}
-
-	return result
-}
-
-func convertActionsToDto(actions []repository.NotificationAction) []NotificationAction {
-	result := make([]NotificationAction, len(actions))
-	for i, action := range actions {
-		result[i] = NotificationAction(action)
-	}
-	return result
-}
-
-func convertDeckToDto(deck *repository.Deck) Deck {
-	return Deck{
+func convertDeckToDto(deck *Deck) DeckResponse {
+	return DeckResponse{
 		ID:           &deck.ID,
 		Commander:    deck.Commander,
 		Colors:       deck.Colors,

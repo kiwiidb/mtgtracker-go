@@ -1,7 +1,6 @@
-package mtgtracker
+package core
 
 import (
-	"mtgtracker/internal/repository"
 	"testing"
 
 	"gorm.io/gorm"
@@ -14,7 +13,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 	tests := []struct {
 		name              string
 		requestRankings   []UpdateRanking
-		existingRankings  []repository.Ranking
+		existingRankings  []Ranking
 		expectError       bool
 		errorMessage      string
 		expectedPositions []int
@@ -26,7 +25,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{RankingID: 1, Position: 0}, // Position ignored
 				{RankingID: 3, Position: 0}, // Position ignored
 			},
-			existingRankings: []repository.Ranking{
+			existingRankings: []Ranking{
 				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
 				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 				{Model: gorm.Model{ID: 3}, PlayerID: strPtr("player3"), Position: 0},
@@ -39,7 +38,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 			requestRankings: []UpdateRanking{
 				{RankingID: 1, Position: 0},
 			},
-			existingRankings: []repository.Ranking{
+			existingRankings: []Ranking{
 				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
 				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 			},
@@ -53,7 +52,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{RankingID: 2, Position: 0},
 				{RankingID: 3, Position: 0},
 			},
-			existingRankings: []repository.Ranking{
+			existingRankings: []Ranking{
 				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
 				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 			},
@@ -66,7 +65,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 				{RankingID: 1, Position: 0},
 				{RankingID: 999, Position: 0}, // Invalid ranking ID
 			},
-			existingRankings: []repository.Ranking{
+			existingRankings: []Ranking{
 				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
 				{Model: gorm.Model{ID: 2}, PlayerID: strPtr("player2"), Position: 0},
 			},
@@ -76,7 +75,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 		{
 			name:              "empty rankings",
 			requestRankings:   []UpdateRanking{},
-			existingRankings:  []repository.Ranking{},
+			existingRankings:  []Ranking{},
 			expectError:       false,
 			expectedPositions: []int{},
 		},
@@ -85,7 +84,7 @@ func TestValidateAndReorderRankings(t *testing.T) {
 			requestRankings: []UpdateRanking{
 				{RankingID: 1, Position: 0},
 			},
-			existingRankings: []repository.Ranking{
+			existingRankings: []Ranking{
 				{Model: gorm.Model{ID: 1}, PlayerID: strPtr("player1"), Position: 0},
 			},
 			expectError:       false,
