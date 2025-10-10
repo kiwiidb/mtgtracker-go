@@ -71,38 +71,38 @@ type UpdatePlayerRequest struct {
 }
 
 type GameResponse struct {
-	ID         uint                 `json:"id"`
-	CreatorID  *string              `json:"creator_id,omitempty"`
-	Duration   *int                 `json:"duration,omitempty"`
-	Date       *time.Time           `json:"date,omitempty"`
-	Comments   string               `json:"comments,omitempty"`
-	Rankings   []RankingResponse    `json:"rankings,omitempty"`
-	Finished   bool                 `json:"finished"`
-	GameEvents []GameEventResponse  `json:"game_events,omitempty"`
-	Creator    *PlayerResponse      `json:"creator,omitempty"`
+	ID         uint                `json:"id"`
+	CreatorID  *string             `json:"creator_id,omitempty"`
+	Duration   *int                `json:"duration,omitempty"`
+	Date       *time.Time          `json:"date,omitempty"`
+	Comments   string              `json:"comments,omitempty"`
+	Rankings   []RankingResponse   `json:"rankings,omitempty"`
+	Finished   bool                `json:"finished"`
+	GameEvents []GameEventResponse `json:"game_events,omitempty"`
+	Creator    *PlayerResponse     `json:"creator,omitempty"`
 }
 
 type GameEventResponse struct {
-	GameID               uint              `json:"game_id"`
-	EventType            string            `json:"event_type"`
-	DamageDelta          int               `json:"damage_delta"`
-	CreatedAt            time.Time         `json:"created_at"`
-	TargetLifeTotalAfter int               `json:"target_life_total_after"`
-	SourceRanking        *RankingResponse  `json:"source_ranking,omitempty"`
-	TargetRanking        *RankingResponse  `json:"target_ranking,omitempty"`
-	ImageUrl             string            `json:"image_url"`                  // URL of the uploaded image
-	UploadImageUrl       string            `json:"upload_image_url,omitempty"` // Presigned URL for image upload
-	Comment              *string           `json:"comment,omitempty"`          // New field for text description
+	GameID               uint             `json:"game_id"`
+	EventType            string           `json:"event_type"`
+	DamageDelta          int              `json:"damage_delta"`
+	CreatedAt            time.Time        `json:"created_at"`
+	TargetLifeTotalAfter int              `json:"target_life_total_after"`
+	SourceRanking        *RankingResponse `json:"source_ranking,omitempty"`
+	TargetRanking        *RankingResponse `json:"target_ranking,omitempty"`
+	ImageUrl             string           `json:"image_url"`                  // URL of the uploaded image
+	UploadImageUrl       string           `json:"upload_image_url,omitempty"` // Presigned URL for image upload
+	Comment              *string          `json:"comment,omitempty"`          // New field for text description
 }
 
 type RankingResponse struct {
-	ID                     uint             `json:"id"`
-	PlayerID               *string          `json:"player_id,omitempty"`
-	Position               int              `json:"position"`
-	LastLifeTotal          *int             `json:"last_life_total,omitempty"`
-	LastLifeTotalTimestamp *time.Time       `json:"last_life_total_timestamp,omitempty"`
-	Deck                   DeckResponse     `json:"deck"`
-	Player                 *PlayerResponse  `json:"player,omitempty"` // Optional, can be omitted if not needed
+	ID                     uint            `json:"id"`
+	PlayerID               *string         `json:"player_id,omitempty"`
+	Position               int             `json:"position"`
+	LastLifeTotal          *int            `json:"last_life_total,omitempty"`
+	LastLifeTotalTimestamp *time.Time      `json:"last_life_total_timestamp,omitempty"`
+	Deck                   DeckResponse    `json:"deck"`
+	Player                 *PlayerResponse `json:"player,omitempty"` // Optional, can be omitted if not needed
 }
 
 type DeckResponse struct {
@@ -113,14 +113,14 @@ type DeckResponse struct {
 	Image        string   `json:"image"`
 	Colors       []string `json:"colors,omitempty"` // Scryfall color codes: W, U, B, R, G, C
 	MoxfieldURL  *string  `json:"moxfield_url,omitempty"`
-	Bracket      uint     `json:"bracket,omitempty"`
+	Bracket      *uint    `json:"bracket,omitempty"`
 	Themes       []string `json:"themes,omitempty"`
 }
 
 type CreateDeckRequest struct {
 	MoxfieldURL    *string  `json:"moxfield_url"`
 	Themes         []string `json:"themes"`
-	Bracket        uint     `json:"bracket"`
+	Bracket        *uint    `json:"bracket,omitempty"`
 	Commander      string   `json:"commander"`
 	Colors         []string `json:"colors"`
 	Image          string   `json:"image"`

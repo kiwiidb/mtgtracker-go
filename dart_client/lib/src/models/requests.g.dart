@@ -149,7 +149,7 @@ CreateDeckRequest _$CreateDeckRequestFromJson(Map<String, dynamic> json) =>
       moxfieldUrl: json['moxfield_url'] as String?,
       themes:
           (json['themes'] as List<dynamic>).map((e) => e as String).toList(),
-      bracket: (json['bracket'] as num).toInt(),
+      bracket: (json['bracket'] as num?)?.toInt(),
       commander: json['commander'] as String,
       colors:
           (json['colors'] as List<dynamic>).map((e) => e as String).toList(),

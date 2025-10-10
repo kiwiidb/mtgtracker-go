@@ -171,7 +171,7 @@ class CreateDeckRequest {
   @JsonKey(name: 'moxfield_url')
   final String? moxfieldUrl;
   final List<String> themes;
-  final int bracket;
+  final int? bracket;
   final String commander;
   final List<String> colors;
   final String image;
@@ -182,7 +182,7 @@ class CreateDeckRequest {
   const CreateDeckRequest({
     this.moxfieldUrl,
     required this.themes,
-    required this.bracket,
+    this.bracket,
     required this.commander,
     required this.colors,
     required this.image,
