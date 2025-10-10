@@ -4,18 +4,26 @@ import (
 	"encoding/json"
 	"log"
 	"mtgtracker/internal/middleware"
+	"mtgtracker/internal/mtgtracker"
 	"mtgtracker/internal/pagination"
+	"mtgtracker/internal/repository"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
 type Service struct {
-	Repository *Repository
+	Repository  *Repository
+	coreService CoreService
 }
 
-func NewService(repo *Repository) *Service {
-	return &Service{Repository: repo}
+func NewService(repo *Repository, coreService CoreService) *Service {
+	return &Service{Repository: repo, coreService: coreService}
+}
+
+type CoreService interface {
+	ConvertPlayerToResponse(player *repository.Player) mtgtracker.Player
+	ConvertGameToDto(game *repository.Game, includePlayers bool) mtgtracker.Game
 }
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
@@ -54,7 +62,7 @@ func (s *Service) GetNotifications(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]NotificationResponse, 0, len(notifications))
 	for _, notification := range notifications {
-		items = append(items, convertNotificationToDto(&notification))
+		items = append(items, s.convertNotificationToDto(&notification))
 	}
 
 	result := pagination.PaginatedResult[NotificationResponse]{

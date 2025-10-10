@@ -28,7 +28,7 @@ const (
 	ActionResponseAddImageGameEvent NotificationResponseAction = "add_image_game_event"
 )
 
-func convertNotificationToDto(notification *Notification) NotificationResponse {
+func (s *Service) convertNotificationToDto(notification *Notification) NotificationResponse {
 	result := NotificationResponse{
 		ID:               notification.ID,
 		Title:            notification.Title,
@@ -43,12 +43,12 @@ func convertNotificationToDto(notification *Notification) NotificationResponse {
 	}
 
 	if notification.Game != nil {
-		game := mtgtracker.ConvertGameToDto(notification.Game, false)
+		game := s.coreService.ConvertGameToDto(notification.Game, false)
 		result.Game = &game
 	}
 
 	if notification.ReferredPlayer != nil {
-		player := mtgtracker.ConvertPlayerToDtoSimple(notification.ReferredPlayer)
+		player := s.coreService.ConvertPlayerToResponse(notification.ReferredPlayer)
 		result.ReferredPlayer = &player
 	}
 

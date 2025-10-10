@@ -10,6 +10,15 @@ import (
 type Repository struct {
 	DB *gorm.DB
 }
+
+func NewRepository(db *gorm.DB) *Repository {
+	err := db.AutoMigrate(&Follow{})
+	if err != nil {
+		panic("Failed to migrate Follow repo: " + err.Error())
+	}
+	return &Repository{DB: db}
+}
+
 type Follow struct {
 	gorm.Model
 	Player1ID string `gorm:"not null" json:"player1_id"`

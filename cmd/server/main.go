@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/mtgtracker"
 	"mtgtracker/internal/notification"
@@ -51,22 +52,26 @@ func main() {
 	// // Initialize the repositories
 	notificationsRepo := notification.NewRepository(db)
 	repo := repository.NewRepository(db, notificationsRepo)
+	followRepo := follows.NewRepository(db)
 
 	// // Initialize the S3 storage
 	log.Println("initializing storage")
 	storage := storage.InitStorage()
 
 	// // Initialize the services
-	service := mtgtracker.NewService(repo, storage)
-	notificationsSvc := notification.NewService(notificationsRepo)
+	coreService := mtgtracker.NewService(repo, storage)
+	notificationsSvc := notification.NewService(notificationsRepo, coreService)
 	moxfieldService := moxfield.NewService()
+	followService := follows.NewService(followRepo, coreService)
 
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
 
-	service.RegisterRoutes(mux)
+	coreService.RegisterRoutes(mux)
 	moxfieldService.RegisterRoutes(mux)
 	notificationsSvc.RegisterRoutes(mux)
+	followService.RegisterRoutes(mux)
+
 	// add middleware chain
 	handler := middleware.ApacheLogMw(mux)
 	handler = middleware.CorsMw(handler)

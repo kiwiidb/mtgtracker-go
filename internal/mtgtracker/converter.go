@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func ConvertGameToDto(game *repository.Game, addEvents bool) Game {
+func (svc *Service) ConvertGameToDto(game *repository.Game, addEvents bool) Game {
 	result := Game{
 		ID:         game.ID,
 		CreatorID:  game.CreatorID,
@@ -21,7 +21,7 @@ func ConvertGameToDto(game *repository.Game, addEvents bool) Game {
 
 	// Include creator information if available
 	if game.Creator != nil && game.Creator.FirebaseID != "" {
-		creator := convertPlayerToDto(game.Creator)
+		creator := svc.ConvertPlayerToResponse(game.Creator)
 		result.Creator = &creator
 	}
 
@@ -157,7 +157,7 @@ func convertRankingsWithLifeTotal(rankings []repository.Ranking, gameEvents []re
 	return result
 }
 
-func convertPlayerToDto(player *repository.Player) Player {
+func (svc *Service) ConvertPlayerToResponse(player *repository.Player) Player {
 	result := Player{
 		ID:               player.FirebaseID,
 		Name:             player.Name,
@@ -173,7 +173,7 @@ func convertPlayerToDto(player *repository.Player) Player {
 
 	for i, game := range player.Games {
 		// Convert game to DTO
-		games[i] = ConvertGameToDto(&game, false)
+		games[i] = svc.ConvertGameToDto(&game, false)
 
 		// Normally you will only have 1 game in progress at a time
 		if !game.Finished {

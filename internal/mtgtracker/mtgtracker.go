@@ -53,6 +53,10 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
 }
 
+func (s *Service) GetPlayerByFirebaseID(firebaseID string) (*repository.Player, error) {
+	return s.Repository.GetPlayerByFirebaseID(firebaseID)
+}
+
 func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the context
 	userID := middleware.GetUserID(r)
@@ -68,7 +72,7 @@ func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -101,7 +105,7 @@ func (s *Service) SignupPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -123,7 +127,7 @@ func (s *Service) GetPlayers(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]Player, 0, len(players))
 	for _, player := range players {
-		items = append(items, convertPlayerToDto(&player))
+		items = append(items, s.ConvertPlayerToResponse(&player))
 	}
 
 	result := pagination.PaginatedResult[Player]{
@@ -147,7 +151,7 @@ func (s *Service) GetPlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -217,7 +221,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := ConvertGameToDto(game, false)
+	result := s.ConvertGameToDto(game, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -292,7 +296,7 @@ func (s *Service) GetGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// convert the game to a DTO
-	result := ConvertGameToDto(game, true)
+	result := s.ConvertGameToDto(game, true)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -329,7 +333,7 @@ func (s *Service) GetGames(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]Game, 0, len(games))
 	for _, game := range games {
-		items = append(items, ConvertGameToDto(&game, true))
+		items = append(items, s.ConvertGameToDto(&game, true))
 	}
 
 	result := pagination.PaginatedResult[Game]{
@@ -363,7 +367,7 @@ func (s *Service) GetActiveGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := ConvertGameToDto(game, true)
+	result := s.ConvertGameToDto(game, true)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -410,7 +414,7 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := ConvertGameToDto(updatedGame, false)
+	result := s.ConvertGameToDto(updatedGame, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
@@ -606,7 +610,7 @@ func (s *Service) GetPlayerGames(w http.ResponseWriter, r *http.Request) {
 	// Convert to DTO
 	items := make([]Game, 0, len(games))
 	for _, game := range games {
-		items = append(items, ConvertGameToDto(&game, true))
+		items = append(items, s.ConvertGameToDto(&game, true))
 	}
 
 	result := pagination.PaginatedResult[Game]{
@@ -656,7 +660,7 @@ func (s *Service) UpdateMyPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := convertPlayerToDto(player)
+	result := s.ConvertPlayerToResponse(player)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)
