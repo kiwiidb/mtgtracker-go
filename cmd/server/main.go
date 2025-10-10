@@ -60,8 +60,8 @@ func main() {
 	// // Initialize the services
 	coreService := core.NewService(coreRepo, storage)
 	notificationsSvc := notification.NewService(notificationsRepo, coreService)
-	moxfieldService := moxfield.NewService()
 	followService := follows.NewService(followRepo, coreService)
+	moxfieldService := moxfield.NewService()
 
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
