@@ -29,9 +29,9 @@ type Notification struct {
 	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
 	PlayerRankingID  *uint                `json:"player_ranking_id,omitempty"`
 
-	Player         core.Player  `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
-	Game           *core.Game   `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
-	ReferredPlayer *core.Player `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
+	Player         core.Player   `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
+	Game           *core.Game    `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
+	ReferredPlayer *core.Player  `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
 	PlayerRanking  *core.Ranking `gorm:"foreignKey:PlayerRankingID;references:ID" json:"player_ranking,omitempty"`
 }
 
@@ -112,8 +112,10 @@ func (r *Repository) GameCreated(game *core.Game, creator *core.Player) error {
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
 			// Get commander name from either referenced deck or embedded deck
-			commanderName := ""
-			commanderName = ranking.Deck.Commander
+			commanderName := ranking.DeckEmbedded.Commander
+			if ranking.Deck != nil {
+				commanderName = ranking.Deck.Commander
+			}
 
 			notification := Notification{
 				UserID:           *ranking.PlayerID,
