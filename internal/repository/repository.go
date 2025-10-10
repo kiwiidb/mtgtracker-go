@@ -206,7 +206,7 @@ func (r *Repository) GetPlayerGames(playerID string, limit, offset int) ([]Game,
 }
 
 func NewRepository(db *gorm.DB, notifier Notifications) *Repository {
-	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Follow{}, &Deck{})
+	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Deck{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -329,97 +329,6 @@ func (r *Repository) GetGameWithEvents(gameID uint) (*Game, error) {
 		return nil, err
 	}
 	return &game, nil
-}
-
-func (r *Repository) CreateFollow(player1ID, player2ID string) (*Follow, error) {
-	if player1ID == player2ID {
-		return nil, errors.New("cannot follow yourself")
-	}
-
-	// Ensure consistent ordering for symmetrical relationship
-	if player1ID > player2ID {
-		player1ID, player2ID = player2ID, player1ID
-	}
-
-	follow := Follow{
-		Player1ID: player1ID,
-		Player2ID: player2ID,
-	}
-
-	if err := r.DB.Create(&follow).Error; err != nil {
-		return nil, err
-	}
-
-	// Load the related players
-	if err := r.DB.Preload("Player1").Preload("Player2").First(&follow, follow.ID).Error; err != nil {
-		return nil, err
-	}
-
-	return &follow, nil
-}
-
-func (r *Repository) DeleteFollow(player1ID, player2ID string) error {
-	if player1ID == player2ID {
-		return errors.New("invalid follow relationship")
-	}
-
-	// Ensure consistent ordering for symmetrical relationship
-	if player1ID > player2ID {
-		player1ID, player2ID = player2ID, player1ID
-	}
-
-	result := r.DB.Where("player1_id = ? AND player2_id = ?", player1ID, player2ID).Delete(&Follow{})
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return errors.New("follow relationship not found")
-	}
-
-	return nil
-}
-
-func (r *Repository) GetFollows(playerID string) ([]Player, error) {
-	var follows []Follow
-
-	// Get all follows where the player is either player1 or player2
-	err := r.DB.Preload("Player1").Preload("Player2").
-		Where("player1_id = ? OR player2_id = ?", playerID, playerID).
-		Find(&follows).Error
-	if err != nil {
-		return nil, err
-	}
-
-	var followedPlayers []Player
-	for _, follow := range follows {
-		if follow.Player1ID == playerID {
-			followedPlayers = append(followedPlayers, follow.Player2)
-		} else {
-			followedPlayers = append(followedPlayers, follow.Player1)
-		}
-	}
-
-	return followedPlayers, nil
-}
-
-func (r *Repository) IsFollowing(player1ID, player2ID string) (bool, error) {
-	if player1ID == player2ID {
-		return false, nil
-	}
-
-	// Ensure consistent ordering for symmetrical relationship
-	if player1ID > player2ID {
-		player1ID, player2ID = player2ID, player1ID
-	}
-
-	var count int64
-	err := r.DB.Model(&Follow{}).Where("player1_id = ? AND player2_id = ?", player1ID, player2ID).Count(&count).Error
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
 }
 
 func (r *Repository) UpdatePlayerProfileImage(firebaseID, imageURL string) error {
