@@ -2,7 +2,7 @@ package follows
 
 import (
 	"errors"
-	"mtgtracker/internal/repository"
+	"mtgtracker/internal/core"
 
 	"gorm.io/gorm"
 )
@@ -24,8 +24,8 @@ type Follow struct {
 	Player1ID string `gorm:"not null" json:"player1_id"`
 	Player2ID string `gorm:"not null" json:"player2_id"`
 
-	Player1 repository.Player `gorm:"foreignKey:Player1ID;references:FirebaseID" json:"player1"`
-	Player2 repository.Player `gorm:"foreignKey:Player2ID;references:FirebaseID" json:"player2"`
+	Player1 core.Player `gorm:"foreignKey:Player1ID;references:FirebaseID" json:"player1"`
+	Player2 core.Player `gorm:"foreignKey:Player2ID;references:FirebaseID" json:"player2"`
 }
 
 func (r *Repository) CreateFollow(player1ID, player2ID string) (*Follow, error) {
@@ -77,7 +77,7 @@ func (r *Repository) DeleteFollow(player1ID, player2ID string) error {
 	return nil
 }
 
-func (r *Repository) GetFollows(playerID string) ([]repository.Player, error) {
+func (r *Repository) GetFollows(playerID string) ([]core.Player, error) {
 	var follows []Follow
 
 	// Get all follows where the player is either player1 or player2
@@ -88,7 +88,7 @@ func (r *Repository) GetFollows(playerID string) ([]repository.Player, error) {
 		return nil, err
 	}
 
-	var followedPlayers []repository.Player
+	var followedPlayers []core.Player
 	for _, follow := range follows {
 		if follow.Player1ID == playerID {
 			followedPlayers = append(followedPlayers, follow.Player2)

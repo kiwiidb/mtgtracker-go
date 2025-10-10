@@ -3,10 +3,9 @@ package notification
 import (
 	"encoding/json"
 	"log"
+	"mtgtracker/internal/core"
 	"mtgtracker/internal/middleware"
-	"mtgtracker/internal/mtgtracker"
 	"mtgtracker/internal/pagination"
-	"mtgtracker/internal/repository"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,8 +21,8 @@ func NewService(repo *Repository, coreService CoreService) *Service {
 }
 
 type CoreService interface {
-	ConvertPlayerToResponse(player *repository.Player) mtgtracker.Player
-	ConvertGameToDto(game *repository.Game, includePlayers bool) mtgtracker.Game
+	ConvertPlayerToResponse(player *core.Player) core.PlayerResponse
+	ConvertGameToDto(game *core.Game, includePlayers bool) core.GameResponse
 }
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {

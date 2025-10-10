@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"mtgtracker/internal/core"
 	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
-	"mtgtracker/internal/mtgtracker"
 	"mtgtracker/internal/notification"
-	"mtgtracker/internal/repository"
 	"mtgtracker/pkg/moxfield"
 	"net/http"
 	"os"
@@ -51,7 +50,7 @@ func main() {
 
 	// // Initialize the repositories
 	notificationsRepo := notification.NewRepository(db)
-	repo := repository.NewRepository(db, notificationsRepo)
+	repo := core.NewRepository(db, notificationsRepo)
 	followRepo := follows.NewRepository(db)
 
 	// // Initialize the S3 storage
@@ -59,7 +58,7 @@ func main() {
 	storage := storage.InitStorage()
 
 	// // Initialize the services
-	coreService := mtgtracker.NewService(repo, storage)
+	coreService := core.NewService(repo, storage)
 	notificationsSvc := notification.NewService(notificationsRepo, coreService)
 	moxfieldService := moxfield.NewService()
 	followService := follows.NewService(followRepo, coreService)

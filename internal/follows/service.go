@@ -3,9 +3,8 @@ package follows
 import (
 	"encoding/json"
 	"log"
+	"mtgtracker/internal/core"
 	"mtgtracker/internal/middleware"
-	"mtgtracker/internal/mtgtracker"
-	"mtgtracker/internal/repository"
 	"net/http"
 	"strings"
 )
@@ -16,8 +15,8 @@ type Service struct {
 }
 
 type playerService interface {
-	GetPlayerByFirebaseID(firebaseID string) (*repository.Player, error)
-	ConvertPlayerToResponse(player *repository.Player) mtgtracker.Player
+	GetPlayerByFirebaseID(firebaseID string) (*core.Player, error)
+	ConvertPlayerToResponse(player *core.Player) core.PlayerResponse
 }
 
 func NewService(repo *Repository, playerSvc playerService) *Service {
@@ -58,9 +57,9 @@ func (s *Service) CreateFollow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := struct {
-		ID      uint              `json:"id"`
-		Player1 mtgtracker.Player `json:"player1"`
-		Player2 mtgtracker.Player `json:"player2"`
+		ID      uint                `json:"id"`
+		Player1 core.PlayerResponse `json:"player1"`
+		Player2 core.PlayerResponse `json:"player2"`
 	}{
 		ID:      follow.ID,
 		Player1: s.playerService.ConvertPlayerToResponse(&follow.Player1),
@@ -122,7 +121,7 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([]mtgtracker.Player, 0, len(follows))
+	result := make([]core.PlayerResponse, 0, len(follows))
 	for _, player := range follows {
 		result = append(result, s.playerService.ConvertPlayerToResponse(&player))
 	}
@@ -142,7 +141,7 @@ func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([]mtgtracker.Player, 0, len(follows))
+	result := make([]core.PlayerResponse, 0, len(follows))
 	for _, player := range follows {
 		result = append(result, s.playerService.ConvertPlayerToResponse(&player))
 	}

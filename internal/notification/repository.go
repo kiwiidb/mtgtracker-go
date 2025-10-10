@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"mtgtracker/internal/mtgtracker"
-	"mtgtracker/internal/repository"
+	"mtgtracker/internal/core"
 
 	"gorm.io/gorm"
 )
@@ -30,10 +29,10 @@ type Notification struct {
 	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
 	PlayerRankingID  *uint                `json:"player_ranking_id,omitempty"`
 
-	Player         mtgtracker.Player   `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
-	Game           *repository.Game    `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
-	ReferredPlayer *repository.Player  `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
-	PlayerRanking  *repository.Ranking `gorm:"foreignKey:PlayerRankingID;references:ID" json:"player_ranking,omitempty"`
+	Player         core.Player  `gorm:"foreignKey:UserID;references:FirebaseID" json:"user"`
+	Game           *core.Game   `gorm:"foreignKey:GameID;references:ID" json:"game,omitempty"`
+	ReferredPlayer *core.Player `gorm:"foreignKey:ReferredPlayerID;references:FirebaseID" json:"referred_player,omitempty"`
+	PlayerRanking  *core.Ranking `gorm:"foreignKey:PlayerRankingID;references:ID" json:"player_ranking,omitempty"`
 }
 
 type Repository struct {
@@ -108,7 +107,7 @@ func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) 
 	return nil
 }
 
-func (r *Repository) GameCreated(game *repository.Game, creator *repository.Player) error {
+func (r *Repository) GameCreated(game *core.Game, creator *core.Player) error {
 	// Create notifications for all players in the game
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
@@ -137,7 +136,7 @@ func (r *Repository) GameCreated(game *repository.Game, creator *repository.Play
 	return nil
 }
 
-func (r *Repository) GameFinished(game *repository.Game) error {
+func (r *Repository) GameFinished(game *core.Game) error {
 	// Delete all game_created notifications for this game
 	if err := r.DB.Where("game_id = ? AND type = ?", game.ID, "game_created").Delete(&Notification{}).Error; err != nil {
 		log.Printf("Failed to delete game_created notifications for game %d: %v", game.ID, err)
