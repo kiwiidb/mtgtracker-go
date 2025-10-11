@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"mtgtracker/internal/core"
+	"mtgtracker/internal/events"
 	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/notification"
@@ -48,9 +49,13 @@ func main() {
 		log.Fatal("failed to connect to database", err)
 	}
 
+	// Initialize event bus
+	log.Println("initializing event bus")
+	eventBus := events.NewEventBus()
+
 	// // Initialize the repositories
 	notificationsRepo := notification.NewRepository(db)
-	coreRepo := core.NewRepository(db, notificationsRepo)
+	coreRepo := core.NewRepository(db, eventBus)
 	followRepo := follows.NewRepository(db)
 
 	// // Initialize the S3 storage
@@ -62,6 +67,11 @@ func main() {
 	notificationsSvc := notification.NewService(notificationsRepo, coreService)
 	followService := follows.NewService(followRepo, coreService)
 	moxfieldService := moxfield.NewService()
+
+	// Register event handlers
+	log.Println("registering event handlers")
+	notificationHandlers := notification.NewEventHandlers(notificationsRepo, coreService)
+	notificationHandlers.RegisterHandlers(eventBus)
 
 	// // Create a new HTTP server
 	mux := http.NewServeMux()

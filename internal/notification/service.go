@@ -23,6 +23,8 @@ func NewService(repo *Repository, coreService CoreService) *Service {
 type CoreService interface {
 	ConvertPlayerToResponse(player *core.Player) core.PlayerResponse
 	ConvertGameToDto(game *core.Game, includePlayers bool) core.GameResponse
+	GetGameByID(gameID uint) (*core.Game, error)
+	GetPlayerByFirebaseID(firebaseID string) (*core.Player, error)
 }
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {

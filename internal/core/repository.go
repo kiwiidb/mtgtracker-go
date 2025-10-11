@@ -3,19 +3,19 @@ package core
 import (
 	"errors"
 	"log"
+	"mtgtracker/internal/events"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 type Repository struct {
-	DB            *gorm.DB
-	notifications Notifications
+	DB       *gorm.DB
+	eventBus EventBus
 }
 
-type Notifications interface {
-	GameCreated(game *Game, creator *Player) error
-	GameFinished(game *Game) error
+type EventBus interface {
+	Publish(event events.Event)
 }
 
 func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
@@ -97,7 +97,7 @@ func (r *Repository) GetActiveGameForPlayer(playerID string) (*Game, error) {
 
 func (r *Repository) DeleteGame(gameID uint) error {
 	// Use a transaction to ensure all deletions succeed or fail together
-	return r.DB.Transaction(func(tx *gorm.DB) error {
+	err := r.DB.Transaction(func(tx *gorm.DB) error {
 		// First delete game events
 		if err := tx.Where("game_id = ?", gameID).Delete(&GameEvent{}).Error; err != nil {
 			return err
@@ -115,6 +115,18 @@ func (r *Repository) DeleteGame(gameID uint) error {
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
+
+	// Publish game deleted event
+	r.eventBus.Publish(events.GameDeletedEvent{
+		GameID: gameID,
+		Date:   time.Now(),
+	})
+
+	return nil
 }
 
 func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool) (*Game, error) {
@@ -146,10 +158,16 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 			// Don't fail the game update if deck stats update fails
 		}
 
-		if err := r.notifications.GameFinished(res); err != nil {
-			log.Printf("Failed to create finished game notifications: %v", err)
-			// Don't fail the game update if notifications fail
+		// Publish game finished event
+		rankingIDs := make([]uint, len(res.Rankings))
+		for i, ranking := range res.Rankings {
+			rankingIDs[i] = ranking.ID
 		}
+		r.eventBus.Publish(events.GameFinishedEvent{
+			GameID:     res.ID,
+			RankingIDs: rankingIDs,
+			Date:       time.Now(),
+		})
 	}
 
 	return res, nil
@@ -205,7 +223,7 @@ func (r *Repository) GetPlayerGames(playerID string, limit, offset int) ([]Game,
 	return games, total, nil
 }
 
-func NewRepository(db *gorm.DB, notifier Notifications) *Repository {
+func NewRepository(db *gorm.DB, eventBus EventBus) *Repository {
 	err := db.AutoMigrate(&Player{}, &Game{}, &Ranking{}, &GameEvent{}, &Deck{})
 	if err != nil {
 		log.Fatal(err)
@@ -216,8 +234,8 @@ func NewRepository(db *gorm.DB, notifier Notifications) *Repository {
 		ON follows (player1_id, player2_id)`)
 
 	return &Repository{
-		DB:            db,
-		notifications: notifier,
+		DB:       db,
+		eventBus: eventBus,
 	}
 }
 func (r *Repository) InsertPlayer(name string, email string, userId string) (*Player, error) {
@@ -270,11 +288,18 @@ func (r *Repository) InsertGame(creator *Player, duration *int, comments, image 
 		return nil, err
 	}
 
-	// Create notifications for all players in the game
-	if err := r.notifications.GameCreated(&game, creator); err != nil {
-		log.Printf("Failed to create game notifications: %v", err)
-		// Don't fail the game creation if notifications fail
+	// Publish game created event
+	rankingIDs := make([]uint, len(game.Rankings))
+	for i, ranking := range game.Rankings {
+		rankingIDs[i] = ranking.ID
 	}
+	r.eventBus.Publish(events.GameCreatedEvent{
+		GameID:     game.ID,
+		CreatorID:  creator.FirebaseID,
+		RankingIDs: rankingIDs,
+		Date:       time.Now(),
+	})
+
 	if err := r.createInitGameEvents(&game); err != nil {
 		log.Printf("Failed to create initial game events: %v", err)
 		// Don't fail the game creation if initial game events fail

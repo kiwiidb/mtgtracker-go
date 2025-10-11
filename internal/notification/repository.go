@@ -107,7 +107,7 @@ func (r *Repository) MarkNotificationAsRead(notificationID uint, userID string) 
 	return nil
 }
 
-func (r *Repository) GameCreated(game *core.Game, creator *core.Player) error {
+func (r *Repository) CreateGameNotifications(game *core.Game, creator *core.Player) error {
 	// Create notifications for all players in the game
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
@@ -138,7 +138,7 @@ func (r *Repository) GameCreated(game *core.Game, creator *core.Player) error {
 	return nil
 }
 
-func (r *Repository) GameFinished(game *core.Game) error {
+func (r *Repository) CreateGameFinishedNotifications(game *core.Game) error {
 	// Delete all game_created notifications for this game
 	if err := r.DB.Where("game_id = ? AND type = ?", game.ID, "game_created").Delete(&Notification{}).Error; err != nil {
 		log.Printf("Failed to delete game_created notifications for game %d: %v", game.ID, err)
@@ -206,4 +206,8 @@ func (r *Repository) GameFinished(game *core.Game) error {
 		}
 	}
 	return nil
+}
+
+func (r *Repository) DeleteNotificationsByGameID(gameID uint) error {
+	return r.DB.Where("game_id = ?", gameID).Delete(&Notification{}).Error
 }

@@ -56,6 +56,10 @@ func (s *Service) GetPlayerByFirebaseID(firebaseID string) (*Player, error) {
 	return s.Repository.GetPlayerByFirebaseID(firebaseID)
 }
 
+func (s *Service) GetGameByID(gameID uint) (*Game, error) {
+	return s.Repository.GetGameWithEvents(gameID)
+}
+
 func (s *Service) GetMyPlayer(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the context
 	userID := middleware.GetUserID(r)
