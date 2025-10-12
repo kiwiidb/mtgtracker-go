@@ -28,6 +28,7 @@ func NewEventHandlers(repo *Repository, coreService CoreService) *EventHandlers 
 func (h *EventHandlers) RegisterHandlers(bus *events.EventBus) {
 	bus.Subscribe("game.created", h.HandleGameCreated)
 	bus.Subscribe("game.deleted", h.HandleGameDeleted)
+	bus.Subscribe("ranking.deleted", h.HandleRankingDeleted)
 	log.Println("Follow event handlers registered")
 }
 
@@ -75,6 +76,29 @@ func (h *EventHandlers) HandleGameDeleted(event events.Event) error {
 	// Use player IDs from the event (game is already deleted)
 	// Decrement follows for all unique player pairs
 	return h.updateFollowsForPlayerPairs(e.PlayerIDs, false)
+}
+
+// HandleRankingDeleted processes ranking deleted events
+// Decrements follow counts between the deleted player and all other players in the game
+func (h *EventHandlers) HandleRankingDeleted(event events.Event) error {
+	e, ok := event.(events.RankingDeletedEvent)
+	if !ok {
+		log.Printf("Invalid event type for ranking.deleted: %T", event)
+		return nil
+	}
+
+	log.Printf("Processing ranking.deleted event for follows (ranking %d, game %d)", e.RankingID, e.GameID)
+
+	// Decrement follows between the removed player and all other players
+	for _, otherPlayerID := range e.OtherPlayerIDs {
+		err := h.repo.DecrementGameCount(e.PlayerID, otherPlayerID)
+		if err != nil {
+			log.Printf("Failed to decrement follow count for %s <-> %s: %v", e.PlayerID, otherPlayerID, err)
+			// Continue processing other pairs
+		}
+	}
+
+	return nil
 }
 
 // updateFollowsForPlayerPairs creates or updates follow relationships for all unique pairs

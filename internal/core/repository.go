@@ -342,6 +342,40 @@ func (r *Repository) UpdatePlayer(firebaseID string, updates map[string]interfac
 	return &player, nil
 }
 
+// GetRankingWithGamePlayers fetches ranking data and other player IDs in the same game
+// Returns: ranking, gameID, otherPlayerIDs (excluding the ranking's player), error
+func (r *Repository) GetRankingWithGamePlayers(rankingID uint) (*Ranking, uint, []string, error) {
+	// Get the ranking
+	var ranking Ranking
+	if err := r.DB.First(&ranking, rankingID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, 0, nil, errors.New("ranking not found")
+		}
+		return nil, 0, nil, err
+	}
+
+	// Check if ranking is already deleted (player_id is nil)
+	if ranking.PlayerID == nil {
+		return nil, 0, nil, errors.New("ranking already deleted")
+	}
+
+	// Get all other rankings in the same game
+	var allRankings []Ranking
+	if err := r.DB.Where("game_id = ?", ranking.GameID).Find(&allRankings).Error; err != nil {
+		return nil, 0, nil, err
+	}
+
+	// Extract other player IDs (excluding the current ranking's player and guests)
+	otherPlayerIDs := make([]string, 0)
+	for _, r := range allRankings {
+		if r.ID != rankingID && r.PlayerID != nil {
+			otherPlayerIDs = append(otherPlayerIDs, *r.PlayerID)
+		}
+	}
+
+	return &ranking, ranking.GameID, otherPlayerIDs, nil
+}
+
 func (r *Repository) DeleteRanking(rankingID uint, userID string) error {
 	// First, get the ranking to verify it exists and get the game info
 	var ranking Ranking

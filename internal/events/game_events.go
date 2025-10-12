@@ -36,3 +36,16 @@ type GameDeletedEvent struct {
 func (e GameDeletedEvent) EventName() string {
 	return "game.deleted"
 }
+
+// RankingDeletedEvent is published when a player removes themselves from a game
+type RankingDeletedEvent struct {
+	RankingID uint
+	GameID    uint
+	PlayerID  string   // The player who was removed
+	OtherPlayerIDs []string // Other players in the game (for follow count decrements)
+	Date      time.Time
+}
+
+func (e RankingDeletedEvent) EventName() string {
+	return "ranking.deleted"
+}

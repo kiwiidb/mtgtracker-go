@@ -568,6 +568,17 @@ func (s *Service) DeleteRanking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch ranking data before deletion to include in event
+	ranking, gameID, otherPlayerIDs, err := s.Repository.GetRankingWithGamePlayers(uint(rankingID))
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// Call the repository to delete the ranking
 	err = s.Repository.DeleteRanking(uint(rankingID), userID)
 	if err != nil {
@@ -577,6 +588,17 @@ func (s *Service) DeleteRanking(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Publish ranking deleted event if the ranking had a player
+	if ranking.PlayerID != nil {
+		s.eventBus.Publish(events.RankingDeletedEvent{
+			RankingID:      uint(rankingID),
+			GameID:         gameID,
+			PlayerID:       *ranking.PlayerID,
+			OtherPlayerIDs: otherPlayerIDs,
+			Date:           time.Now(),
+		})
 	}
 
 	w.WriteHeader(http.StatusNoContent)
