@@ -294,6 +294,60 @@ class MTGTrackerClient {
     }
   }
 
+  // Follow endpoints
+  Future<Follow> createFollow(String playerId) async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/follow/v1/follows/$playerId'),
+      headers: _headers,
+    );
+    return _handleResponse(response, Follow.fromJson);
+  }
+
+  Future<void> deleteFollow(String playerId) async {
+    final response = await _httpClient.delete(
+      Uri.parse('$baseUrl/follow/v1/follows/$playerId'),
+      headers: _headers,
+    );
+
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
+  Future<PaginatedResult<PlayerOpponentWithCount>> getMyFollows({
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/follow/v1/follows')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, PlayerOpponentWithCount.fromJson);
+  }
+
+  Future<PaginatedResult<PlayerOpponentWithCount>> getPlayerFollows(
+    String playerId, {
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/follow/v1/players/$playerId/follows')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, PlayerOpponentWithCount.fromJson);
+  }
+
   void dispose() {
     _httpClient.close();
   }
