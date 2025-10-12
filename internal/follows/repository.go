@@ -21,8 +21,9 @@ func NewRepository(db *gorm.DB) *Repository {
 
 type Follow struct {
 	gorm.Model
-	Player1ID string `gorm:"not null" json:"player1_id"`
-	Player2ID string `gorm:"not null" json:"player2_id"`
+	Player1ID  string `gorm:"not null" json:"player1_id"`
+	Player2ID  string `gorm:"not null" json:"player2_id"`
+	GameCount  int    `gorm:"default:0;not null" json:"game_count"` // Number of games played together
 
 	Player1 core.Player `gorm:"foreignKey:Player1ID;references:FirebaseID" json:"player1"`
 	Player2 core.Player `gorm:"foreignKey:Player2ID;references:FirebaseID" json:"player2"`
@@ -117,4 +118,54 @@ func (r *Repository) IsFollowing(player1ID, player2ID string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+// IncrementGameCount increments the game count for a follow relationship
+// Creates the follow if it doesn't exist
+func (r *Repository) IncrementGameCount(player1ID, player2ID string) error {
+	if player1ID == player2ID {
+		return nil // Players don't follow themselves
+	}
+
+	// Ensure consistent ordering for symmetrical relationship
+	if player1ID > player2ID {
+		player1ID, player2ID = player2ID, player1ID
+	}
+
+	// Try to find existing follow
+	var follow Follow
+	err := r.DB.Where("player1_id = ? AND player2_id = ?", player1ID, player2ID).First(&follow).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Create new follow with count = 1
+		follow = Follow{
+			Player1ID: player1ID,
+			Player2ID: player2ID,
+			GameCount: 1,
+		}
+		return r.DB.Create(&follow).Error
+	} else if err != nil {
+		return err
+	}
+
+	// Increment existing follow count
+	return r.DB.Model(&follow).UpdateColumn("game_count", gorm.Expr("game_count + ?", 1)).Error
+}
+
+// DecrementGameCount decrements the game count for a follow relationship
+// Does NOT delete the follow even if count reaches 0
+func (r *Repository) DecrementGameCount(player1ID, player2ID string) error {
+	if player1ID == player2ID {
+		return nil // Players don't follow themselves
+	}
+
+	// Ensure consistent ordering for symmetrical relationship
+	if player1ID > player2ID {
+		player1ID, player2ID = player2ID, player1ID
+	}
+
+	return r.DB.Model(&Follow{}).
+		Where("player1_id = ? AND player2_id = ?", player1ID, player2ID).
+		UpdateColumn("game_count", gorm.Expr("CASE WHEN game_count > 0 THEN game_count - 1 ELSE 0 END")).
+		Error
 }

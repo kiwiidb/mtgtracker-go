@@ -81,7 +81,7 @@ func (h *EventHandlers) HandleGameDeleted(event events.Event) error {
 		return nil
 	}
 
-	log.Printf("Processing game.deleted event for game %d", e.GameID)
+	log.Printf("Processing game.deleted event for notifications (game %d)", e.GameID)
 
 	// Delete all notifications related to this game
 	return h.repo.DeleteNotificationsByGameID(e.GameID)

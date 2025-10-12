@@ -335,6 +335,13 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch game data before deletion to include in event
+	game, err := s.Repository.GetGameWithEvents(uint(gameId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// Call the repository to delete the game
 	err = s.Repository.DeleteGame(uint(gameId))
 	if err != nil {
@@ -342,10 +349,21 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Publish game deleted event
+	// Publish game deleted event with player/ranking info
+	rankingIDs := make([]uint, len(game.Rankings))
+	playerIDs := make([]string, 0, len(game.Rankings))
+	for i, ranking := range game.Rankings {
+		rankingIDs[i] = ranking.ID
+		if ranking.PlayerID != nil {
+			playerIDs = append(playerIDs, *ranking.PlayerID)
+		}
+	}
+
 	s.eventBus.Publish(events.GameDeletedEvent{
-		GameID: uint(gameId),
-		Date:   time.Now(),
+		GameID:     uint(gameId),
+		RankingIDs: rankingIDs,
+		PlayerIDs:  playerIDs,
+		Date:       time.Now(),
 	})
 
 	w.WriteHeader(http.StatusNoContent)

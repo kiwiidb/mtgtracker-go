@@ -73,6 +73,9 @@ func main() {
 	notificationHandlers := notification.NewEventHandlers(notificationsRepo, coreService)
 	notificationHandlers.RegisterHandlers(eventBus)
 
+	followHandlers := follows.NewEventHandlers(followRepo, coreService)
+	followHandlers.RegisterHandlers(eventBus)
+
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
 

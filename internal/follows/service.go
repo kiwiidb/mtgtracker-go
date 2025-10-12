@@ -17,6 +17,7 @@ type Service struct {
 type playerService interface {
 	GetPlayerByFirebaseID(firebaseID string) (*core.Player, error)
 	ConvertPlayerToResponse(player *core.Player) core.PlayerResponse
+	GetGameByID(gameID uint) (*core.Game, error)
 }
 
 func NewService(repo *Repository, playerSvc playerService) *Service {

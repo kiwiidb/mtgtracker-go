@@ -27,8 +27,10 @@ func (e GameFinishedEvent) EventName() string {
 
 // GameDeletedEvent is published when a game is deleted
 type GameDeletedEvent struct {
-	GameID uint
-	Date   time.Time
+	GameID     uint
+	RankingIDs []uint
+	PlayerIDs  []string // Player IDs from rankings (for follow count decrements)
+	Date       time.Time
 }
 
 func (e GameDeletedEvent) EventName() string {
