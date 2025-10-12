@@ -55,7 +55,7 @@ func main() {
 
 	// // Initialize the repositories
 	notificationsRepo := notification.NewRepository(db)
-	coreRepo := core.NewRepository(db, eventBus)
+	coreRepo := core.NewRepository(db)
 	followRepo := follows.NewRepository(db)
 
 	// // Initialize the S3 storage
@@ -63,7 +63,7 @@ func main() {
 	storage := storage.InitStorage()
 
 	// // Initialize the services
-	coreService := core.NewService(coreRepo, storage)
+	coreService := core.NewService(coreRepo, storage, eventBus)
 	notificationsSvc := notification.NewService(notificationsRepo, coreService)
 	followService := follows.NewService(followRepo, coreService)
 	moxfieldService := moxfield.NewService()

@@ -5,25 +5,34 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"mtgtracker/internal/events"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/pagination"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Storage interface {
 	GeneratePresignedUploadURL(fileName string, contentType string) (string, error)
 }
+
+type EventBus interface {
+	Publish(event events.Event)
+}
+
 type Service struct {
 	Repository *Repository
 	Storage    Storage
+	eventBus   EventBus
 }
 
-func NewService(repo *Repository, storage Storage) *Service {
+func NewService(repo *Repository, storage Storage, eventBus EventBus) *Service {
 	return &Service{
 		Repository: repo,
 		Storage:    storage,
+		eventBus:   eventBus,
 	}
 }
 
@@ -224,6 +233,18 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Publish game created event
+	rankingIDs := make([]uint, len(game.Rankings))
+	for i, ranking := range game.Rankings {
+		rankingIDs[i] = ranking.ID
+	}
+	s.eventBus.Publish(events.GameCreatedEvent{
+		GameID:     game.ID,
+		CreatorID:  user.FirebaseID,
+		RankingIDs: rankingIDs,
+		Date:       time.Now(),
+	})
+
 	result := s.ConvertGameToDto(game, false)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
@@ -321,6 +342,12 @@ func (s *Service) DeleteGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Publish game deleted event
+	s.eventBus.Publish(events.GameDeletedEvent{
+		GameID: uint(gameId),
+		Date:   time.Now(),
+	})
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -415,6 +442,19 @@ func (s *Service) UpdateGame(w http.ResponseWriter, r *http.Request) {
 	if updatedGame == nil {
 		http.Error(w, "Game not found", http.StatusNotFound)
 		return
+	}
+
+	// Publish game finished event if game was just finished
+	if request.Finished != nil && *request.Finished {
+		rankingIDs := make([]uint, len(updatedGame.Rankings))
+		for i, ranking := range updatedGame.Rankings {
+			rankingIDs[i] = ranking.ID
+		}
+		s.eventBus.Publish(events.GameFinishedEvent{
+			GameID:     updatedGame.ID,
+			RankingIDs: rankingIDs,
+			Date:       time.Now(),
+		})
 	}
 
 	result := s.ConvertGameToDto(updatedGame, false)
