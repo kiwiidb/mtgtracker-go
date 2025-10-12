@@ -78,7 +78,13 @@ func (r *Repository) DeleteFollow(player1ID, player2ID string) error {
 	return nil
 }
 
-func (r *Repository) GetFollows(playerID string) ([]core.Player, error) {
+// FollowWithCount represents a follow relationship with the game count
+type FollowWithCount struct {
+	Player    core.Player
+	GameCount int
+}
+
+func (r *Repository) GetFollows(playerID string) ([]FollowWithCount, error) {
 	var follows []Follow
 
 	// Get all follows where the player is either player1 or player2
@@ -89,12 +95,18 @@ func (r *Repository) GetFollows(playerID string) ([]core.Player, error) {
 		return nil, err
 	}
 
-	var followedPlayers []core.Player
+	var followedPlayers []FollowWithCount
 	for _, follow := range follows {
 		if follow.Player1ID == playerID {
-			followedPlayers = append(followedPlayers, follow.Player2)
+			followedPlayers = append(followedPlayers, FollowWithCount{
+				Player:    follow.Player2,
+				GameCount: follow.GameCount,
+			})
 		} else {
-			followedPlayers = append(followedPlayers, follow.Player1)
+			followedPlayers = append(followedPlayers, FollowWithCount{
+				Player:    follow.Player1,
+				GameCount: follow.GameCount,
+			})
 		}
 	}
 

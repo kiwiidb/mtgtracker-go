@@ -122,9 +122,12 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([]core.PlayerResponse, 0, len(follows))
-	for _, player := range follows {
-		result = append(result, s.playerService.ConvertPlayerToResponse(&player))
+	result := make([]core.PlayerOpponentWithCount, 0, len(follows))
+	for _, follow := range follows {
+		result = append(result, core.PlayerOpponentWithCount{
+			Player: s.playerService.ConvertPlayerToResponse(&follow.Player),
+			Count:  follow.GameCount,
+		})
 	}
 
 	err = json.NewEncoder(w).Encode(result)
@@ -142,9 +145,12 @@ func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([]core.PlayerResponse, 0, len(follows))
-	for _, player := range follows {
-		result = append(result, s.playerService.ConvertPlayerToResponse(&player))
+	result := make([]core.PlayerOpponentWithCount, 0, len(follows))
+	for _, follow := range follows {
+		result = append(result, core.PlayerOpponentWithCount{
+			Player: s.playerService.ConvertPlayerToResponse(&follow.Player),
+			Count:  follow.GameCount,
+		})
 	}
 
 	err = json.NewEncoder(w).Encode(result)
