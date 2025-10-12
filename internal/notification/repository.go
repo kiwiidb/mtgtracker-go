@@ -84,13 +84,6 @@ func (r *Repository) GetNotifications(userID string, readFilter *bool, limit, of
 	if err != nil {
 		return nil, 0, err
 	}
-	for _, n := range notifications {
-		log.Println(len(n.Game.Rankings))
-		for _, rk := range n.Game.Rankings {
-			log.Println(rk.ID)
-
-		}
-	}
 	return notifications, total, nil
 }
 
