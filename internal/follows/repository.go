@@ -84,15 +84,25 @@ type FollowWithCount struct {
 	GameCount int
 }
 
-func (r *Repository) GetFollows(playerID string) ([]FollowWithCount, error) {
+func (r *Repository) GetFollows(playerID string, limit, offset int) ([]FollowWithCount, int64, error) {
 	var follows []Follow
+	var total int64
 
-	// Get all follows where the player is either player1 or player2
+	// Count total follows
+	query := r.DB.Model(&Follow{}).Where("player1_id = ? OR player2_id = ?", playerID, playerID)
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated follows where the player is either player1 or player2
 	err := r.DB.Preload("Player1").Preload("Player2").
 		Where("player1_id = ? OR player2_id = ?", playerID, playerID).
+		Order("game_count DESC").
+		Limit(limit).
+		Offset(offset).
 		Find(&follows).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var followedPlayers []FollowWithCount
@@ -110,7 +120,7 @@ func (r *Repository) GetFollows(playerID string) ([]FollowWithCount, error) {
 		}
 	}
 
-	return followedPlayers, nil
+	return followedPlayers, total, nil
 }
 
 func (r *Repository) IsFollowing(player1ID, player2ID string) (bool, error) {

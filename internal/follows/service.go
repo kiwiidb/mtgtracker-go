@@ -5,6 +5,7 @@ import (
 	"log"
 	"mtgtracker/internal/core"
 	"mtgtracker/internal/middleware"
+	"mtgtracker/internal/pagination"
 	"net/http"
 	"strings"
 )
@@ -109,6 +110,8 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p := pagination.ParsePagination(r)
+
 	// Get the current user's player record
 	currentPlayer, err := s.playerService.GetPlayerByFirebaseID(userID)
 	if err != nil {
@@ -116,18 +119,25 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	follows, err := s.Repository.GetFollows(currentPlayer.FirebaseID)
+	follows, total, err := s.Repository.GetFollows(currentPlayer.FirebaseID, p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]core.PlayerOpponentWithCount, 0, len(follows))
+	items := make([]core.PlayerOpponentWithCount, 0, len(follows))
 	for _, follow := range follows {
-		result = append(result, core.PlayerOpponentWithCount{
+		items = append(items, core.PlayerOpponentWithCount{
 			Player: s.playerService.ConvertPlayerToResponse(&follow.Player),
 			Count:  follow.GameCount,
 		})
+	}
+
+	result := pagination.PaginatedResult[core.PlayerOpponentWithCount]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
 	}
 
 	err = json.NewEncoder(w).Encode(result)
@@ -138,19 +148,27 @@ func (s *Service) GetMyFollows(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) GetPlayerFollows(w http.ResponseWriter, r *http.Request) {
 	playerID := r.PathValue("playerId")
+	p := pagination.ParsePagination(r)
 
-	follows, err := s.Repository.GetFollows(playerID)
+	follows, total, err := s.Repository.GetFollows(playerID, p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]core.PlayerOpponentWithCount, 0, len(follows))
+	items := make([]core.PlayerOpponentWithCount, 0, len(follows))
 	for _, follow := range follows {
-		result = append(result, core.PlayerOpponentWithCount{
+		items = append(items, core.PlayerOpponentWithCount{
 			Player: s.playerService.ConvertPlayerToResponse(&follow.Player),
 			Count:  follow.GameCount,
 		})
+	}
+
+	result := pagination.PaginatedResult[core.PlayerOpponentWithCount]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
 	}
 
 	err = json.NewEncoder(w).Encode(result)
