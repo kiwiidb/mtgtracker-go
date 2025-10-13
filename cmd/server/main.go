@@ -9,6 +9,7 @@ import (
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/notification"
 	"mtgtracker/internal/opponents"
+	"mtgtracker/internal/push"
 	"mtgtracker/pkg/moxfield"
 	"net/http"
 	"os"
@@ -26,9 +27,11 @@ func main() {
 	// Initialize Firebase app
 	ctx := context.Background()
 	var authClient *auth.Client
+	var app *firebase.App
 	if os.Getenv("FIREBASE_CONFIG") != "" {
 		log.Println("initializing firebase")
-		app, err := firebase.NewApp(ctx, nil)
+		var err error
+		app, err = firebase.NewApp(ctx, nil)
 		if err != nil {
 			log.Fatal("failed to initialize Firebase app", err)
 		}
@@ -58,10 +61,18 @@ func main() {
 	notificationsRepo := notification.NewRepository(db)
 	coreRepo := core.NewRepository(db)
 	opponentRepo := opponents.NewRepository(db)
+	pushRepo := push.NewRepository(db)
 
 	// // Initialize the S3 storage
 	log.Println("initializing storage")
 	storage := storage.InitStorage()
+
+	// // Initialize push notification service
+	log.Println("initializing push service")
+	pushService, err := push.NewService(app, pushRepo)
+	if err != nil {
+		log.Fatal("failed to initialize push service", err)
+	}
 
 	// // Initialize the services
 	coreService := core.NewService(coreRepo, storage, eventBus)
@@ -72,7 +83,7 @@ func main() {
 
 	// Register event handlers
 	log.Println("registering event handlers")
-	notificationHandlers := notification.NewEventHandlers(notificationsRepo, coreService)
+	notificationHandlers := notification.NewEventHandlers(notificationsRepo, coreService, pushService)
 	notificationHandlers.RegisterHandlers(eventBus)
 
 	opponentHandlers := opponents.NewEventHandlers(opponentRepo, coreService)
@@ -86,6 +97,7 @@ func main() {
 	notificationsSvc.RegisterRoutes(mux)
 	opponentService.RegisterRoutes(mux)
 	feedService.RegisterRoutes(mux)
+	pushService.RegisterRoutes(mux)
 
 	// add middleware chain
 	handler := middleware.ApacheLogMw(mux)

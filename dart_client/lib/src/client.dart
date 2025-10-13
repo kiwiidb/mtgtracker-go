@@ -384,6 +384,42 @@ class MTGTrackerClient {
     return _handlePaginatedResponse(response, Game.fromJson);
   }
 
+  // Push notification endpoints
+  Future<void> registerPushToken(String token, String platform) async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/push/v1/tokens'),
+      headers: _headers,
+      body: jsonEncode({
+        'token': token,
+        'platform': platform,
+      }),
+    );
+
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
+  Future<void> unregisterPushToken(String token) async {
+    final response = await _httpClient.delete(
+      Uri.parse('$baseUrl/push/v1/tokens'),
+      headers: _headers,
+      body: jsonEncode({
+        'token': token,
+      }),
+    );
+
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   void dispose() {
     _httpClient.close();
   }
