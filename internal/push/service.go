@@ -105,6 +105,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /push/v1/tokens", s.GetMyTokens)
 	mux.HandleFunc("POST /push/v1/tokens", s.RegisterToken)
 	mux.HandleFunc("DELETE /push/v1/tokens", s.UnregisterToken)
+	mux.HandleFunc("POST /push/v1/debug", s.SendTestNotification)
 }
 
 // GetMyTokens returns all registered device tokens for the current user
@@ -209,5 +210,48 @@ func (s *Service) UnregisterToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Unregistered push token for user %s", userID)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// SendTestNotification sends a test notification to the current user
+func (s *Service) SendTestNotification(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		Title    string `json:"title"`
+		Body     string `json:"body"`
+		ImageURL string `json:"image_url,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Title == "" {
+		http.Error(w, "Title is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.Body == "" {
+		http.Error(w, "Body is required", http.StatusBadRequest)
+		return
+	}
+
+	// Send test notification to self
+	err := s.SendNotification(userID, req.Title, req.Body, req.ImageURL, map[string]string{
+		"type": "test",
+	})
+	if err != nil {
+		log.Printf("Failed to send test notification: %v", err)
+		http.Error(w, "Failed to send test notification", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("Sent test notification to user %s", userID)
 	w.WriteHeader(http.StatusNoContent)
 }

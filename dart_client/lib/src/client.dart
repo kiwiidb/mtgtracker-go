@@ -439,6 +439,33 @@ class MTGTrackerClient {
     }
   }
 
+  Future<void> sendTestNotification({
+    required String title,
+    required String body,
+    String? imageUrl,
+  }) async {
+    final requestBody = <String, dynamic>{
+      'title': title,
+      'body': body,
+    };
+    if (imageUrl != null) {
+      requestBody['image_url'] = imageUrl;
+    }
+
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/push/v1/debug/send'),
+      headers: _headers,
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode != 204) {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   void dispose() {
     _httpClient.close();
   }
