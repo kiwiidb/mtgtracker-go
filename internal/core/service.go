@@ -53,6 +53,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /deck/v1/decks", s.CreateDeck)
 	mux.HandleFunc("POST /game/v1/games", s.CreateGame)
 	mux.HandleFunc("GET /game/v1/games", s.GetGames)
+	mux.HandleFunc("POST /game/v1/games/search", s.SearchGamesEndpoint)
 	mux.HandleFunc("GET /game/v1/games/active", s.GetActiveGame)
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
@@ -744,6 +745,44 @@ func (s *Service) UpdateMyPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := s.ConvertPlayerToResponse(player)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) SearchGamesEndpoint(w http.ResponseWriter, r *http.Request) {
+	var request SearchGamesRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	p := pagination.ParsePagination(r)
+
+	// Convert request to filter
+	filter := request.ToFilter()
+
+	// Search games with filter
+	games, total, err := s.Repository.SearchGamesWithFilters(filter, p.PerPage, p.Offset())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to DTO
+	items := make([]GameResponse, 0, len(games))
+	for _, game := range games {
+		items = append(items, s.ConvertGameToDto(&game, true))
+	}
+
+	result := pagination.PaginatedResult[GameResponse]{
+		Items:      items,
+		TotalCount: total,
+		Page:       p.Page,
+		PerPage:    p.PerPage,
+	}
+
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)

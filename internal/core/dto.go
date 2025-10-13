@@ -126,3 +126,17 @@ type CreateDeckRequest struct {
 	SecondaryImage string   `json:"secondary_image"`
 	Crop           string   `json:"crop"`
 }
+
+type SearchGamesRequest struct {
+	PlayerIDs  []string `json:"player_ids,omitempty"`  // Games where ANY of these players participated (OR)
+	Commanders []string `json:"commanders,omitempty"`  // Games where ANY of these commanders were played (OR)
+	AllPlayers []string `json:"all_players,omitempty"` // Games where ALL of these players participated (AND)
+}
+
+func (req SearchGamesRequest) ToFilter() GameFilter {
+	return GameFilter{
+		PlayerIDs:  req.PlayerIDs,
+		Commanders: req.Commanders,
+		AllPlayers: req.AllPlayers,
+	}
+}
