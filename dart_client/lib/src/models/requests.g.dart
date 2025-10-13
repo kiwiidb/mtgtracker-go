@@ -169,3 +169,23 @@ Map<String, dynamic> _$CreateDeckRequestToJson(CreateDeckRequest instance) =>
       'secondary_image': instance.secondaryImage,
       'crop': instance.crop,
     };
+
+SearchGamesRequest _$SearchGamesRequestFromJson(Map<String, dynamic> json) =>
+    SearchGamesRequest(
+      playerIds: (json['player_ids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      commanders: (json['commanders'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      allPlayers: (json['all_players'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$SearchGamesRequestToJson(SearchGamesRequest instance) =>
+    <String, dynamic>{
+      'player_ids': instance.playerIds,
+      'commanders': instance.commanders,
+      'all_players': instance.allPlayers,
+    };

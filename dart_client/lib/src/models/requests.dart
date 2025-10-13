@@ -194,3 +194,22 @@ class CreateDeckRequest {
       _$CreateDeckRequestFromJson(json);
   Map<String, dynamic> toJson() => _$CreateDeckRequestToJson(this);
 }
+
+@JsonSerializable()
+class SearchGamesRequest {
+  @JsonKey(name: 'player_ids')
+  final List<String>? playerIds;
+  final List<String>? commanders;
+  @JsonKey(name: 'all_players')
+  final List<String>? allPlayers;
+
+  const SearchGamesRequest({
+    this.playerIds,
+    this.commanders,
+    this.allPlayers,
+  });
+
+  factory SearchGamesRequest.fromJson(Map<String, dynamic> json) =>
+      _$SearchGamesRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$SearchGamesRequestToJson(this);
+}

@@ -193,6 +193,26 @@ class MTGTrackerClient {
     return _handlePaginatedResponse(response, Game.fromJson);
   }
 
+  Future<PaginatedResult<Game>> searchGames(
+    SearchGamesRequest request, {
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/game/v1/games/search')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.post(
+      uri,
+      headers: _headers,
+      body: jsonEncode(request.toJson()),
+    );
+    return _handlePaginatedResponse(response, Game.fromJson);
+  }
+
   Future<Game?> getActiveGame() async {
     final response = await _httpClient.get(
       Uri.parse('$baseUrl/game/v1/games/active'),
@@ -346,6 +366,22 @@ class MTGTrackerClient {
 
     final response = await _httpClient.get(uri, headers: _headers);
     return _handlePaginatedResponse(response, PlayerOpponentWithCount.fromJson);
+  }
+
+  // Feed endpoints
+  Future<PaginatedResult<Game>> getFeedItems({
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/feed/v1/items')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, Game.fromJson);
   }
 
   void dispose() {
