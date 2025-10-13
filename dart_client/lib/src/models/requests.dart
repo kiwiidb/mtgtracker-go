@@ -202,11 +202,14 @@ class SearchGamesRequest {
   final List<String>? commanders;
   @JsonKey(name: 'all_players')
   final List<String>? allPlayers;
+  @JsonKey(name: 'all_commanders')
+  final List<String>? allCommanders;
 
   const SearchGamesRequest({
     this.playerIds,
     this.commanders,
     this.allPlayers,
+    this.allCommanders,
   });
 
   factory SearchGamesRequest.fromJson(Map<String, dynamic> json) =>

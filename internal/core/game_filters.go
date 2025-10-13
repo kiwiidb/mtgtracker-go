@@ -4,9 +4,10 @@ import "gorm.io/gorm"
 
 // GameFilter represents search criteria for games
 type GameFilter struct {
-	PlayerIDs  []string // Games where ANY of these players participated
-	Commanders []string // Games where ANY of these commanders were played
-	AllPlayers []string // Games where ALL of these players participated (AND)
+	PlayerIDs     []string // Games where ANY of these players participated (OR)
+	Commanders    []string // Games where ANY of these commanders were played (OR)
+	AllPlayers    []string // Games where ALL of these players participated (AND)
+	AllCommanders []string // Games where ALL of these commanders were played (AND)
 }
 
 // ApplyGameFilters applies the filter criteria to a GORM query
@@ -40,6 +41,18 @@ func ApplyGameFilters(db *gorm.DB, filter GameFilter) *gorm.DB {
 			subQuery := db.Session(&gorm.Session{}).Model(&Ranking{}).
 				Select("game_id").
 				Where("player_id = ?", playerID)
+			query = query.Where("id IN (?)", subQuery)
+		}
+	}
+
+	// Filter by all commanders (AND condition - all of these commanders must be in the game)
+	if len(filter.AllCommanders) > 0 {
+		// For each commander, ensure they're in the game
+		for _, commander := range filter.AllCommanders {
+			subQuery := db.Session(&gorm.Session{}).Model(&Ranking{}).
+				Select("DISTINCT game_id").
+				Joins("LEFT JOIN decks ON rankings.deck_id = decks.id").
+				Where("rankings.commander = ? OR decks.commander = ?", commander, commander)
 			query = query.Where("id IN (?)", subQuery)
 		}
 	}

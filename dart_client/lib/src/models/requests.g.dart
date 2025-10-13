@@ -181,6 +181,9 @@ SearchGamesRequest _$SearchGamesRequestFromJson(Map<String, dynamic> json) =>
       allPlayers: (json['all_players'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      allCommanders: (json['all_commanders'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$SearchGamesRequestToJson(SearchGamesRequest instance) =>
@@ -188,4 +191,5 @@ Map<String, dynamic> _$SearchGamesRequestToJson(SearchGamesRequest instance) =>
       'player_ids': instance.playerIds,
       'commanders': instance.commanders,
       'all_players': instance.allPlayers,
+      'all_commanders': instance.allCommanders,
     };

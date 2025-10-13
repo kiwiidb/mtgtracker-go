@@ -128,15 +128,17 @@ type CreateDeckRequest struct {
 }
 
 type SearchGamesRequest struct {
-	PlayerIDs  []string `json:"player_ids,omitempty"`  // Games where ANY of these players participated (OR)
-	Commanders []string `json:"commanders,omitempty"`  // Games where ANY of these commanders were played (OR)
-	AllPlayers []string `json:"all_players,omitempty"` // Games where ALL of these players participated (AND)
+	PlayerIDs     []string `json:"player_ids,omitempty"`      // Games where ANY of these players participated (OR)
+	Commanders    []string `json:"commanders,omitempty"`      // Games where ANY of these commanders were played (OR)
+	AllPlayers    []string `json:"all_players,omitempty"`     // Games where ALL of these players participated (AND)
+	AllCommanders []string `json:"all_commanders,omitempty"`  // Games where ALL of these commanders were played (AND)
 }
 
 func (req SearchGamesRequest) ToFilter() GameFilter {
 	return GameFilter{
-		PlayerIDs:  req.PlayerIDs,
-		Commanders: req.Commanders,
-		AllPlayers: req.AllPlayers,
+		PlayerIDs:     req.PlayerIDs,
+		Commanders:    req.Commanders,
+		AllPlayers:    req.AllPlayers,
+		AllCommanders: req.AllCommanders,
 	}
 }
