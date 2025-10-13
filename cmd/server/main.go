@@ -5,6 +5,7 @@ import (
 	"log"
 	"mtgtracker/internal/core"
 	"mtgtracker/internal/events"
+	"mtgtracker/internal/feed"
 	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/notification"
@@ -66,6 +67,7 @@ func main() {
 	coreService := core.NewService(coreRepo, storage, eventBus)
 	notificationsSvc := notification.NewService(notificationsRepo, coreService)
 	followService := follows.NewService(followRepo, coreService)
+	feedService := feed.NewService(followRepo, coreRepo, coreService)
 	moxfieldService := moxfield.NewService()
 
 	// Register event handlers
@@ -83,6 +85,7 @@ func main() {
 	moxfieldService.RegisterRoutes(mux)
 	notificationsSvc.RegisterRoutes(mux)
 	followService.RegisterRoutes(mux)
+	feedService.RegisterRoutes(mux)
 
 	// add middleware chain
 	handler := middleware.ApacheLogMw(mux)

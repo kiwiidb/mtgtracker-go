@@ -4,18 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"mtgtracker/internal/core"
+	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
 	"mtgtracker/internal/pagination"
 	"net/http"
 )
 
-type FollowWithCount struct {
-	Player    core.Player
-	GameCount int
-}
-
 type FollowRepository interface {
-	GetFollows(playerID string, limit, offset int) ([]FollowWithCount, int64, error)
+	GetFollows(playerID string, limit, offset int) ([]follows.FollowWithCount, int64, error)
 }
 
 type GameRepository interface {
