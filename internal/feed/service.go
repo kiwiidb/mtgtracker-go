@@ -15,7 +15,7 @@ type FollowRepository interface {
 }
 
 type GameRepository interface {
-	SearchGames(playerIDs []string, limit, offset int) ([]core.Game, int64, error)
+	SearchGamesWithFilters(filter core.GameFilter, limit, offset int) ([]core.Game, int64, error)
 }
 
 type GameConverter interface {
@@ -63,7 +63,8 @@ func (s *Service) GetFeedItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Search games with those player IDs
-	games, total, err := s.gameRepo.SearchGames(playerIDs, p.PerPage, p.Offset())
+	filter := core.GameFilter{PlayerIDs: playerIDs}
+	games, total, err := s.gameRepo.SearchGamesWithFilters(filter, p.PerPage, p.Offset())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
