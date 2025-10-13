@@ -477,3 +477,33 @@ func (r *Repository) GetPlayerDecks(playerID string, limit, offset int) ([]Deck,
 	}
 	return decks, total, nil
 }
+
+func (r *Repository) SearchGames(playerIDs []string, limit, offset int) ([]Game, int64, error) {
+	var games []Game
+	var total int64
+
+	// Subquery to get game IDs where any of the players participated
+	subQuery := r.DB.Model(&Ranking{}).Select("game_id").Where("player_id IN ?", playerIDs)
+
+	// Get total count
+	if err := r.DB.Model(&Game{}).Where("id IN (?)", subQuery).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	err := r.DB.Where("id IN (?)", subQuery).
+		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Player").Preload("Deck")
+		}).
+		Preload("GameEvents").
+		Preload("Creator").
+		Order("date DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&games).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return games, total, nil
+}
