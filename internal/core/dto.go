@@ -54,16 +54,15 @@ type DeckWithCount struct {
 	Wins  int          `json:"wins"`
 }
 type PlayerResponse struct {
-	ID                   string                    `json:"id"`
-	Name                 string                    `json:"name"`
-	ProfileImageURL      string                    `json:"profile_image_url,omitempty"`
-	MoxfieldUsername     string                    `json:"moxfield_username,omitempty"`
-	Colors               []string                  `json:"colors,omitempty"` // Top 2 most played colors
-	WinrateAllTime       float64                   `json:"winrate_all_time"`
-	NumberofGamesAllTime int                       `json:"number_of_games_all_time"`
-	DecksAllTime         []DeckWithCount           `json:"decks_all_time"`
-	OpponentsAllTime     []PlayerOpponentWithCount `json:"opponents_all_time"`
-	CurrentGame          *GameResponse             `json:"current_game,omitempty"`
+	ID                   string          `json:"id"`
+	Name                 string          `json:"name"`
+	ProfileImageURL      string          `json:"profile_image_url,omitempty"`
+	MoxfieldUsername     string          `json:"moxfield_username,omitempty"`
+	Colors               []string        `json:"colors,omitempty"` // Top 2 most played colors
+	WinrateAllTime       float64         `json:"winrate_all_time"`
+	NumberofGamesAllTime int             `json:"number_of_games_all_time"`
+	DecksAllTime         []DeckWithCount `json:"decks_all_time"`
+	CurrentGame          *GameResponse   `json:"current_game,omitempty"`
 }
 
 type UpdatePlayerRequest struct {

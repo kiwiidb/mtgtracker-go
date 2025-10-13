@@ -19,25 +19,6 @@ func (r *Repository) GetPlayerByFirebaseID(userID string) (*Player, error) {
 		return nil, err
 	}
 
-	// Manually load games for this player since Games field has gorm:"-"
-	// We need to find games where this player has rankings
-	var games []Game
-	err = r.DB.Joins("JOIN rankings ON games.id = rankings.game_id").
-		Where("rankings.player_id = ?", player.FirebaseID).
-		Preload("Rankings", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Player").Preload("Deck")
-		}).
-		Preload("GameEvents").
-		Distinct().
-		Order("games.created_at desc").
-		Find(&games).Error
-	if err != nil {
-		return nil, err
-	}
-
-	// Populate the Games field manually
-	player.Games = games
-
 	return &player, nil
 }
 

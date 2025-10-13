@@ -19,8 +19,6 @@ class Player {
   final int numberOfGamesAllTime;
   @JsonKey(name: 'decks_all_time')
   final List<DeckWithCount>? decksAllTime;
-  @JsonKey(name: 'opponents_all_time')
-  final List<PlayerOpponentWithCount>? opponentsAllTime;
   @JsonKey(name: 'current_game')
   final Game? currentGame;
 
@@ -33,7 +31,6 @@ class Player {
     required this.winrateAllTime,
     required this.numberOfGamesAllTime,
     required this.decksAllTime,
-    required this.opponentsAllTime,
     this.currentGame,
   });
 

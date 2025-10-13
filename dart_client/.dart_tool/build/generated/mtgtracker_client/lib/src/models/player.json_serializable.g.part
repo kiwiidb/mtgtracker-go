@@ -14,10 +14,6 @@ Player _$PlayerFromJson(Map<String, dynamic> json) => Player(
       decksAllTime: (json['decks_all_time'] as List<dynamic>?)
           ?.map((e) => DeckWithCount.fromJson(e as Map<String, dynamic>))
           .toList(),
-      opponentsAllTime: (json['opponents_all_time'] as List<dynamic>?)
-          ?.map((e) =>
-              PlayerOpponentWithCount.fromJson(e as Map<String, dynamic>))
-          .toList(),
       currentGame: json['current_game'] == null
           ? null
           : Game.fromJson(json['current_game'] as Map<String, dynamic>),
@@ -32,7 +28,6 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'winrate_all_time': instance.winrateAllTime,
       'number_of_games_all_time': instance.numberOfGamesAllTime,
       'decks_all_time': instance.decksAllTime,
-      'opponents_all_time': instance.opponentsAllTime,
       'current_game': instance.currentGame,
     };
 

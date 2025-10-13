@@ -26,8 +26,8 @@ func NewService(repo *Repository, playerSvc playerService) *Service {
 }
 
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /follow/v1/follows/{playerId}", s.CreateFollow)
-	mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
+	//mux.HandleFunc("POST /follow/v1/follows/{playerId}", s.CreateFollow)
+	//mux.HandleFunc("DELETE /follow/v1/follows/{playerId}", s.DeleteFollow)
 	mux.HandleFunc("GET /follow/v1/follows", s.GetMyFollows)
 	mux.HandleFunc("GET /follow/v1/players/{playerId}/follows", s.GetPlayerFollows)
 }

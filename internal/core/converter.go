@@ -164,77 +164,9 @@ func (svc *Service) ConvertPlayerToResponse(player *Player) PlayerResponse {
 		ProfileImageURL:  player.Image,
 		MoxfieldUsername: player.MoxfieldUsername,
 	}
-
-	// Calculate winrate and game statistics
-	totalGames := len(player.Games)
-	wins := 0
-	opponentMap := make(map[string]PlayerOpponentWithCount)
-	games := make([]GameResponse, len(player.Games))
-
-	for i, game := range player.Games {
-		// Convert game to DTO
-		games[i] = svc.ConvertGameToDto(&game, false)
-
-		// Normally you will only have 1 game in progress at a time
-		if !game.Finished {
-			result.CurrentGame = &games[i]
-			continue
-		}
-
-		// Find this player's ranking in the game to count wins
-		for _, ranking := range game.Rankings {
-			if ranking.PlayerID != nil && *ranking.PlayerID == player.FirebaseID {
-				if ranking.Position == 1 {
-					wins++
-				}
-			}
-		}
-
-		// Collect opponents
-		for _, ranking := range game.Rankings {
-			if ranking.PlayerID != nil && *ranking.PlayerID != player.FirebaseID {
-				if opponent, exists := opponentMap[*ranking.PlayerID]; exists {
-					opponent.Count++
-					opponentMap[*ranking.PlayerID] = opponent
-				} else {
-					opponentMap[*ranking.PlayerID] = PlayerOpponentWithCount{
-						Player: PlayerResponse{
-							ID: func() string {
-								if ranking.Player != nil {
-									return ranking.Player.FirebaseID
-								}
-								if ranking.PlayerID != nil {
-									return *ranking.PlayerID
-								}
-								return ""
-							}(),
-							Name: func() string {
-								if ranking.Player != nil {
-									return ranking.Player.Name
-								}
-								return ""
-							}(),
-							ProfileImageURL: func() string {
-								if ranking.Player != nil {
-									return ranking.Player.Image
-								}
-								return ""
-							}(),
-						},
-						Count: 1,
-					}
-				}
-			}
-		}
-	}
-
-	// Calculate winrate
-	var winrate float64
-	if totalGames > 0 {
-		winrate = float64(wins) / float64(totalGames) * 100
-	}
-
 	// Convert player.Decks to DeckWithCount
+	wins := 0
+	totalGames := 0
 	decks := make([]DeckWithCount, 0, len(player.Decks))
 	for _, deck := range player.Decks {
 		decks = append(decks, DeckWithCount{
@@ -252,6 +184,8 @@ func (svc *Service) ConvertPlayerToResponse(player *Player) PlayerResponse {
 			Count: deck.GameCount,
 			Wins:  deck.WinCount,
 		})
+		wins += deck.WinCount
+		totalGames += deck.GameCount
 	}
 	// sort decks by count descending
 	sort.Slice(decks, func(i, j int) bool {
@@ -260,21 +194,16 @@ func (svc *Service) ConvertPlayerToResponse(player *Player) PlayerResponse {
 
 	// Calculate top 2 most played colors from decks
 	colors := calculateTopColors(decks, 2)
+	// Calculate winrate
 
-	opponents := make([]PlayerOpponentWithCount, 0, len(opponentMap))
-	for _, opponent := range opponentMap {
-		opponents = append(opponents, opponent)
+	var winrate float64
+	if totalGames > 0 {
+		winrate = float64(wins) / float64(totalGames) * 100
 	}
-	//sort opponents by count descending
-	sort.Slice(opponents, func(i, j int) bool {
-		return opponents[i].Count > opponents[j].Count
-	})
-
 	result.Colors = colors
 	result.WinrateAllTime = winrate
 	result.NumberofGamesAllTime = totalGames
 	result.DecksAllTime = decks
-	result.OpponentsAllTime = opponents
 
 	return result
 }
@@ -317,15 +246,10 @@ func calculateTopColors(decks []DeckWithCount, topN int) []string {
 // convertPlayerToDtoSimple converts a player for notification context without game statistics
 func ConvertPlayerToDtoSimple(player *Player) PlayerResponse {
 	return PlayerResponse{
-		ID:                   player.FirebaseID,
-		Name:                 player.Name,
-		ProfileImageURL:      player.Image,
-		MoxfieldUsername:     player.MoxfieldUsername,
-		WinrateAllTime:       0,
-		NumberofGamesAllTime: 0,
-		DecksAllTime:         []DeckWithCount{},
-		OpponentsAllTime:     []PlayerOpponentWithCount{},
-		CurrentGame:          nil,
+		ID:               player.FirebaseID,
+		Name:             player.Name,
+		ProfileImageURL:  player.Image,
+		MoxfieldUsername: player.MoxfieldUsername,
 	}
 }
 func convertDeckToDto(deck *Deck) DeckResponse {
