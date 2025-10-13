@@ -314,18 +314,18 @@ class MTGTrackerClient {
     }
   }
 
-  // Follow endpoints
-  Future<Follow> createFollow(String playerId) async {
+  // Opponent endpoints
+  Future<Opponent> createOpponent(String playerId) async {
     final response = await _httpClient.post(
-      Uri.parse('$baseUrl/follow/v1/follows/$playerId'),
+      Uri.parse('$baseUrl/opponent/v1/opponents/$playerId'),
       headers: _headers,
     );
-    return _handleResponse(response, Follow.fromJson);
+    return _handleResponse(response, Opponent.fromJson);
   }
 
-  Future<void> deleteFollow(String playerId) async {
+  Future<void> deleteOpponent(String playerId) async {
     final response = await _httpClient.delete(
-      Uri.parse('$baseUrl/follow/v1/follows/$playerId'),
+      Uri.parse('$baseUrl/opponent/v1/opponents/$playerId'),
       headers: _headers,
     );
 
@@ -337,7 +337,7 @@ class MTGTrackerClient {
     }
   }
 
-  Future<PaginatedResult<PlayerOpponentWithCount>> getMyFollows({
+  Future<PaginatedResult<PlayerOpponentWithCount>> getMyOpponents({
     int? page,
     int? perPage,
   }) async {
@@ -345,14 +345,14 @@ class MTGTrackerClient {
     if (page != null) queryParams['page'] = page.toString();
     if (perPage != null) queryParams['per_page'] = perPage.toString();
 
-    final uri = Uri.parse('$baseUrl/follow/v1/follows')
+    final uri = Uri.parse('$baseUrl/opponent/v1/opponents')
         .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
 
     final response = await _httpClient.get(uri, headers: _headers);
     return _handlePaginatedResponse(response, PlayerOpponentWithCount.fromJson);
   }
 
-  Future<PaginatedResult<PlayerOpponentWithCount>> getPlayerFollows(
+  Future<PaginatedResult<PlayerOpponentWithCount>> getPlayerOpponents(
     String playerId, {
     int? page,
     int? perPage,
@@ -361,7 +361,7 @@ class MTGTrackerClient {
     if (page != null) queryParams['page'] = page.toString();
     if (perPage != null) queryParams['per_page'] = perPage.toString();
 
-    final uri = Uri.parse('$baseUrl/follow/v1/players/$playerId/follows')
+    final uri = Uri.parse('$baseUrl/opponent/v1/players/$playerId/opponents')
         .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
 
     final response = await _httpClient.get(uri, headers: _headers);

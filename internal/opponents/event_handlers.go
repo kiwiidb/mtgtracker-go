@@ -1,4 +1,4 @@
-package follows
+package opponents
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 	"mtgtracker/internal/events"
 )
 
-// EventHandlers manages event subscriptions for the follows package
+// EventHandlers manages event subscriptions for the opponents package
 type EventHandlers struct {
 	repo        *Repository
 	coreService CoreService
@@ -29,7 +29,7 @@ func (h *EventHandlers) RegisterHandlers(bus *events.EventBus) {
 	bus.Subscribe("game.created", h.HandleGameCreated)
 	bus.Subscribe("game.deleted", h.HandleGameDeleted)
 	bus.Subscribe("ranking.deleted", h.HandleRankingDeleted)
-	log.Println("Follow event handlers registered")
+	log.Println("Opponent event handlers registered")
 }
 
 // HandleGameCreated processes game created events
@@ -41,7 +41,7 @@ func (h *EventHandlers) HandleGameCreated(event events.Event) error {
 		return nil
 	}
 
-	log.Printf("Processing game.created event for follows (game %d)", e.GameID)
+	log.Printf("Processing game.created event for opponents (game %d)", e.GameID)
 
 	// Fetch game data to get rankings
 	game, err := h.coreService.GetGameByID(e.GameID)
@@ -58,8 +58,8 @@ func (h *EventHandlers) HandleGameCreated(event events.Event) error {
 		}
 	}
 
-	// Create/update follows for all unique player pairs
-	return h.updateFollowsForPlayerPairs(playerIDs, true)
+	// Create/update opponents for all unique player pairs
+	return h.updateOpponentsForPlayerPairs(playerIDs, true)
 }
 
 // HandleGameDeleted processes game deleted events
@@ -71,11 +71,11 @@ func (h *EventHandlers) HandleGameDeleted(event events.Event) error {
 		return nil
 	}
 
-	log.Printf("Processing game.deleted event for follows (game %d)", e.GameID)
+	log.Printf("Processing game.deleted event for opponents (game %d)", e.GameID)
 
 	// Use player IDs from the event (game is already deleted)
-	// Decrement follows for all unique player pairs
-	return h.updateFollowsForPlayerPairs(e.PlayerIDs, false)
+	// Decrement opponents for all unique player pairs
+	return h.updateOpponentsForPlayerPairs(e.PlayerIDs, false)
 }
 
 // HandleRankingDeleted processes ranking deleted events
@@ -87,9 +87,9 @@ func (h *EventHandlers) HandleRankingDeleted(event events.Event) error {
 		return nil
 	}
 
-	log.Printf("Processing ranking.deleted event for follows (ranking %d, game %d)", e.RankingID, e.GameID)
+	log.Printf("Processing ranking.deleted event for opponents (ranking %d, game %d)", e.RankingID, e.GameID)
 
-	// Decrement follows between the removed player and all other players
+	// Decrement opponents between the removed player and all other players
 	for _, otherPlayerID := range e.OtherPlayerIDs {
 		err := h.repo.DecrementGameCount(e.PlayerID, otherPlayerID)
 		if err != nil {
@@ -101,9 +101,9 @@ func (h *EventHandlers) HandleRankingDeleted(event events.Event) error {
 	return nil
 }
 
-// updateFollowsForPlayerPairs creates or updates follow relationships for all unique pairs
+// updateOpponentsForPlayerPairs creates or updates follow relationships for all unique pairs
 // If increment is true, increments counts; otherwise decrements
-func (h *EventHandlers) updateFollowsForPlayerPairs(playerIDs []string, increment bool) error {
+func (h *EventHandlers) updateOpponentsForPlayerPairs(playerIDs []string, increment bool) error {
 	// Process all unique pairs
 	for i := 0; i < len(playerIDs); i++ {
 		for j := i + 1; j < len(playerIDs); j++ {

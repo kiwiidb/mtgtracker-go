@@ -1,20 +1,20 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'player.dart';
 
-part 'follow.g.dart';
+part 'opponent.g.dart';
 
 @JsonSerializable()
-class Follow {
+class Opponent {
   final int id;
   final Player player1;
   final Player player2;
 
-  const Follow({
+  const Opponent({
     required this.id,
     required this.player1,
     required this.player2,
   });
 
-  factory Follow.fromJson(Map<String, dynamic> json) => _$FollowFromJson(json);
-  Map<String, dynamic> toJson() => _$FollowToJson(this);
+  factory Opponent.fromJson(Map<String, dynamic> json) => _$OpponentFromJson(json);
+  Map<String, dynamic> toJson() => _$OpponentToJson(this);
 }

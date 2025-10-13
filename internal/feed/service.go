@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"mtgtracker/internal/core"
-	"mtgtracker/internal/follows"
 	"mtgtracker/internal/middleware"
+	"mtgtracker/internal/opponents"
 	"mtgtracker/internal/pagination"
 	"net/http"
 )
 
-type FollowRepository interface {
-	GetFollows(playerID string, limit, offset int) ([]follows.FollowWithCount, int64, error)
+type OpponentRepository interface {
+	GetOpponents(playerID string, limit, offset int) ([]opponents.OpponentWithCount, int64, error)
 }
 
 type GameRepository interface {
@@ -23,14 +23,14 @@ type GameConverter interface {
 }
 
 type Service struct {
-	followRepo    FollowRepository
+	opponentRepo  OpponentRepository
 	gameRepo      GameRepository
 	gameConverter GameConverter
 }
 
-func NewService(followRepo FollowRepository, gameRepo GameRepository, gameConverter GameConverter) *Service {
+func NewService(opponentRepo OpponentRepository, gameRepo GameRepository, gameConverter GameConverter) *Service {
 	return &Service{
-		followRepo:    followRepo,
+		opponentRepo:  opponentRepo,
 		gameRepo:      gameRepo,
 		gameConverter: gameConverter,
 	}
@@ -49,17 +49,17 @@ func (s *Service) GetFeedItems(w http.ResponseWriter, r *http.Request) {
 
 	p := pagination.ParsePagination(r)
 
-	// Get all follows for the player (we need all of them, not paginated)
-	follows, _, err := s.followRepo.GetFollows(userID, 1000, 0)
+	// Get all opponents for the player (we need all of them, not paginated)
+	opponents, _, err := s.opponentRepo.GetOpponents(userID, 1000, 0)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Extract player IDs from follows
-	playerIDs := make([]string, 0, len(follows))
-	for _, follow := range follows {
-		playerIDs = append(playerIDs, follow.Player.FirebaseID)
+	// Extract player IDs from opponents
+	playerIDs := make([]string, 0, len(opponents))
+	for _, opponent := range opponents {
+		playerIDs = append(playerIDs, opponent.Player.FirebaseID)
 	}
 
 	// Search games with those player IDs
