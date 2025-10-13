@@ -23,11 +23,12 @@ func ApplyGameFilters(db *gorm.DB, filter GameFilter) *gorm.DB {
 
 	// Filter by commanders (OR condition - any of these commanders)
 	if len(filter.Commanders) > 0 {
-		// Search in both DeckEmbedded.Commander (JSONB) and referenced Deck.Commander
+		// Search in both DeckEmbedded.Commander (embedded field) and referenced Deck.Commander
+		// When using gorm:"embedded", fields are flattened with no prefix
 		subQuery := db.Session(&gorm.Session{}).Model(&Ranking{}).
 			Select("DISTINCT game_id").
 			Joins("LEFT JOIN decks ON rankings.deck_id = decks.id").
-			Where("rankings.deck_embedded->>'commander' IN ? OR decks.commander IN ?",
+			Where("rankings.commander IN ? OR decks.commander IN ?",
 				filter.Commanders, filter.Commanders)
 		query = query.Where("id IN (?)", subQuery)
 	}
