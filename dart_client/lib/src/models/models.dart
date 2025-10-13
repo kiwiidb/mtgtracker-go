@@ -5,5 +5,6 @@ export 'ranking.dart';
 export 'game_event.dart';
 export 'notification.dart';
 export 'opponent.dart';
+export 'device_token.dart';
 export 'requests.dart';
 export 'paginated_result.dart';

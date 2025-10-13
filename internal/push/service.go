@@ -102,8 +102,36 @@ func (s *Service) handleFailedTokens(response *messaging.BatchResponse, tokens [
 
 // RegisterRoutes registers HTTP endpoints for push token management
 func (s *Service) RegisterRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /push/v1/tokens", s.GetMyTokens)
 	mux.HandleFunc("POST /push/v1/tokens", s.RegisterToken)
 	mux.HandleFunc("DELETE /push/v1/tokens", s.UnregisterToken)
+}
+
+// GetMyTokens returns all registered device tokens for the current user
+func (s *Service) GetMyTokens(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	tokens, err := s.repo.GetPlayerDeviceTokens(userID)
+	if err != nil {
+		log.Printf("Failed to get tokens: %v", err)
+		http.Error(w, "Failed to retrieve tokens", http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to response format
+	response := make([]DeviceTokenResponse, len(tokens))
+	for i, token := range tokens {
+		response[i] = toDeviceTokenResponse(&token)
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
 }
 
 // RegisterToken registers a device token for push notifications

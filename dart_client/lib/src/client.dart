@@ -385,6 +385,25 @@ class MTGTrackerClient {
   }
 
   // Push notification endpoints
+  Future<List<DeviceToken>> getMyPushTokens() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/push/v1/tokens'),
+      headers: _headers,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList
+          .map((json) => DeviceToken.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw MTGTrackerException(
+        statusCode: response.statusCode,
+        message: response.body,
+      );
+    }
+  }
+
   Future<void> registerPushToken(String token, String platform) async {
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/push/v1/tokens'),

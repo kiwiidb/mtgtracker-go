@@ -31,7 +31,7 @@ func (r *Repository) SaveToken(playerID, token, platform string) error {
 		FirstOrCreate(&deviceToken).Error
 }
 
-// GetPlayerTokens returns all device tokens for a player
+// GetPlayerTokens returns all device token strings for a player (for FCM)
 func (r *Repository) GetPlayerTokens(playerID string) ([]string, error) {
 	var tokens []DeviceToken
 	err := r.DB.Where("player_id = ?", playerID).Find(&tokens).Error
@@ -44,6 +44,16 @@ func (r *Repository) GetPlayerTokens(playerID string) ([]string, error) {
 		result[i] = t.Token
 	}
 	return result, nil
+}
+
+// GetPlayerDeviceTokens returns all device tokens with metadata for a player
+func (r *Repository) GetPlayerDeviceTokens(playerID string) ([]DeviceToken, error) {
+	var tokens []DeviceToken
+	err := r.DB.Where("player_id = ?", playerID).Order("created_at DESC").Find(&tokens).Error
+	if err != nil {
+		return nil, err
+	}
+	return tokens, nil
 }
 
 // DeleteToken removes a device token (used when token is invalid)
