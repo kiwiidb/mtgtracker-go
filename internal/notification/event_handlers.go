@@ -7,7 +7,7 @@ import (
 )
 
 type PushService interface {
-	SendNotification(playerID, title, body string, data map[string]string) error
+	SendNotification(playerID, title, body, imageURL string, data map[string]string) error
 }
 
 // EventHandlers manages event subscriptions for the notification package
@@ -66,10 +66,19 @@ func (h *EventHandlers) HandleGameCreated(event events.Event) error {
 	// Send push notifications to all players except creator
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil && *ranking.PlayerID != e.CreatorID {
+			// Use the player's own commander image from their ranking
+			var imageURL string
+			if ranking.Deck != nil {
+				imageURL = ranking.Deck.Image
+			} else if ranking.DeckEmbedded.Image != "" {
+				imageURL = ranking.DeckEmbedded.Image
+			}
+
 			err := h.pushService.SendNotification(
 				*ranking.PlayerID,
-				"New Game",
-				fmt.Sprintf("%s created a game with you", creator.Name),
+				"Game Started",
+				fmt.Sprintf("You're playing a game with %s", creator.Name),
+				imageURL,
 				map[string]string{
 					"type":    "game_created",
 					"game_id": fmt.Sprint(e.GameID),
@@ -109,30 +118,29 @@ func (h *EventHandlers) HandleGameFinished(event events.Event) error {
 	}
 
 	// Send push notifications to all players
-	// Find the winner
-	var winnerName string
-	for _, ranking := range game.Rankings {
-		if ranking.Position == 1 && ranking.Player != nil {
-			winnerName = ranking.Player.Name
-			break
-		}
-	}
-
 	for _, ranking := range game.Rankings {
 		if ranking.PlayerID != nil {
 			var body string
+			var imageURL string
+
+			// Use the player's own commander image
+			if ranking.Deck != nil {
+				imageURL = ranking.Deck.Image
+			} else if ranking.DeckEmbedded.Image != "" {
+				imageURL = ranking.DeckEmbedded.Image
+			}
+
 			if ranking.Position == 1 {
-				body = "Congratulations! You won the game!"
-			} else if winnerName != "" {
-				body = fmt.Sprintf("Game finished. %s won!", winnerName)
+				body = "Victory!"
 			} else {
-				body = "Game finished!"
+				body = "Game finished"
 			}
 
 			err := h.pushService.SendNotification(
 				*ranking.PlayerID,
 				"Game Finished",
 				body,
+				imageURL,
 				map[string]string{
 					"type":     "game_finished",
 					"game_id":  fmt.Sprint(e.GameID),

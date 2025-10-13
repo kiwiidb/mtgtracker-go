@@ -34,7 +34,7 @@ func NewService(app *firebase.App, repo *Repository) (*Service, error) {
 }
 
 // SendNotification sends a push notification to all devices of a player
-func (s *Service) SendNotification(playerID, title, body string, data map[string]string) error {
+func (s *Service) SendNotification(playerID, title, body, imageURL string, data map[string]string) error {
 	if s.client == nil {
 		// Firebase not configured, skip sending
 		return nil
@@ -52,13 +52,20 @@ func (s *Service) SendNotification(playerID, title, body string, data map[string
 	}
 
 	// Build multicast message
+	notification := &messaging.Notification{
+		Title: title,
+		Body:  body,
+	}
+
+	// Add image URL if provided
+	if imageURL != "" {
+		notification.ImageURL = imageURL
+	}
+
 	message := &messaging.MulticastMessage{
-		Notification: &messaging.Notification{
-			Title: title,
-			Body:  body,
-		},
-		Data:   data,
-		Tokens: tokens,
+		Notification: notification,
+		Data:         data,
+		Tokens:       tokens,
 	}
 
 	// Send to FCM
