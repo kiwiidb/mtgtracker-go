@@ -94,10 +94,11 @@ func convertDeckFromRanking(rank *Ranking) DeckResponse {
 
 func convertRankingToDto(rank *Ranking) RankingResponse {
 	return RankingResponse{
-		ID:       rank.ID,
-		PlayerID: rank.PlayerID,
-		Position: rank.Position,
-		Deck:     convertDeckFromRanking(rank),
+		ID:          rank.ID,
+		PlayerID:    rank.PlayerID,
+		Position:    rank.Position,
+		Deck:        convertDeckFromRanking(rank),
+		Description: rank.Description,
 		Player: func() *PlayerResponse {
 			if rank.Player != nil {
 				return &PlayerResponse{
@@ -142,6 +143,7 @@ func convertRankingsWithLifeTotal(rankings []Ranking, gameEvents []GameEvent) []
 			Deck:                   convertDeckFromRanking(&rank),
 			LastLifeTotal:          lastLifeTotal,
 			LastLifeTotalTimestamp: lastLifeTotalTimestamp,
+			Description:            rank.Description,
 			Player: func() *PlayerResponse {
 				if rank.Player != nil {
 					return &PlayerResponse{

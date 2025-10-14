@@ -504,6 +504,9 @@ func validateAndReorderRankings(requestRankings []UpdateRanking, existingRanking
 			return nil, errors.New("invalid ranking ID in rankings")
 		}
 		existing.Position = i + 1 // Set position to 1, 2, 3, etc.
+		if reqRanking.Description != nil {
+			existing.Description = reqRanking.Description
+		}
 		newRankings[i] = existing
 	}
 

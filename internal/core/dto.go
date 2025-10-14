@@ -30,8 +30,9 @@ type UpdateGameRequest struct {
 }
 
 type UpdateRanking struct {
-	RankingID uint `json:"ranking_id"`
-	Position  int  `json:"position"`
+	RankingID   uint             `json:"ranking_id"`
+	Position    int              `json:"position"`
+	Description *GameDescription `json:"description,omitempty"`
 }
 
 type GameEventRequest struct {
@@ -95,13 +96,14 @@ type GameEventResponse struct {
 }
 
 type RankingResponse struct {
-	ID                     uint            `json:"id"`
-	PlayerID               *string         `json:"player_id,omitempty"`
-	Position               int             `json:"position"`
-	LastLifeTotal          *int            `json:"last_life_total,omitempty"`
-	LastLifeTotalTimestamp *time.Time      `json:"last_life_total_timestamp,omitempty"`
-	Deck                   DeckResponse    `json:"deck"`
-	Player                 *PlayerResponse `json:"player,omitempty"` // Optional, can be omitted if not needed
+	ID                     uint             `json:"id"`
+	PlayerID               *string          `json:"player_id,omitempty"`
+	Position               int              `json:"position"`
+	LastLifeTotal          *int             `json:"last_life_total,omitempty"`
+	LastLifeTotalTimestamp *time.Time       `json:"last_life_total_timestamp,omitempty"`
+	Deck                   DeckResponse     `json:"deck"`
+	Player                 *PlayerResponse  `json:"player,omitempty"` // Optional, can be omitted if not needed
+	Description            *GameDescription `json:"description,omitempty"`
 }
 
 type DeckResponse struct {
