@@ -12,6 +12,7 @@ func (svc *Service) ConvertGameToDto(game *Game, addEvents bool) GameResponse {
 		CreatorID:  game.CreatorID,
 		Duration:   game.Duration,
 		Date:       game.Date,
+		EndDate:    game.EndDate,
 		Comments:   game.Comments,
 		Finished:   game.Finished,
 		Rankings:   convertRankingsWithLifeTotal(game.Rankings, game.GameEvents),

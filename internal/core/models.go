@@ -55,6 +55,7 @@ type Game struct {
 	CreatorID  *string `json:"creator_id,omitempty"`
 	Duration   *int
 	Date       *time.Time
+	EndDate    *time.Time
 	Comments   string
 	Image      string
 	Rankings   []Ranking

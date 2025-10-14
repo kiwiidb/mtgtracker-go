@@ -103,7 +103,12 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 	}
 	// update the game as finished
 	if finished != nil {
-		if err := r.DB.Model(&Game{}).Where("id = ?", gameId).Update("finished", *finished).Error; err != nil {
+		updates := map[string]interface{}{"finished": *finished}
+		if *finished {
+			now := time.Now()
+			updates["end_date"] = now
+		}
+		if err := r.DB.Model(&Game{}).Where("id = ?", gameId).Updates(updates).Error; err != nil {
 			return nil, err
 		}
 	}

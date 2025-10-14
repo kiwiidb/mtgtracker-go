@@ -76,6 +76,7 @@ type GameResponse struct {
 	CreatorID  *string             `json:"creator_id,omitempty"`
 	Duration   *int                `json:"duration,omitempty"`
 	Date       *time.Time          `json:"date,omitempty"`
+	EndDate    *time.Time          `json:"end_date,omitempty"`
 	Comments   string              `json:"comments,omitempty"`
 	Rankings   []RankingResponse   `json:"rankings,omitempty"`
 	Finished   bool                `json:"finished"`
