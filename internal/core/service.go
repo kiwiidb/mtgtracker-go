@@ -507,6 +507,9 @@ func validateAndReorderRankings(requestRankings []UpdateRanking, existingRanking
 		if reqRanking.Description != nil {
 			existing.Description = reqRanking.Description
 		}
+		if reqRanking.StartingPlayer != nil {
+			existing.StartingPlayer = *reqRanking.StartingPlayer
+		}
 		newRankings[i] = existing
 	}
 

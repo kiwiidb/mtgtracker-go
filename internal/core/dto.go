@@ -30,9 +30,10 @@ type UpdateGameRequest struct {
 }
 
 type UpdateRanking struct {
-	RankingID   uint             `json:"ranking_id"`
-	Position    int              `json:"position"`
-	Description *GameDescription `json:"description,omitempty"`
+	RankingID      uint             `json:"ranking_id"`
+	Position       int              `json:"position"`
+	Description    *GameDescription `json:"description,omitempty"`
+	StartingPlayer *bool            `json:"starting_player,omitempty"`
 }
 
 type GameEventRequest struct {
