@@ -64,16 +64,33 @@ type Game struct {
 	Creator *Player `gorm:"foreignKey:CreatorID;references:FirebaseID" json:"creator,omitempty"`
 }
 
+type CardReference struct {
+	Name                string   `json:"name"`
+	OracleText          string   `json:"oracle_text"`
+	ImageURI            *string  `json:"image_uri,omitempty"`
+	ArtCropURI          *string  `json:"art_crop_uri,omitempty"`
+	SecondaryImageURI   *string  `json:"secondary_image_uri,omitempty"`
+	SecondaryArtCropURI *string  `json:"secondary_art_crop_uri,omitempty"`
+	ColorIdentity       []string `json:"color_identity"`
+}
+
+type GameDescription struct {
+	Text             string                    `json:"text"`
+	CardReferences   map[string]CardReference  `json:"card_references"`   // keyed by card name
+	PlayerReferences []string                  `json:"player_references"` // player IDs referenced
+}
+
 type Ranking struct {
 	gorm.Model
-	GameID         uint    `json:"game_id"`
-	PlayerID       *string `json:"player_id,omitempty"`
-	DeckID         *uint   `json:"deck_id,omitempty"` // Reference to player's deck (optional)
-	Position       int     `json:"position"`
-	CouldHaveWon   bool    `json:"could_have_won"`
-	EarlySolRing   bool    `json:"early_sol_ring"`
-	StartingPlayer bool    `json:"starting_player"`
-	PlayerName     string  `gorm:"-"`
+	GameID         uint             `json:"game_id"`
+	PlayerID       *string          `json:"player_id,omitempty"`
+	DeckID         *uint            `json:"deck_id,omitempty"` // Reference to player's deck (optional)
+	Position       int              `json:"position"`
+	CouldHaveWon   bool             `json:"could_have_won"`
+	EarlySolRing   bool             `json:"early_sol_ring"`
+	StartingPlayer bool             `json:"starting_player"`
+	Description    *GameDescription `json:"description,omitempty" gorm:"type:jsonb"`
+	PlayerName     string           `gorm:"-"`
 
 	Player       *Player    `gorm:"foreignKey:PlayerID;references:FirebaseID" json:"player,omitempty"`
 	Deck         *Deck      `gorm:"foreignKey:DeckID;references:ID" json:"deck,omitempty"` // Reference to Deck model
