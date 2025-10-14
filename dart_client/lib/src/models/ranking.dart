@@ -36,12 +36,27 @@ class CardReference {
 }
 
 @JsonSerializable()
+class PlayerReference {
+  final String id;
+  final String name;
+
+  PlayerReference({
+    required this.id,
+    required this.name,
+  });
+
+  factory PlayerReference.fromJson(Map<String, dynamic> json) =>
+      _$PlayerReferenceFromJson(json);
+  Map<String, dynamic> toJson() => _$PlayerReferenceToJson(this);
+}
+
+@JsonSerializable()
 class GameDescription {
   final String text;
   @JsonKey(name: 'card_references')
   final Map<String, CardReference> cardReferences;
   @JsonKey(name: 'player_references')
-  final List<String> playerReferences;
+  final List<PlayerReference> playerReferences;
 
   GameDescription({
     required this.text,

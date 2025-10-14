@@ -30,6 +30,18 @@ Map<String, dynamic> _$CardReferenceToJson(CardReference instance) =>
       'color_identity': instance.colorIdentity,
     };
 
+PlayerReference _$PlayerReferenceFromJson(Map<String, dynamic> json) =>
+    PlayerReference(
+      id: json['id'] as String,
+      name: json['name'] as String,
+    );
+
+Map<String, dynamic> _$PlayerReferenceToJson(PlayerReference instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+    };
+
 GameDescription _$GameDescriptionFromJson(Map<String, dynamic> json) =>
     GameDescription(
       text: json['text'] as String,
@@ -38,7 +50,7 @@ GameDescription _$GameDescriptionFromJson(Map<String, dynamic> json) =>
             MapEntry(k, CardReference.fromJson(e as Map<String, dynamic>)),
       ),
       playerReferences: (json['player_references'] as List<dynamic>)
-          .map((e) => e as String)
+          .map((e) => PlayerReference.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

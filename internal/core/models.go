@@ -78,10 +78,15 @@ type CardReference struct {
 	ColorIdentity       []string `json:"color_identity"`
 }
 
+type PlayerReference struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type GameDescription struct {
 	Text             string                    `json:"text"`
 	CardReferences   map[string]CardReference  `json:"card_references"`   // keyed by card name
-	PlayerReferences []string                  `json:"player_references"` // player IDs referenced
+	PlayerReferences []PlayerReference         `json:"player_references"` // player IDs and names referenced
 }
 
 // Scan implements sql.Scanner interface for GameDescription
