@@ -56,4 +56,5 @@ const _$NotificationActionEnumMap = {
   NotificationAction.deleteRanking: 'delete_ranking',
   NotificationAction.viewGame: 'view_game',
   NotificationAction.addImageGameEvent: 'add_image_game_event',
+  NotificationAction.addGameDescription: 'add_game_description',
 };

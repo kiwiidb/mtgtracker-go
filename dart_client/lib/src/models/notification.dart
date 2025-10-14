@@ -11,6 +11,8 @@ enum NotificationAction {
   viewGame,
   @JsonValue('add_image_game_event')
   addImageGameEvent,
+  @JsonValue('add_game_description')
+  addGameDescription,
 }
 
 enum NotificationType {
