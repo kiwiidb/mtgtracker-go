@@ -300,6 +300,17 @@ class MTGTrackerClient {
   }
 
   // Ranking endpoints
+  Future<Ranking> updateRanking(
+      int rankingId, UpdateRankingRequest request) async {
+    final response = await _httpClient.put(
+      Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId'),
+      headers: _headers,
+      body: jsonEncode(request.toJson()),
+    );
+
+    return _handleResponse(response, Ranking.fromJson);
+  }
+
   Future<void> deleteRanking(int rankingId) async {
     final response = await _httpClient.delete(
       Uri.parse('$baseUrl/ranking/v1/rankings/$rankingId'),

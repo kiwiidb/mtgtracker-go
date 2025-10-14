@@ -328,6 +328,23 @@ func (r *Repository) UpdatePlayer(firebaseID string, updates map[string]interfac
 	return &player, nil
 }
 
+func (r *Repository) UpdateRanking(rankingID uint, updates map[string]interface{}) (*Ranking, error) {
+	result := r.DB.Model(&Ranking{}).Where("id = ?", rankingID).Updates(updates)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("ranking not found")
+	}
+
+	// Fetch and return the updated ranking with relationships
+	var ranking Ranking
+	if err := r.DB.Preload("Player").Preload("Deck").Where("id = ?", rankingID).First(&ranking).Error; err != nil {
+		return nil, err
+	}
+	return &ranking, nil
+}
+
 // GetRankingWithGamePlayers fetches ranking data and other player IDs in the same game
 // Returns: ranking, gameID, otherPlayerIDs (excluding the ranking's player), error
 func (r *Repository) GetRankingWithGamePlayers(rankingID uint) (*Ranking, uint, []string, error) {

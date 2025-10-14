@@ -222,3 +222,25 @@ class SearchGamesRequest {
       _$SearchGamesRequestFromJson(json);
   Map<String, dynamic> toJson() => _$SearchGamesRequestToJson(this);
 }
+
+@JsonSerializable()
+class UpdateRankingRequest {
+  final GameDescription? description;
+  @JsonKey(name: 'starting_player')
+  final bool? startingPlayer;
+  @JsonKey(name: 'could_have_won')
+  final bool? couldHaveWon;
+  @JsonKey(name: 'early_sol_ring')
+  final bool? earlySolRing;
+
+  const UpdateRankingRequest({
+    this.description,
+    this.startingPlayer,
+    this.couldHaveWon,
+    this.earlySolRing,
+  });
+
+  factory UpdateRankingRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateRankingRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$UpdateRankingRequestToJson(this);
+}

@@ -58,6 +58,7 @@ func (s *Service) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /game/v1/games/{gameId}", s.UpdateGame)
 	mux.HandleFunc("GET /game/v1/games/{gameId}", s.GetGame)
 	mux.HandleFunc("DELETE /game/v1/games/{gameId}", s.DeleteGame)
+	mux.HandleFunc("PUT /ranking/v1/rankings/{rankingId}", s.UpdateRankingEndpoint)
 	mux.HandleFunc("DELETE /ranking/v1/rankings/{rankingId}", s.DeleteRanking)
 	mux.HandleFunc("POST /game/v1/games/{gameId}/events", s.AddGameEvent)
 }
@@ -789,6 +790,57 @@ func (s *Service) SearchGamesEndpoint(w http.ResponseWriter, r *http.Request) {
 		PerPage:    p.PerPage,
 	}
 
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		log.Println("Error encoding response:", err)
+	}
+}
+
+func (s *Service) UpdateRankingEndpoint(w http.ResponseWriter, r *http.Request) {
+	rankingIDStr := r.PathValue("rankingId")
+	rankingID, err := strconv.Atoi(rankingIDStr)
+	if err != nil {
+		http.Error(w, "Invalid ranking ID", http.StatusBadRequest)
+		return
+	}
+
+	var request UpdateRankingRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Build updates map
+	updates := make(map[string]interface{})
+	if request.Description != nil {
+		updates["description"] = request.Description
+	}
+	if request.StartingPlayer != nil {
+		updates["starting_player"] = *request.StartingPlayer
+	}
+	if request.CouldHaveWon != nil {
+		updates["could_have_won"] = *request.CouldHaveWon
+	}
+	if request.EarlySolRing != nil {
+		updates["early_sol_ring"] = *request.EarlySolRing
+	}
+
+	if len(updates) == 0 {
+		http.Error(w, "No fields to update", http.StatusBadRequest)
+		return
+	}
+
+	ranking, err := s.Repository.UpdateRanking(uint(rankingID), updates)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result := convertRankingToDto(ranking)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		log.Println("Error encoding response:", err)

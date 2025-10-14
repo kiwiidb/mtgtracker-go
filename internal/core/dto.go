@@ -36,6 +36,13 @@ type UpdateRanking struct {
 	StartingPlayer *bool            `json:"starting_player,omitempty"`
 }
 
+type UpdateRankingRequest struct {
+	Description    *GameDescription `json:"description,omitempty"`
+	StartingPlayer *bool            `json:"starting_player,omitempty"`
+	CouldHaveWon   *bool            `json:"could_have_won,omitempty"`
+	EarlySolRing   *bool            `json:"early_sol_ring,omitempty"`
+}
+
 type GameEventRequest struct {
 	EventType            string  `json:"event_type"`
 	EventImageName       *string `json:"event_image_name,omitempty"` // Optional field for image upload

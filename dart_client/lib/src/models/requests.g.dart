@@ -200,3 +200,24 @@ Map<String, dynamic> _$SearchGamesRequestToJson(SearchGamesRequest instance) =>
       'all_players': instance.allPlayers,
       'all_commanders': instance.allCommanders,
     };
+
+UpdateRankingRequest _$UpdateRankingRequestFromJson(
+        Map<String, dynamic> json) =>
+    UpdateRankingRequest(
+      description: json['description'] == null
+          ? null
+          : GameDescription.fromJson(
+              json['description'] as Map<String, dynamic>),
+      startingPlayer: json['starting_player'] as bool?,
+      couldHaveWon: json['could_have_won'] as bool?,
+      earlySolRing: json['early_sol_ring'] as bool?,
+    );
+
+Map<String, dynamic> _$UpdateRankingRequestToJson(
+        UpdateRankingRequest instance) =>
+    <String, dynamic>{
+      'description': instance.description,
+      'starting_player': instance.startingPlayer,
+      'could_have_won': instance.couldHaveWon,
+      'early_sol_ring': instance.earlySolRing,
+    };
