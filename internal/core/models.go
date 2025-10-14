@@ -1,6 +1,9 @@
 package core
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -79,6 +82,25 @@ type GameDescription struct {
 	Text             string                    `json:"text"`
 	CardReferences   map[string]CardReference  `json:"card_references"`   // keyed by card name
 	PlayerReferences []string                  `json:"player_references"` // player IDs referenced
+}
+
+// Scan implements sql.Scanner interface for GameDescription
+func (gd *GameDescription) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("failed to scan GameDescription: value is not []byte")
+	}
+
+	return json.Unmarshal(bytes, gd)
+}
+
+// Value implements driver.Valuer interface for GameDescription
+func (gd GameDescription) Value() (driver.Value, error) {
+	return json.Marshal(gd)
 }
 
 type Ranking struct {
