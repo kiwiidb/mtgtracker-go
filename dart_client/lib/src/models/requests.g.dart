@@ -60,12 +60,19 @@ UpdateRanking _$UpdateRankingFromJson(Map<String, dynamic> json) =>
     UpdateRanking(
       rankingId: (json['ranking_id'] as num).toInt(),
       position: (json['position'] as num).toInt(),
+      description: json['description'] == null
+          ? null
+          : GameDescription.fromJson(
+              json['description'] as Map<String, dynamic>),
+      startingPlayer: json['starting_player'] as bool?,
     );
 
 Map<String, dynamic> _$UpdateRankingToJson(UpdateRanking instance) =>
     <String, dynamic>{
       'ranking_id': instance.rankingId,
       'position': instance.position,
+      'description': instance.description,
+      'starting_player': instance.startingPlayer,
     };
 
 UpdateGameRequest _$UpdateGameRequestFromJson(Map<String, dynamic> json) =>

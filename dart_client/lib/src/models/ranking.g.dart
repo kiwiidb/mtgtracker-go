@@ -6,6 +6,49 @@ part of 'ranking.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+CardReference _$CardReferenceFromJson(Map<String, dynamic> json) =>
+    CardReference(
+      name: json['name'] as String,
+      oracleText: json['oracle_text'] as String,
+      imageUri: json['image_uri'] as String?,
+      artCropUri: json['art_crop_uri'] as String?,
+      secondaryImageUri: json['secondary_image_uri'] as String?,
+      secondaryArtCropUri: json['secondary_art_crop_uri'] as String?,
+      colorIdentity: (json['color_identity'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$CardReferenceToJson(CardReference instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'oracle_text': instance.oracleText,
+      'image_uri': instance.imageUri,
+      'art_crop_uri': instance.artCropUri,
+      'secondary_image_uri': instance.secondaryImageUri,
+      'secondary_art_crop_uri': instance.secondaryArtCropUri,
+      'color_identity': instance.colorIdentity,
+    };
+
+GameDescription _$GameDescriptionFromJson(Map<String, dynamic> json) =>
+    GameDescription(
+      text: json['text'] as String,
+      cardReferences: (json['card_references'] as Map<String, dynamic>).map(
+        (k, e) =>
+            MapEntry(k, CardReference.fromJson(e as Map<String, dynamic>)),
+      ),
+      playerReferences: (json['player_references'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$GameDescriptionToJson(GameDescription instance) =>
+    <String, dynamic>{
+      'text': instance.text,
+      'card_references': instance.cardReferences,
+      'player_references': instance.playerReferences,
+    };
+
 Ranking _$RankingFromJson(Map<String, dynamic> json) => Ranking(
       id: (json['id'] as num).toInt(),
       playerId: json['player_id'] as String?,
@@ -20,6 +63,10 @@ Ranking _$RankingFromJson(Map<String, dynamic> json) => Ranking(
           ? null
           : Player.fromJson(json['player'] as Map<String, dynamic>),
       status: json['status'] as String?,
+      description: json['description'] == null
+          ? null
+          : GameDescription.fromJson(
+              json['description'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$RankingToJson(Ranking instance) => <String, dynamic>{
@@ -33,4 +80,5 @@ Map<String, dynamic> _$RankingToJson(Ranking instance) => <String, dynamic>{
       'deck': instance.deck,
       'player': instance.player,
       'status': instance.status,
+      'description': instance.description,
     };

@@ -422,8 +422,9 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-09-11T13:28:18.163650Z",
   "generator": "pub",
-  "generatorVersion": "3.7.3",
+  "generatorVersion": "3.9.0",
+  "flutterRoot": "file:///Users/kwinten/flutter",
+  "flutterVersion": "3.35.0",
   "pubCache": "file:///Users/kwinten/.pub-cache"
 }

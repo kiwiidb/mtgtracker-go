@@ -12,6 +12,8 @@ class Game {
   final String? creatorId;
   final int? duration;
   final DateTime? date;
+  @JsonKey(name: 'end_date')
+  final DateTime? endDate;
   final String? comments;
   final List<Ranking> rankings;
   final bool? finished;
@@ -24,6 +26,7 @@ class Game {
     this.creatorId,
     this.duration,
     this.date,
+    this.endDate,
     required this.comments,
     required this.rankings,
     required this.finished,

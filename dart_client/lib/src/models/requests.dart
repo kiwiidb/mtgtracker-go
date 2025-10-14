@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'deck.dart';
+import 'ranking.dart';
 
 part 'requests.g.dart';
 
@@ -61,10 +62,15 @@ class UpdateRanking {
   @JsonKey(name: 'ranking_id')
   final int rankingId;
   final int position;
+  final GameDescription? description;
+  @JsonKey(name: 'starting_player')
+  final bool? startingPlayer;
 
   const UpdateRanking({
     required this.rankingId,
     required this.position,
+    this.description,
+    this.startingPlayer,
   });
 
   factory UpdateRanking.fromJson(Map<String, dynamic> json) =>

@@ -12,6 +12,9 @@ Game _$GameFromJson(Map<String, dynamic> json) => Game(
       duration: (json['duration'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      endDate: json['end_date'] == null
+          ? null
+          : DateTime.parse(json['end_date'] as String),
       comments: json['comments'] as String?,
       rankings: (json['rankings'] as List<dynamic>)
           .map((e) => Ranking.fromJson(e as Map<String, dynamic>))
@@ -30,6 +33,7 @@ Map<String, dynamic> _$GameToJson(Game instance) => <String, dynamic>{
       'creator_id': instance.creatorId,
       'duration': instance.duration,
       'date': instance.date?.toIso8601String(),
+      'end_date': instance.endDate?.toIso8601String(),
       'comments': instance.comments,
       'rankings': instance.rankings,
       'finished': instance.finished,
