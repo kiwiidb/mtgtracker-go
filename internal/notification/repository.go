@@ -12,9 +12,10 @@ import (
 type NotificationAction string
 
 const (
-	ActionDeleteRanking     NotificationAction = "delete_ranking"
-	ActionViewGame          NotificationAction = "view_game"
-	ActionAddImageGameEvent NotificationAction = "add_image_game_event"
+	ActionDeleteRanking      NotificationAction = "delete_ranking"
+	ActionViewGame           NotificationAction = "view_game"
+	ActionAddGameDescription NotificationAction = "add_game_description"
+	ActionAddImageGameEvent  NotificationAction = "add_image_game_event"
 )
 
 type Notification struct {
@@ -186,7 +187,7 @@ func (r *Repository) CreateGameFinishedNotifications(game *core.Game) error {
 				Title:            title,
 				Body:             body,
 				Type:             notificationType,
-				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking},
+				Actions:          []NotificationAction{ActionViewGame, ActionDeleteRanking, ActionAddGameDescription},
 				Read:             false,
 				GameID:           &game.ID,
 				PlayerRankingID:  &ranking.ID,

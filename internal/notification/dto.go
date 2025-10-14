@@ -6,26 +6,27 @@ import (
 )
 
 type NotificationResponse struct {
-	ID               uint                   `json:"id"`
-	Title            string                 `json:"title"`
-	Body             string                 `json:"body"`
-	Type             string                 `json:"type"`
-	Actions          []NotificationAction   `json:"actions"`
-	Read             bool                   `json:"read"`
-	CreatedAt        time.Time              `json:"created_at"`
-	GameID           *uint                  `json:"game_id,omitempty"`
-	ReferredPlayerID *string                `json:"referred_player_id,omitempty"`
-	PlayerRankingID  *uint                  `json:"player_ranking_id,omitempty"`
-	Game             *core.GameResponse     `json:"game,omitempty"`
-	ReferredPlayer   *core.PlayerResponse   `json:"referred_player,omitempty"`
+	ID               uint                 `json:"id"`
+	Title            string               `json:"title"`
+	Body             string               `json:"body"`
+	Type             string               `json:"type"`
+	Actions          []NotificationAction `json:"actions"`
+	Read             bool                 `json:"read"`
+	CreatedAt        time.Time            `json:"created_at"`
+	GameID           *uint                `json:"game_id,omitempty"`
+	ReferredPlayerID *string              `json:"referred_player_id,omitempty"`
+	PlayerRankingID  *uint                `json:"player_ranking_id,omitempty"`
+	Game             *core.GameResponse   `json:"game,omitempty"`
+	ReferredPlayer   *core.PlayerResponse `json:"referred_player,omitempty"`
 }
 
 type NotificationResponseAction string
 
 const (
-	ActionResponseDeleteRanking     NotificationResponseAction = "delete_ranking"
-	ActionResponseViewGame          NotificationResponseAction = "view_game"
-	ActionResponseAddImageGameEvent NotificationResponseAction = "add_image_game_event"
+	ActionResponseDeleteRanking      NotificationResponseAction = "delete_ranking"
+	ActionResponseViewGame           NotificationResponseAction = "view_game"
+	ActionResponseAddImageGameEvent  NotificationResponseAction = "add_image_game_event"
+	ActionResponseAddGameDescription NotificationResponseAction = "add_game_description"
 )
 
 func (s *Service) convertNotificationToDto(notification *Notification) NotificationResponse {
