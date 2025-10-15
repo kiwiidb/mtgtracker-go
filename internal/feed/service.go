@@ -56,8 +56,9 @@ func (s *Service) GetFeedItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract player IDs from opponents
-	playerIDs := make([]string, 0, len(opponents))
+	// Extract player IDs from opponents and add own player ID
+	playerIDs := make([]string, 0, len(opponents)+1)
+	playerIDs = append(playerIDs, userID) // Add own player ID
 	for _, opponent := range opponents {
 		playerIDs = append(playerIDs, opponent.Player.FirebaseID)
 	}
