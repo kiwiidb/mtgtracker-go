@@ -71,30 +71,44 @@ func (s *Service) SendNotification(playerID, title, body, imageURL string, data 
 	// Send to FCM
 	response, err := s.client.SendEachForMulticast(context.Background(), message)
 	if err != nil {
-		return fmt.Errorf("failed to send push notification: %w", err)
+		return fmt.Errorf("failed to send push notification to player %s: %w", playerID, err)
 	}
 
-	log.Printf("Push notification sent to %d devices (success: %d, failure: %d)",
-		len(tokens), response.SuccessCount, response.FailureCount)
+	log.Printf("Push notification sent to player %s: %d devices (success: %d, failure: %d)",
+		playerID, len(tokens), response.SuccessCount, response.FailureCount)
 
-	// Remove invalid tokens
-	s.handleFailedTokens(response, tokens)
+	// Remove invalid tokens and log detailed errors
+	s.handleFailedTokens(playerID, response, tokens)
 
 	return nil
 }
 
-// handleFailedTokens removes invalid tokens from the database
-func (s *Service) handleFailedTokens(response *messaging.BatchResponse, tokens []string) {
+// handleFailedTokens removes invalid tokens from the database and logs detailed errors
+func (s *Service) handleFailedTokens(playerID string, response *messaging.BatchResponse, tokens []string) {
 	for idx, resp := range response.Responses {
 		if !resp.Success {
+			token := tokens[idx]
+			errorMsg := "unknown error"
+			if resp.Error != nil {
+				errorMsg = resp.Error.Error()
+			}
+
 			// Check if token is invalid or unregistered
-			if messaging.IsRegistrationTokenNotRegistered(resp.Error) ||
-				messaging.IsInvalidArgument(resp.Error) {
-				log.Printf("Removing invalid token: %s", tokens[idx])
-				err := s.repo.DeleteToken(tokens[idx])
+			if messaging.IsUnregistered(resp.Error) {
+				log.Printf("Player %s: Token not registered (will remove): %s, error: %s", playerID, token, errorMsg)
+				err := s.repo.DeleteToken(token)
 				if err != nil {
-					log.Printf("Failed to delete invalid token: %v", err)
+					log.Printf("Player %s: Failed to delete unregistered token %s: %v", playerID, token, err)
 				}
+			} else if messaging.IsInvalidArgument(resp.Error) {
+				log.Printf("Player %s: Invalid token (will remove): %s, error: %s", playerID, token, errorMsg)
+				err := s.repo.DeleteToken(token)
+				if err != nil {
+					log.Printf("Player %s: Failed to delete invalid token %s: %v", playerID, token, err)
+				}
+			} else {
+				// Log other types of errors without removing the token
+				log.Printf("Player %s: Failed to send notification to token %s: %s", playerID, token, errorMsg)
 			}
 		}
 	}
