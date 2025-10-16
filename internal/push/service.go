@@ -69,7 +69,7 @@ func (s *Service) SendNotification(playerID, title, body, imageURL string, data 
 	}
 
 	// Send to FCM
-	response, err := s.client.SendMulticast(context.Background(), message)
+	response, err := s.client.SendEachForMulticast(context.Background(), message)
 	if err != nil {
 		return fmt.Errorf("failed to send push notification: %w", err)
 	}
