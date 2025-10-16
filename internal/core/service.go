@@ -511,6 +511,10 @@ func validateAndReorderRankings(requestRankings []UpdateRanking, existingRanking
 		if reqRanking.StartingPlayer != nil {
 			existing.StartingPlayer = *reqRanking.StartingPlayer
 		}
+		// Only update player_id if it's provided and the ranking doesn't have a player yet
+		if reqRanking.PlayerID != nil && existing.PlayerID == nil {
+			existing.PlayerID = reqRanking.PlayerID
+		}
 		newRankings[i] = existing
 	}
 

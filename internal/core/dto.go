@@ -34,6 +34,7 @@ type UpdateRanking struct {
 	Position       int              `json:"position"`
 	Description    *GameDescription `json:"description,omitempty"`
 	StartingPlayer *bool            `json:"starting_player,omitempty"`
+	PlayerID       *string          `json:"player_id,omitempty"`
 }
 
 type UpdateRankingRequest struct {
@@ -139,10 +140,10 @@ type CreateDeckRequest struct {
 }
 
 type SearchGamesRequest struct {
-	PlayerIDs     []string `json:"player_ids,omitempty"`      // Games where ANY of these players participated (OR)
-	Commanders    []string `json:"commanders,omitempty"`      // Games where ANY of these commanders were played (OR)
-	AllPlayers    []string `json:"all_players,omitempty"`     // Games where ALL of these players participated (AND)
-	AllCommanders []string `json:"all_commanders,omitempty"`  // Games where ALL of these commanders were played (AND)
+	PlayerIDs     []string `json:"player_ids,omitempty"`     // Games where ANY of these players participated (OR)
+	Commanders    []string `json:"commanders,omitempty"`     // Games where ANY of these commanders were played (OR)
+	AllPlayers    []string `json:"all_players,omitempty"`    // Games where ALL of these players participated (AND)
+	AllCommanders []string `json:"all_commanders,omitempty"` // Games where ALL of these commanders were played (AND)
 }
 
 func (req SearchGamesRequest) ToFilter() GameFilter {

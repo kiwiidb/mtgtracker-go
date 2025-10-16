@@ -65,12 +65,15 @@ class UpdateRanking {
   final GameDescription? description;
   @JsonKey(name: 'starting_player')
   final bool? startingPlayer;
+  @JsonKey(name: 'player_id')
+  final String? playerId;
 
   const UpdateRanking({
     required this.rankingId,
     required this.position,
     this.description,
     this.startingPlayer,
+    this.playerId,
   });
 
   factory UpdateRanking.fromJson(Map<String, dynamic> json) =>
