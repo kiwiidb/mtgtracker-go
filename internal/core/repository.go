@@ -114,8 +114,8 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 			now := time.Now()
 			updates["end_date"] = now
 
-			// Calculate duration in minutes
-			duration := int(now.Sub(game.CreatedAt).Minutes())
+			// Calculate duration in seconds
+			duration := int(now.Sub(game.CreatedAt).Seconds())
 			updates["duration"] = duration
 		}
 		if err := r.DB.Model(&Game{}).Where("id = ?", gameId).Updates(updates).Error; err != nil {
