@@ -8,3 +8,4 @@ export 'opponent.dart';
 export 'device_token.dart';
 export 'requests.dart';
 export 'paginated_result.dart';
+export 'player_stats.dart';

@@ -1,0 +1,34 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+PlayerStats _$PlayerStatsFromJson(Map<String, dynamic> json) => PlayerStats(
+      id: (json['id'] as num).toInt(),
+      playerId: json['player_id'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      totalWins: (json['total_wins'] as num).toInt(),
+      winrate: (json['winrate'] as num).toDouble(),
+      rollingWinrate: (json['rolling_winrate'] as num).toDouble(),
+      gameCount: (json['game_count'] as num).toInt(),
+      gameDuration: (json['game_duration'] as num).toInt(),
+      streak: (json['streak'] as num).toInt(),
+      elo: (json['elo'] as num).toInt(),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+
+Map<String, dynamic> _$PlayerStatsToJson(PlayerStats instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'player_id': instance.playerId,
+      'timestamp': instance.timestamp.toIso8601String(),
+      'total_wins': instance.totalWins,
+      'winrate': instance.winrate,
+      'rolling_winrate': instance.rollingWinrate,
+      'game_count': instance.gameCount,
+      'game_duration': instance.gameDuration,
+      'streak': instance.streak,
+      'elo': instance.elo,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+    };

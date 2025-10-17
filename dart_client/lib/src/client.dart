@@ -477,6 +477,70 @@ class MTGTrackerClient {
     }
   }
 
+  // Statistics endpoints
+  Future<PaginatedResult<PlayerStats>> getAllLatestPlayerStats({
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/statistics/v1/players')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, PlayerStats.fromJson);
+  }
+
+  Future<PlayerStats> getLatestPlayerStats(String playerId) async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/statistics/v1/players/$playerId'),
+      headers: _headers,
+    );
+    return _handleResponse(response, PlayerStats.fromJson);
+  }
+
+  Future<PaginatedResult<PlayerStats>> getPlayerStatsTimeSeries(
+    String playerId, {
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri =
+        Uri.parse('$baseUrl/statistics/v1/players/$playerId/timeseries')
+            .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, PlayerStats.fromJson);
+  }
+
+  Future<PlayerStats> getMyLatestStats() async {
+    final response = await _httpClient.get(
+      Uri.parse('$baseUrl/statistics/v1/me'),
+      headers: _headers,
+    );
+    return _handleResponse(response, PlayerStats.fromJson);
+  }
+
+  Future<PaginatedResult<PlayerStats>> getMyStatsTimeSeries({
+    int? page,
+    int? perPage,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (perPage != null) queryParams['per_page'] = perPage.toString();
+
+    final uri = Uri.parse('$baseUrl/statistics/v1/me/timeseries')
+        .replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+    final response = await _httpClient.get(uri, headers: _headers);
+    return _handlePaginatedResponse(response, PlayerStats.fromJson);
+  }
+
   void dispose() {
     _httpClient.close();
   }
