@@ -229,7 +229,7 @@ func (s *Service) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 		rankings = append(rankings, toAdd)
 	}
-	game, err := s.Repository.InsertGame(user, request.Duration, request.Comments, request.Image, request.Date, request.Finished, rankings)
+	game, err := s.Repository.InsertGame(user, request.Comments, request.Image, request.Date, request.Finished, rankings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

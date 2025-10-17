@@ -10,7 +10,6 @@ type SignupPlayerRequest struct {
 
 // duration int, comments, image string, rankings []Ranking
 type CreateGameRequest struct {
-	Duration *int                   `json:"duration"`
 	Date     *time.Time             `json:"date"`
 	Comments string                 `json:"comments"`
 	Image    string                 `json:"image"`

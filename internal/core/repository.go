@@ -105,8 +105,18 @@ func (r *Repository) UpdateGame(gameId uint, rankings []Ranking, finished *bool)
 	if finished != nil {
 		updates := map[string]interface{}{"finished": *finished}
 		if *finished {
+			// Get the game to access its CreatedAt time
+			var game Game
+			if err := r.DB.Where("id = ?", gameId).First(&game).Error; err != nil {
+				return nil, err
+			}
+
 			now := time.Now()
 			updates["end_date"] = now
+
+			// Calculate duration in minutes
+			duration := int(now.Sub(game.CreatedAt).Minutes())
+			updates["duration"] = duration
 		}
 		if err := r.DB.Model(&Game{}).Where("id = ?", gameId).Updates(updates).Error; err != nil {
 			return nil, err
@@ -200,7 +210,7 @@ func (r *Repository) InsertPlayer(name string, email string, userId string) (*Pl
 	return &player, result.Error
 }
 
-func (r *Repository) InsertGame(creator *Player, duration *int, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
+func (r *Repository) InsertGame(creator *Player, comments, image string, date *time.Time, finished bool, rankings []Ranking) (*Game, error) {
 
 	// Ensure each ranking has valid player and deck
 	for i, rank := range rankings {
@@ -233,7 +243,6 @@ func (r *Repository) InsertGame(creator *Player, duration *int, comments, image 
 
 	game := Game{
 		CreatorID: &creator.FirebaseID,
-		Duration:  duration,
 		Date:      date,
 		Comments:  comments,
 		Image:     image,

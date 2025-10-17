@@ -37,7 +37,6 @@ Map<String, dynamic> _$CreateRankingRequestToJson(
 
 CreateGameRequest _$CreateGameRequestFromJson(Map<String, dynamic> json) =>
     CreateGameRequest(
-      duration: (json['duration'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
       comments: json['comments'] as String,
@@ -49,7 +48,6 @@ CreateGameRequest _$CreateGameRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CreateGameRequestToJson(CreateGameRequest instance) =>
     <String, dynamic>{
-      'duration': instance.duration,
       'date': instance.date?.toIso8601String(),
       'comments': instance.comments,
       'finished': instance.finished,

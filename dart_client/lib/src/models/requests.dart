@@ -38,14 +38,12 @@ class CreateRankingRequest {
 
 @JsonSerializable()
 class CreateGameRequest {
-  final int? duration;
   final DateTime? date;
   final String comments;
   final bool finished;
   final List<CreateRankingRequest> rankings;
 
   const CreateGameRequest({
-    this.duration,
     this.date,
     required this.comments,
     required this.finished,
