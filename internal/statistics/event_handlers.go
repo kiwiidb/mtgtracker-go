@@ -2,6 +2,7 @@ package statistics
 
 import (
 	"log"
+	"math"
 	"mtgtracker/internal/core"
 	"mtgtracker/internal/events"
 )
@@ -71,8 +72,25 @@ func (h *EventHandlers) HandleGameFinished(event events.Event) error {
 			}
 		}
 
+		// Get all player stats for ELO calculation
+		allPlayerStats := make(map[string]*PlayerStats)
+		allPlayerStats[playerID] = currentStats
+		for _, r := range game.Rankings {
+			if r.PlayerID != nil && *r.PlayerID != playerID {
+				otherStats, err := h.repo.GetLatestPlayerStats(*r.PlayerID)
+				if err != nil {
+					// Initialize with default ELO if player has no stats
+					otherStats = &PlayerStats{
+						PlayerID: *r.PlayerID,
+						Elo:      1000,
+					}
+				}
+				allPlayerStats[*r.PlayerID] = otherStats
+			}
+		}
+
 		// Calculate new stats
-		newStats := h.calculateNewStats(currentStats, &ranking, game)
+		newStats := h.calculateNewStats(currentStats, &ranking, game, allPlayerStats)
 
 		// Create new stats entry
 		err = h.repo.CreatePlayerStats(newStats)
@@ -89,7 +107,7 @@ func (h *EventHandlers) HandleGameFinished(event events.Event) error {
 }
 
 // calculateNewStats computes updated statistics based on game result
-func (h *EventHandlers) calculateNewStats(current *PlayerStats, ranking *core.Ranking, game *core.Game) *PlayerStats {
+func (h *EventHandlers) calculateNewStats(current *PlayerStats, ranking *core.Ranking, game *core.Game, allPlayerStats map[string]*PlayerStats) *PlayerStats {
 	won := ranking.Position == 1
 	newGameCount := current.GameCount + 1
 
@@ -116,8 +134,8 @@ func (h *EventHandlers) calculateNewStats(current *PlayerStats, ranking *core.Ra
 		newGameDuration = totalDuration / newGameCount
 	}
 
-	// Calculate new ELO
-	newElo := h.calculateElo(current.Elo, won, len(game.Rankings))
+	// Calculate new ELO based on performance against all other players
+	newElo := h.calculateMultiplayerElo(current.PlayerID, ranking, game, allPlayerStats)
 
 	return &PlayerStats{
 		PlayerID:       current.PlayerID,
@@ -131,18 +149,62 @@ func (h *EventHandlers) calculateNewStats(current *PlayerStats, ranking *core.Ra
 	}
 }
 
-// calculateElo computes the new ELO rating based on game result
-func (h *EventHandlers) calculateElo(currentElo int, won bool, numPlayers int) int {
-	// K-factor of 32, expected score based on number of players
+// calculateMultiplayerElo computes ELO rating by comparing against each opponent
+// Uses the formula: R'i = Ri + K/(N-1) * Σ(Sij - Eij) for all j ≠ i
+func (h *EventHandlers) calculateMultiplayerElo(playerID string, ranking *core.Ranking, game *core.Game, allPlayerStats map[string]*PlayerStats) int {
+	currentElo := allPlayerStats[playerID].Elo
 	kFactor := 32.0
-	expectedScore := 1.0 / float64(numPlayers)
-	actualScore := 0.0
-	if won {
-		actualScore = 1.0
+	numPlayers := len(game.Rankings)
+
+	if numPlayers <= 1 {
+		return currentElo // No change if playing alone
 	}
 
-	eloChange := int(kFactor * (actualScore - expectedScore))
-	newElo := max(currentElo+eloChange, 0)
+	// Create a map of playerID to their ranking position
+	playerPositions := make(map[string]int)
+	for _, r := range game.Rankings {
+		if r.PlayerID != nil {
+			playerPositions[*r.PlayerID] = r.Position
+		}
+	}
+
+	currentPosition := ranking.Position
+	totalChange := 0.0
+
+	// Compare against each other player
+	for _, otherRanking := range game.Rankings {
+		if otherRanking.PlayerID == nil || *otherRanking.PlayerID == playerID {
+			continue // Skip self
+		}
+
+		otherPlayerID := *otherRanking.PlayerID
+		otherElo := allPlayerStats[otherPlayerID].Elo
+		otherPosition := otherRanking.Position
+
+		// Sij: 1 if player i ranked higher (lower position number) than j, else 0
+		var sij float64
+		if currentPosition < otherPosition {
+			sij = 1.0
+		} else {
+			sij = 0.0
+		}
+
+		// Eij: Expected probability of player i beating player j
+		// Eij = 1 / (1 + 10^((Rj - Ri)/400))
+		eij := 1.0 / (1.0 + math.Pow(10.0, float64(otherElo-currentElo)/400.0))
+
+		// Accumulate the difference
+		totalChange += (sij - eij)
+	}
+
+	// Apply the formula: R'i = Ri + K/(N-1) * Σ(Sij - Eij)
+	eloChange := (kFactor / float64(numPlayers-1)) * totalChange
+	newElo := currentElo + int(eloChange)
+
+	// Ensure ELO doesn't go below 0
+	if newElo < 0 {
+		newElo = 0
+	}
 
 	return newElo
 }
