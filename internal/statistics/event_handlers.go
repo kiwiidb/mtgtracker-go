@@ -126,12 +126,10 @@ func (h *EventHandlers) calculateNewStats(current *PlayerStats, ranking *core.Ra
 	// Update streak
 	newStreak := h.calculateStreak(current.Streak, won)
 
-	// Update average game duration
+	// Update total game duration
 	newGameDuration := current.GameDuration
 	if game.Duration != nil {
-		totalDuration := current.GameDuration * current.GameCount
-		totalDuration += *game.Duration
-		newGameDuration = totalDuration / newGameCount
+		newGameDuration = current.GameDuration + *game.Duration
 	}
 
 	// Calculate new ELO based on performance against all other players

@@ -14,7 +14,7 @@ type PlayerStats struct {
 	Winrate        float64
 	RollingWinrate float64 // Winrate over last N games (moving average)
 	GameCount      int
-	GameDuration   int // Average game duration in minutes
+	GameDuration   int // Total game duration in minutes
 	Streak         int // Current win/loss streak (positive = wins, negative = losses)
 	Elo            int
 }
