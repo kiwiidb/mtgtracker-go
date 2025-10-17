@@ -1,6 +1,7 @@
 package statistics
 
 import (
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -11,6 +12,10 @@ type Repository struct {
 }
 
 func NewRepository(db *gorm.DB) *Repository {
+	err := db.AutoMigrate(&PlayerStats{})
+	if err != nil {
+		log.Fatalf("Failed to migrate stats repo: %v", err)
+	}
 	return &Repository{DB: db}
 }
 
