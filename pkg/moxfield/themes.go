@@ -76,6 +76,7 @@ var ValidThemes = []string{
 	"Mutate",
 	"Pillowfort",
 	"Poison",
+	"Politics",
 	"Primer",
 	"Prison",
 	"Ramp",

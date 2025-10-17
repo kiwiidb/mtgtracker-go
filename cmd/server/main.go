@@ -10,6 +10,7 @@ import (
 	"mtgtracker/internal/notification"
 	"mtgtracker/internal/opponents"
 	"mtgtracker/internal/push"
+	"mtgtracker/internal/statistics"
 	"mtgtracker/pkg/moxfield"
 	"net/http"
 	"os"
@@ -62,6 +63,7 @@ func main() {
 	coreRepo := core.NewRepository(db)
 	opponentRepo := opponents.NewRepository(db)
 	pushRepo := push.NewRepository(db)
+	statsRepo := statistics.NewRepository(db)
 
 	// // Initialize the S3 storage
 	log.Println("initializing storage")
@@ -80,6 +82,7 @@ func main() {
 	opponentService := opponents.NewService(opponentRepo, coreService)
 	feedService := feed.NewService(opponentRepo, coreRepo, coreService)
 	moxfieldService := moxfield.NewService()
+	statsService := statistics.NewService(statsRepo)
 
 	// Register event handlers
 	log.Println("registering event handlers")
@@ -88,6 +91,9 @@ func main() {
 
 	opponentHandlers := opponents.NewEventHandlers(opponentRepo, coreService)
 	opponentHandlers.RegisterHandlers(eventBus)
+
+	statsHandlers := statistics.NewEventHandlers(statsRepo, coreService)
+	statsHandlers.RegisterHandlers(eventBus)
 
 	// // Create a new HTTP server
 	mux := http.NewServeMux()
@@ -98,6 +104,7 @@ func main() {
 	opponentService.RegisterRoutes(mux)
 	feedService.RegisterRoutes(mux)
 	pushService.RegisterRoutes(mux)
+	statsService.RegisterRoutes(mux)
 
 	// add middleware chain
 	handler := middleware.ApacheLogMw(mux)
