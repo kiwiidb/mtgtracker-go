@@ -137,6 +137,11 @@ func (h *EventHandlers) calculateNewStats(current *PlayerStats, ranking *core.Ra
 	// Calculate new ELO based on performance against all other players
 	newElo := h.calculateMultiplayerElo(current.PlayerID, ranking, game, allPlayerStats)
 
+	// Ensure streak doesn't go negative
+	if newStreak < 0 {
+		newStreak = 0
+	}
+
 	return &PlayerStats{
 		PlayerID:       current.PlayerID,
 		TotalWins:      newTotalWins,

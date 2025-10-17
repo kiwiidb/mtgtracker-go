@@ -39,7 +39,8 @@ func (s *Service) GetLatestPlayerStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(stats)
+	response := stats.ToResponse()
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -61,8 +62,13 @@ func (s *Service) GetPlayerStatsTimeSeries(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	result := pagination.PaginatedResult[PlayerStats]{
-		Items:      stats,
+	responses := make([]PlayerStatsResponse, len(stats))
+	for i, stat := range stats {
+		responses[i] = stat.ToResponse()
+	}
+
+	result := pagination.PaginatedResult[PlayerStatsResponse]{
+		Items:      responses,
 		TotalCount: total,
 		Page:       p.Page,
 		PerPage:    p.PerPage,
@@ -88,7 +94,8 @@ func (s *Service) GetMyLatestStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(stats)
+	response := stats.ToResponse()
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("Error encoding response:", err)
 	}
@@ -110,8 +117,13 @@ func (s *Service) GetMyStatsTimeSeries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := pagination.PaginatedResult[PlayerStats]{
-		Items:      stats,
+	responses := make([]PlayerStatsResponse, len(stats))
+	for i, stat := range stats {
+		responses[i] = stat.ToResponse()
+	}
+
+	result := pagination.PaginatedResult[PlayerStatsResponse]{
+		Items:      responses,
 		TotalCount: total,
 		Page:       p.Page,
 		PerPage:    p.PerPage,
@@ -133,8 +145,13 @@ func (s *Service) GetAllLatestPlayerStats(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	result := pagination.PaginatedResult[PlayerStats]{
-		Items:      stats,
+	responses := make([]PlayerStatsResponse, len(stats))
+	for i, stat := range stats {
+		responses[i] = stat.ToResponse()
+	}
+
+	result := pagination.PaginatedResult[PlayerStatsResponse]{
+		Items:      responses,
 		TotalCount: total,
 		Page:       p.Page,
 		PerPage:    p.PerPage,
